@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "333188318051",
+    "project_id": "ju-event-management-planner",
+    "storage_bucket": "ju-event-management-planner.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333188318051:android:74b45b2b073528651a0956",
+        "android_client_info": {
+          "package_name": "com.JU_Event_Management.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAMFJ190lUpBvY3od1dA-vPBDbxEWDyBg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

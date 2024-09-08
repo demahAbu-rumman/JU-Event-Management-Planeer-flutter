@@ -1,6 +1,24 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:ju_event_managment_planner/notification_service.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-void main() {
+import 'package:get/get.dart';
+import 'Util/app_constrens.dart';
+import 'firebase_options.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print(message.data.toString());
+  print(message.notification!.toString());
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  //Stripe.publishableKey = publishableKey;
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
+  LocalNotificationService.initialize();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(const MyApp());
 }
 
@@ -180,16 +198,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
                   child: Container(
-                    width: 114,
+                    width: 140,
                     height: 54,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       color: Colors.green,
                     ),
-                    child: const Center(
-                      child: Text(
+                    child: MaterialButton(
+                      onPressed: () {  /*Get.to(()=> const LoginView()); */},
+                      child: const Text(
                         "Get Started",
-                        style: TextStyle(color: Colors.black, fontSize: 17, fontFamily: "gilory"),
+                        style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: "gilory"),
                       ),
                     ),
                   ),
