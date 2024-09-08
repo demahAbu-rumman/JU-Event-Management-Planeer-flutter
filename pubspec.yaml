@@ -39,8 +39,10 @@ dependencies:
   get: ^4.6.6
   firebase_core: ^2.28.0
   firebase_auth: ^4.19.0
+  google_sign_in: 6.2.1
+  flutter_svg: ^2.0.10+1
   firebase_messaging: ^14.8.0
-
+  google_fonts: ^6.2.1
   flutter_local_notifications: ^17.0.0
   firebase_storage: ^11.7.0
   cloud_firestore: ^4.16.0
@@ -73,6 +75,13 @@ flutter:
       - lib/asset/1.png
       - lib/asset/2.png
       - lib/asset/3.png
+      - lib/asset/lock.png
+      - lib/asset/mail.png
+      - lib/asset/Header.png
+      - lib/asset/facebook.png.png
+      - lib/asset/googleg.png
+      - lib/asset/JU.png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

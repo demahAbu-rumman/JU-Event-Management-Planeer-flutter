@@ -6,6 +6,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:get/get.dart';
 import 'Util/app_constrens.dart';
 import 'firebase_options.dart';
+import 'login_and_signup.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print(message.data.toString());
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return const GetMaterialApp(
       home: MyHomePage(),
       debugShowCheckedModeBanner: false,
     );
@@ -97,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: const Center(
                       child: Text(
                         "Next",
-                        style: TextStyle(color: Colors.black, fontSize: 17, fontFamily: "gilory"),
+                        style: TextStyle(color: Colors.white, fontSize: 17, fontFamily: "gilory"),
                       ),
                     ),
                   ),
@@ -151,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: const Center(
                       child: Text(
                         "Next",
-                        style: TextStyle(color: Colors.black, fontSize: 17, fontFamily: "gilory"),
+                        style: TextStyle(color: Colors.white, fontSize: 17, fontFamily: "gilory"),
                       ),
                     ),
                   ),
@@ -205,10 +206,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.green,
                     ),
                     child: MaterialButton(
-                      onPressed: () {  /*Get.to(()=> const LoginView()); */},
+                      onPressed: () {  Get.to(()=> const LoginView()); },
                       child: const Text(
                         "Get Started",
-                        style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: "gilory"),
+                        style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: "gilory"),
                       ),
                     ),
                   ),
