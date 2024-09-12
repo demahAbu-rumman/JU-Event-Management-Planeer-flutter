@@ -340,6 +340,7 @@ Widget userProfile({title, path, style}) {
 }
 
 
+
 Widget completeCommunityWidget({
   imagePath,
   imageTitle,

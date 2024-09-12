@@ -413,6 +413,7 @@ class _LoginViewState extends State<LoginView> {
                 onPressed: () {
                   authController.signInWithGoogle();
                 },
+
               ),
             ],
           )

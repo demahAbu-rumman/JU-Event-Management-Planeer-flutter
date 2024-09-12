@@ -46,7 +46,8 @@ dependencies:
   flutter_local_notifications: ^17.0.0
   firebase_storage: ^11.7.0
   cloud_firestore: ^4.16.0
-
+  firebase_app_check: ^0.2.2+7
+  table_calendar: ^3.1.2
 
 dev_dependencies:
   flutter_test:
@@ -81,7 +82,9 @@ flutter:
       - lib/asset/facebook.png.png
       - lib/asset/googleg.png
       - lib/asset/JU.png
-
+      - lib/asset/homephoto1.png
+      - lib/asset/homephoto2.png
+      - lib/asset/homephoto3.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

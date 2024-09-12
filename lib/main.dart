@@ -7,6 +7,8 @@ import 'package:get/get.dart';
 import 'Util/app_constrens.dart';
 import 'firebase_options.dart';
 import 'login_and_signup.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';  // Add Firebase App Check package
+
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print(message.data.toString());
@@ -22,6 +24,7 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

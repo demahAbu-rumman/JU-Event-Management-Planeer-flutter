@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:ju_event_managment_planner/home_page.dart';
 
 //import '../views/Profile/add_page.dart';
 
@@ -23,7 +24,7 @@ class AuthController extends GetxController {
       /// Login Success
 
       isLoading(false);
-    //  Get.to(() => BottomBarView());
+      Get.to(() => const HomePage());
     }).catchError((e) {
       isLoading(false);
       Get.snackbar('Error', "$e");
