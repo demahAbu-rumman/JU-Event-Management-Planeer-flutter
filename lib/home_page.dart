@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ju_event_managment_planner/add_event.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'Util/app_color.dart';
 
@@ -123,46 +124,59 @@ class HomePage extends StatelessWidget {
                 ),
               ),
             ),
-      Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // TableCalendar for upcoming events
-            TableCalendar(
-              firstDay: DateTime.utc(2020, 10, 16),
-              lastDay: DateTime.utc(2030, 3, 14),
-              focusedDay: DateTime.now(),
-              calendarStyle: CalendarStyle(
-                todayDecoration: BoxDecoration(
-                  color: AppColors.lightgreen, // Light green for today's highlight
-                  shape: BoxShape.circle,
-                ),
-                selectedDecoration: BoxDecoration(
-                  color: AppColors.darkGreen, // Dark green for selected day
-                  shape: BoxShape.circle,
-                ),
-              ),
-              headerStyle: HeaderStyle(
-                formatButtonVisible: false,
-                titleCentered: true,
-                titleTextStyle: TextStyle(
-                  color: AppColors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // TableCalendar for upcoming events
+                  TableCalendar(
+                    firstDay: DateTime.utc(2020, 10, 16),
+                    lastDay: DateTime.utc(2030, 3, 14),
+                    focusedDay: DateTime.now(),
+                    calendarStyle: CalendarStyle(
+                      todayDecoration: BoxDecoration(
+                        color: AppColors.lightgreen, // Light green for today's highlight
+                        shape: BoxShape.circle,
+                      ),
+                      selectedDecoration: BoxDecoration(
+                        color: AppColors.darkGreen, // Dark green for selected day
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    headerStyle: HeaderStyle(
+                      formatButtonVisible: false,
+                      titleCentered: true,
+                      titleTextStyle: TextStyle(
+                        color: AppColors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20), // Spacing
+                ],
               ),
             ),
-            const SizedBox(height: 20), // Spacing
           ],
         ),
-      )])),
-
+      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppColors.white, // Use white from AppColors
         selectedItemColor: AppColors.darkGreen, // Use darkGreen for selected items
         unselectedItemColor: AppColors.grey, // Use grey for unselected items
         showSelectedLabels: false,
         showUnselectedLabels: false,
+        onTap: (index) {
+          if (index == 1) {
+            // Navigate to EventPageView when "Events" is clicked
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CreateEventView(), // Make sure this page exists
+              ),
+            );
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
