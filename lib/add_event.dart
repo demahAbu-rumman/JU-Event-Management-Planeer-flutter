@@ -1,5 +1,3 @@
-// ignore_for_file: non_constant_identifier_names
-
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:dotted_border/dotted_border.dart';
@@ -138,6 +136,12 @@ class _CreateEventViewState extends State<CreateEventView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.lightgreen,
+        title: const Text('Create Events', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        elevation: 0,  // Remove AppBar shadow for a cleaner look
+      ),
       body: SingleChildScrollView(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -145,7 +149,7 @@ class _CreateEventViewState extends State<CreateEventView> {
             key: formKey,
             child: Column(
               children: [
-                iconWithTitle(text: 'Create Event', func: () {}),
+                //iconWithTitle(text: 'Create Event', func: () {}),
                 SizedBox(
                   height: Get.height * 0.02,
                 ),
@@ -230,7 +234,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                           myText(
                             text: 'Click and upload image/video',
                             style: TextStyle(
-                              color: AppColors.lightgreen,
+                              color: AppColors.lightGreen,
                               fontSize: 19,
                               fontWeight: FontWeight.w400,
                             ),
