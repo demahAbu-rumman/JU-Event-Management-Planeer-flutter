@@ -5,6 +5,7 @@ import 'package:ju_event_managment_planner/widgets/my_widgets.dart';
 import 'Util/app_color.dart';
 import 'controller/auth_controller.dart';
 
+
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 

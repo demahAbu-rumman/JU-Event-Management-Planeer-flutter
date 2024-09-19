@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'Util/app_color.dart';
 import 'add_event.dart';
 import 'calender.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -158,6 +159,14 @@ class _HomePageState extends State<HomePage> {
               context,
               MaterialPageRoute(
                 builder: (context) => const CalendarPage(),
+              ),
+            );
+          }
+          if (index == 3) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ProfilePage(),
               ),
             );
           }

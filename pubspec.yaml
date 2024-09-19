@@ -51,6 +51,7 @@ dependencies:
   video_thumbnail: ^0.5.3
   dotted_border: ^2.1.0
   image_picker: ^1.0.7
+  sliding_up_panel: ^2.0.0+1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -97,6 +98,23 @@ flutter:
       - lib/asset/uploadIcon.png
       - lib/asset/dollarLogo.png
       - lib/asset/profile.png
+      - lib/asset/profilePic.png
+      - lib/asset/eventsPic1.jpg
+      - lib/asset/eventsPic2.jpg
+      - lib/asset/eventsPic3.jpg
+      - lib/asset/eventsPic4.jpg
+      - lib/asset/eventsPic5.jpg
+      - lib/asset/eventPic6.jpg
+      - lib/asset/eventPic7.jpg
+      - lib/asset/eventPic8.jpg
+      - lib/asset/eventPic9.jpg
+      - lib/asset/eventPic10.jpg
+      - lib/asset/eventPic11.jpg
+      - lib/asset/eventPicc12.jpg
+      - lib/asset/eventPic13.jpg
+      - lib/asset/eventPic14.jpg
+      - lib/asset/eventPic15.jpg
+      - lib/asset/eventPic16.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
