@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:ju_event_managment_planner/drawer.dart';
 import 'Util/app_color.dart';
 import 'add_event.dart';
 import 'calender.dart';
 import 'profile_page.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,20 +18,22 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final DateTime now = DateTime.now();
+    final String formattedDate = DateFormat('EEEE, d MMMM').format(now);
     return Scaffold(
       backgroundColor: AppColors.background,
+      drawer: const CustomDrawer(),
       body: Column(
         children: [
-          // Updated AppBar with background image and gradient
           Container(
             height: 250,
-            decoration: BoxDecoration(
-              image: const DecorationImage(
-                image: AssetImage('lib/asset/2.png'), // Use the entire image as background
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('lib/asset/2.png'),
                 fit: BoxFit.cover,
-                opacity: 0.7, // Reduce the opacity of the image
+                opacity: 0.7,
               ),
-              borderRadius: const BorderRadius.only(
+              borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(32),
                 bottomRight: Radius.circular(32),
               ),
@@ -51,7 +55,7 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Column(
                 children: [
-                  const SizedBox(height: 60), // Space for status bar
+                  const SizedBox(height: 60),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Row(
@@ -63,14 +67,25 @@ class _HomePageState extends State<HomePage> {
                             color: AppColors.white,
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5, // Add some letter spacing for professionalism
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        Builder(
+                          builder: (context) => IconButton(
+                            icon: const Icon(
+                              Icons.menu, // Drawer icon
+                              color: Colors.white,
+                              size: 30,
+                            ),
+                            onPressed: () {
+                              Scaffold.of(context).openDrawer();
+                            },
                           ),
                         ),
                       ],
                     ),
                   ),
                   const Spacer(),
-                  // Tabs for Today, Week, Month, Year
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     height: 60,
@@ -99,7 +114,7 @@ class _HomePageState extends State<HomePage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              "Today, 25 June, Saturday",
+              "Today, $formattedDate",
               style: TextStyle(
                 fontSize: 16,
                 color: AppColors.black,
@@ -108,11 +123,10 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(height: 8),
-          // Rest of the UI like event cards...
           Expanded(
             child: ListView(
               children: [
-                EventCard(
+                const EventCard(
                   eventName: "Meeting with Aunt Lily",
                   eventTime: "01 PM - 02 PM",
                   location: "Birch Grove Str.",
@@ -171,8 +185,6 @@ class _HomePageState extends State<HomePage> {
             );
           }
         },
-
-
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -210,7 +222,7 @@ class _HomePageState extends State<HomePage> {
           Text(
             text,
             style: TextStyle(
-              color: isSelected ? Color(0xFF5E2587) : AppColors.grey,
+              color: isSelected ? const Color(0xFF5E2587) : AppColors.grey,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               fontSize: 16,
             ),
@@ -220,7 +232,7 @@ class _HomePageState extends State<HomePage> {
               margin: const EdgeInsets.only(top: 4),
               height: 2,
               width: 40,
-              color: Color(0xFF5E2587), // Purple underline
+              color: const Color(0xFF5E2587),
             ),
         ],
       ),
@@ -259,69 +271,43 @@ class EventCard extends StatelessWidget {
           children: [
             Row(
               children: [
+                Icon(icon, color: iconColor),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     eventName,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.black,
                     ),
                   ),
                 ),
                 if (tag != null)
-                  Row(
-                    children: [
-                      Text(
-                        tag!,
-                        style: TextStyle(
-                          color: Colors.redAccent,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      tag!,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Icon(
-                        icon,
-                        color: iconColor,
-                      ),
-                    ],
+                    ),
                   ),
               ],
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.access_time,
-                  color: AppColors.grey,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  eventTime,
-                  style: TextStyle(
-                    color: AppColors.grey,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 4),
+            Text(
+              eventTime,
+              style: TextStyle(color: AppColors.grey),
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.location_on,
-                  color: AppColors.grey,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  location,
-                  style: TextStyle(
-                    color: AppColors.grey,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 4),
+            Text(
+              location,
+              style: TextStyle(color: AppColors.grey),
             ),
           ],
         ),

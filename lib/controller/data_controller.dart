@@ -51,12 +51,19 @@ class DataController extends GetxController{
     });
   }
 
-  getMyDocument(){
-    FirebaseFirestore.instance.collection('users').doc(auth.currentUser!.uid)
-        .snapshots().listen((event) {
+  void getMyDocument() {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(auth.currentUser!.uid)
+        .snapshots()
+        .listen((event) {
       myDocument = event;
+      if (myDocument != null) {
+        update(); // This will notify the listeners about the data change
+      }
     });
   }
+
 
   Future<String> uploadImageToFirebase(File file)async{
     String fileUrl = '';

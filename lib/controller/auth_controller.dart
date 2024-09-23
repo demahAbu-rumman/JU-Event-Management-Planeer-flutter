@@ -6,9 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ju_event_managment_planner/home_page.dart';
-
-//import '../views/Profile/add_page.dart';
-
+import 'package:ju_event_managment_planner/profile_signup.dart';
 import 'package:path/path.dart' as Path;
 
 class AuthController extends GetxController {
@@ -20,34 +18,29 @@ class AuthController extends GetxController {
     isLoading(true);
 
     auth.signInWithEmailAndPassword(email: email!, password: password!)
-        .then((value) {
-      /// Login Success
+        .then((value) async {
+      // Fetch user data after successful login
+      await fetchUserData();
 
       isLoading(false);
       Get.to(() => const HomePage());
     }).catchError((e) {
       isLoading(false);
       Get.snackbar('Error', "$e");
-
-      ///Error occured
     });
   }
 
   void signUp({String? email, String? password}) {
-    ///here we have to provide two things
-    ///1- email
-    ///2- password
-
     isLoading(true);
 
     auth.createUserWithEmailAndPassword(email: email!, password: password!)
-        .then((value) {
-      isLoading(false);
+        .then((value) async {
+      // Fetch user data after successful signup
+      await fetchUserData();
 
-      /// Navigate user to profile screen
-     // Get.to(() => ProfileScreen());
+      isLoading(false);
+      Get.to(() => const ProfileScreen());
     }).catchError((e) {
-      /// print error information
       print("Error in authentication $e");
       isLoading(false);
     });
@@ -82,7 +75,7 @@ class AuthController extends GetxController {
       isLoading(false);
 
       ///SuccessFull loged in
-     // Get.to(() => BottomBarView());
+      // Get.to(() => BottomBarView());
     }).catchError((e) {
       /// Error in getting Login
       isLoading(false);
@@ -123,5 +116,39 @@ class AuthController extends GetxController {
       'gender': gender
     }).then((value) {
       isProfileInformationLoading(false);
-     // Get.offAll(()=> BottomBarView());
-    });}}
+      // Get.offAll(()=> BottomBarView());
+    });}
+
+// Add this method in AuthController
+  Future<void> fetchUserData() async {
+    try {
+      String uid = auth.currentUser!.uid;
+      DocumentSnapshot userSnapshot =
+      await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      if (userSnapshot.exists) {
+        _userData = userSnapshot.data() as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print("Error fetching user data: $e");
+    }
+  }
+
+// Method to save user data
+void saveUserData(String name, String mobile, String role, String organizationName, String imageUrl) {
+  _userData = {
+    'name': name,
+    'mobile': mobile,
+    'role': role,
+    'organizationName': organizationName,
+    'imageUrl': imageUrl,
+  };
+}
+
+// Method to retrieve user data
+Map<String, dynamic>? getUserData() {
+  return _userData;
+}
+
+// Private variable to hold user data
+Map<String, dynamic>? _userData;}

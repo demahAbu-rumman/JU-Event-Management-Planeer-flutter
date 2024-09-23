@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ju_event_managment_planner/widgets/my_widgets.dart';
 import 'Util/app_color.dart';
 import 'controller/auth_controller.dart';
+import 'profile_signup.dart';
 
 
 class LoginView extends StatefulWidget {
@@ -286,7 +287,7 @@ class _LoginViewState extends State<LoginView> {
               socialAppsIcons(
                 text: 'lib/asset/facebook.png.png',
                 onPressed: () {
-                  // Get.to(()=>   ProfileScreen());
+                   Get.to(()=>   ProfileScreen());
                 },
               ),
               socialAppsIcons(
@@ -406,7 +407,7 @@ class _LoginViewState extends State<LoginView> {
               socialAppsIcons(
                 text: 'lib/asset/facebook.png.png',
                 onPressed: () {
-                  // Get.to(()=>   ProfileScreen());
+                   Get.to(()=>   ProfileScreen());
                 },
               ),
               socialAppsIcons(

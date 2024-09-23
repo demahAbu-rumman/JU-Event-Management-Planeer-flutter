@@ -74,8 +74,8 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             panelBuilder: (ScrollController controller)=>
-           _panelBody(controller),
-              onPanelSlide: (value){
+                _panelBody(controller),
+            onPanelSlide: (value){
               if (value >= 0.2){
                 if(!_isOpen){
                   setState(() {
@@ -83,7 +83,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   });
                 }
               }
-              },
+            },
             onPanelClosed: (){
               setState(() {
                 _isOpen = false;
