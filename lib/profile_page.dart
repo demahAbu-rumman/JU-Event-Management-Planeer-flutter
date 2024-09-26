@@ -240,12 +240,15 @@ class _ProfilePageState extends State<ProfilePage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        _infoCell(title: 'Events Created', value: '3'),
-        Container(
-          width: 1,
-          height: 40,
-          color: Colors.grey,
-        ),
+        // Check if the selectedRole is not 'Student'
+        if (selectedRole != 'Student') ...[
+          _infoCell(title: 'Events Created', value: '3'),
+          Container(
+            width: 1,
+            height: 40,
+            color: Colors.grey,
+          ),
+        ],
         _infoCell(title: 'Events Joined', value: '15'),
         Container(
           width: 1,

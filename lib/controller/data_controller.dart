@@ -8,29 +8,30 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as Path;
 
-class DataController extends GetxController{
+class DataController extends GetxController {
   @override
-
 
   FirebaseAuth auth = FirebaseAuth.instance;
 
   DocumentSnapshot? myDocument;
 
-  var allUsers  = <DocumentSnapshot>[].obs;
+  var allUsers = <DocumentSnapshot>[].obs;
   var filteredUsers = <DocumentSnapshot>[].obs;
   var allEvents = <DocumentSnapshot>[].obs;
   var filteredEvents = <DocumentSnapshot>[].obs;
   var joinedEvents = <DocumentSnapshot>[].obs;
 
   var isEventsLoading = false.obs;
-
   var isMessageSending = false.obs;
+
+  // Controller for the selected role
+  var selectedRole = ''.obs;
+
   sendMessageToFirebase({
-    Map<String,dynamic>? data,
+    Map<String, dynamic>? data,
     String? lastMessage,
     String? grouid
-  })async{
-
+  }) async {
     isMessageSending(true);
 
     await FirebaseFirestore.instance.collection('chats').doc(grouid).collection('chatroom').add(data!);
@@ -38,18 +39,16 @@ class DataController extends GetxController{
       'lastMessage': lastMessage,
       'groupId': grouid,
       'group': grouid!.split('-'),
-    },SetOptions(merge: true));
+    }, SetOptions(merge: true));
 
     isMessageSending(false);
-
   }
 
-
-  createNotification(String recUid){
+  createNotification(String recUid) {
     FirebaseFirestore.instance.collection('notifications').doc(recUid).collection('myNotifications').add({
       'message': "Send you a message.",
       'image': myDocument!.get('image'),
-      'name': myDocument!.get('first')+ " "+ myDocument!.get('last'),
+      'name': myDocument!.get('first') + " " + myDocument!.get('last'),
       'time': DateTime.now()
     });
   }
@@ -67,8 +66,7 @@ class DataController extends GetxController{
     });
   }
 
-
-  Future<String> uploadImageToFirebase(File file)async{
+  Future<String> uploadImageToFirebase(File file) async {
     String fileUrl = '';
     String fileName = Path.basename(file.path);
     var reference = FirebaseStorage.instance.ref().child('myfiles/$fileName');
@@ -81,7 +79,7 @@ class DataController extends GetxController{
     return fileUrl;
   }
 
-  Future<String> uploadThumbnailToFirebase(Uint8List file)async{
+  Future<String> uploadThumbnailToFirebase(Uint8List file) async {
     String fileUrl = '';
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
     var reference = FirebaseStorage.instance.ref().child('myfiles/$fileName.jpg');
@@ -91,13 +89,12 @@ class DataController extends GetxController{
       fileUrl = value;
     });
 
-
     print("Thumbnail $fileUrl");
 
     return fileUrl;
   }
 
-  Future<bool> createEvent(Map<String,dynamic> eventData)async{
+  Future<bool> createEvent(Map<String, dynamic> eventData) async {
     bool isCompleted = false;
 
     await FirebaseFirestore.instance.collection('events')
@@ -105,11 +102,10 @@ class DataController extends GetxController{
         .then((value) {
       isCompleted = true;
       Get.snackbar('Event Uploaded', 'Event is uploaded successfully.',
-          colorText: Colors.white,backgroundColor: Colors.lightGreen);
-    }).catchError((e){
+          colorText: Colors.white, backgroundColor: Colors.lightGreen);
+    }).catchError((e) {
       isCompleted = false;
     });
-
 
     return isCompleted;
   }
@@ -121,12 +117,18 @@ class DataController extends GetxController{
     getMyDocument();
     getUsers();
     getEvents();
-  }
 
+    // Listening for changes in the selectedRole
+    selectedRole.listen((role) {
+      if (role == 'Student') {
+        hideEventCreatedSection();
+      }
+    });
+  }
 
   var isUsersLoading = false.obs;
 
-  getUsers(){
+  getUsers() {
     isUsersLoading(true);
     FirebaseFirestore.instance.collection('users').snapshots().listen((event) {
       allUsers.value = event.docs;
@@ -147,9 +149,9 @@ class DataController extends GetxController{
     }
   }
 
-
-
-
-
-
+  // Function to hide the Event Created section
+  void hideEventCreatedSection() {
+    // Logic to hide the "Event Created" section
+    filteredEvents.value.clear(); // Clear the events list to hide them
+  }
 }
