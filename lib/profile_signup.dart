@@ -20,7 +20,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController mobileNumberController = TextEditingController();
-  TextEditingController eventOrganizationController = TextEditingController();
+  TextEditingController eventOrganizationNameController = TextEditingController();
+  //TextEditingController role = TextEditingController();
+  TextEditingController gender = TextEditingController();
 
   File? profileImage;
 
@@ -185,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         selectedRole = value;
                         isEventOrganizer = value == "Event Organizer";
                         if (!isEventOrganizer) {
-                          eventOrganizationController.clear(); // Clear the organization name
+                          eventOrganizationNameController.clear(); // Clear the organization name
                         }
                       });
                     },
@@ -215,7 +217,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 16),
                   textField(
                     text: 'Name of the Event Organization',
-                    controller: eventOrganizationController,
+                    controller: eventOrganizationNameController
+                    ,
                     validator: (String input) {
                       if (input.isEmpty) {
                         return 'Event Organization Name is required.';
@@ -250,8 +253,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       authController!.saveUserData(
                         firstNameController.text.trim() + " " + lastNameController.text.trim(),
                         mobileNumberController.text.trim(),
-                        selectedRole ?? "",
-                        isEventOrganizer ? eventOrganizationController.text.trim() : "",
+                        selectedRole!.toString().trim(),
+                        isEventOrganizer ? eventOrganizationNameController.text.trim() : "",
                         profileImage != null ? await authController!.uploadImageToFirebaseStorage(profileImage!) : '',
                       );
 
@@ -260,10 +263,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         firstNameController.text.trim(),
                         lastNameController.text.trim(),
                         mobileNumberController.text.trim(),
-                        selectedRole!,
-                        isEventOrganizer
-                            ? eventOrganizationController.text.trim()
-                            : '',
+                       // selectedRole!,
+                       eventOrganizationNameController.text.trim(),
+                        selectedRole!.toString().trim(),
+                        gender.text.trim(),
                       );
 
                       Get.to(()=>   const HomePage());

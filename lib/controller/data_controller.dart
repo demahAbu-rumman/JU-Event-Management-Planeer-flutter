@@ -7,7 +7,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as Path;
+
 class DataController extends GetxController{
+  @override
+
 
   FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -102,7 +105,7 @@ class DataController extends GetxController{
         .then((value) {
       isCompleted = true;
       Get.snackbar('Event Uploaded', 'Event is uploaded successfully.',
-          colorText: Colors.white,backgroundColor: Colors.blue);
+          colorText: Colors.white,backgroundColor: Colors.lightGreen);
     }).catchError((e){
       isCompleted = false;
     });
@@ -132,27 +135,19 @@ class DataController extends GetxController{
     });
   }
 
-
-  getEvents(){
-    isEventsLoading(true);
-
-    FirebaseFirestore.instance.collection('events').snapshots().listen((event) {
-      allEvents.assignAll(event.docs);
-      filteredEvents.assignAll(event.docs);
-
-
-      joinedEvents.value =   allEvents.where((e){
-        List joinedIds = e.get('joined');
-
-        return joinedIds.contains(FirebaseAuth.instance.currentUser!.uid);
-
-      }).toList();
-
+  Future<void> getEvents() async {
+    try {
+      isEventsLoading(true);
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('events').get();
+      allEvents.value = querySnapshot.docs; // Update the observable list
+    } catch (e) {
+      print("Error fetching events: $e");
+    } finally {
       isEventsLoading(false);
-    });
-
-
+    }
   }
+
+
 
 
 

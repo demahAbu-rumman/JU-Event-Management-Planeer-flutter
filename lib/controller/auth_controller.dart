@@ -11,7 +11,6 @@ import 'package:path/path.dart' as Path;
 
 class AuthController extends GetxController {
   FirebaseAuth auth = FirebaseAuth.instance;
-
   var isLoading = false.obs;
 
   void login({String? email, String? password}) {
@@ -35,6 +34,10 @@ class AuthController extends GetxController {
 
     auth.createUserWithEmailAndPassword(email: email!, password: password!)
         .then((value) async {
+      // After successful signup, call uploadProfileData
+      String uid = value.user!.uid;
+     // uploadProfileData("", "FirstName", "LastName", "1234567890", "01/01/2000", "Gender");
+
       // Fetch user data after successful signup
       await fetchUserData();
 
@@ -45,6 +48,7 @@ class AuthController extends GetxController {
       isLoading(false);
     });
   }
+
 
   void forgetPassword(String email) {
     auth.sendPasswordResetEmail(email: email).then((value) {
@@ -104,7 +108,7 @@ class AuthController extends GetxController {
   }
 
   uploadProfileData(String imageUrl, String firstName, String lastName,
-      String mobileNumber, String dob, String gender) {
+      String mobileNumber, String gender,String role,String eventOrganizationName) {
 
     String uid = FirebaseAuth.instance.currentUser!.uid;
 
@@ -112,11 +116,14 @@ class AuthController extends GetxController {
       'image': imageUrl,
       'first': firstName,
       'last': lastName,
-      'dob': dob,
-      'gender': gender
+      'phone':mobileNumber,
+      'gender': gender,
+      'role':role,
+      'eventOrganizationName' :eventOrganizationName
+
     }).then((value) {
       isProfileInformationLoading(false);
-      // Get.offAll(()=> BottomBarView());
+      Get.offAll(()=> HomePage());
     });}
 
 // Add this method in AuthController

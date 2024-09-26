@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:ju_event_managment_planner/drawer.dart';
-import 'Util/app_color.dart';
-import 'add_event.dart';
-import 'calender.dart';
-import 'profile_page.dart';
+import 'package:ju_event_managment_planner/util/app_color.dart';
+import 'package:ju_event_managment_planner/add_event.dart';
+import 'package:ju_event_managment_planner/calender.dart';
+import 'package:ju_event_managment_planner/profile_page.dart';
+import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,18 +16,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedFilterIndex = 1; // Default to "Week"
+  int _selectedFilterIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    final DataController dataController = Get.put(DataController());
     final DateTime now = DateTime.now();
     final String formattedDate = DateFormat('EEEE, d MMMM').format(now);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       drawer: const CustomDrawer(),
       body: Column(
         children: [
           Container(
+
             height: 250,
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -73,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                         Builder(
                           builder: (context) => IconButton(
                             icon: const Icon(
-                              Icons.menu, // Drawer icon
+                              Icons.menu,
                               color: Colors.white,
                               size: 30,
                             ),
@@ -123,35 +128,28 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(height: 8),
-          Expanded(
-            child: ListView(
-              children: [
-                const EventCard(
-                  eventName: "Meeting with Aunt Lily",
-                  eventTime: "01 PM - 02 PM",
-                  location: "Birch Grove Str.",
-                  tag: "Soon!",
-                  icon: Icons.notifications_active,
-                  iconColor: Colors.redAccent,
-                ),
-                EventCard(
-                  eventName: "Rammstein Concert",
-                  eventTime: "09 PM - 10 PM",
-                  location: "Dark Stage, USA",
-                  icon: Icons.location_on,
-                  iconColor: AppColors.grey,
-                ),
-                EventCard(
-                  eventName: "Starting Events",
-                  eventTime: "05 PM - 06 PM",
-                  location: "USA",
-                  icon: Icons.location_on,
-                  iconColor: AppColors.grey,
-                ),
-              ],
-            ),
-          ),
-        ],
+      Expanded(
+        child: Obx(() {
+          // Check if there are events available
+          if (dataController.allEvents.isEmpty) {
+            return Center(child: Text("No events available.")); // Notify user
+          }
+          return ListView.builder(
+            itemCount: dataController.allEvents.length,
+            itemBuilder: (context, index) {
+              final event = dataController.allEvents[index];
+              return EventCard(
+                eventName: event.get('name') ?? 'No Name',
+                eventTime: event.get('time') ?? 'No Time',
+                location: event.get('location') ?? 'No Location',
+                icon: Icons.event,
+                iconColor: Colors.blue,
+              );
+            },
+          );
+        }),
+
+      )],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppColors.white,
@@ -207,7 +205,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Function to build each tab
   Widget buildFilterTab(int index, String text) {
     bool isSelected = index == _selectedFilterIndex;
     return GestureDetector(
@@ -315,3 +312,4 @@ class EventCard extends StatelessWidget {
     );
   }
 }
+

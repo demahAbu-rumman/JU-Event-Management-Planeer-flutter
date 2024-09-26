@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -10,7 +12,12 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
 
+  //TextEditingController role = TextEditingController();
+ // TextEditingController descriptionController = TextEditingController();
+  TextEditingController firstNameController = TextEditingController();
+  TextEditingController lastNameController = TextEditingController();
   bool _isOpen = false;
+
   late PanelController _panelController = PanelController();
   var _imageList = [
     'lib/asset/eventsPic1.jpg',
@@ -30,8 +37,32 @@ class _ProfilePageState extends State<ProfilePage> {
     'lib/asset/eventPic15.jpg',
     'lib/asset/eventPic16.jpg',
   ];
+  bool isNotEditable = true;
+  DataController? dataController;
+  String image = '';
+  String? selectedRole; // Add this variable to hold the selected role
+
 
   @override
+  initState(){
+    super.initState();
+    dataController = Get.find<DataController>();
+
+    firstNameController.text = dataController!.myDocument!.get('first');
+    lastNameController.text = dataController!.myDocument!.get('last');
+
+    try{
+      image = dataController!.myDocument!.get('image');
+    }catch(e){
+      image = '';
+    }
+
+    try {
+      selectedRole = dataController!.myDocument!.get('role');
+    } catch (e) {
+      selectedRole = 'Role not set'; // Default value if no role is fetched
+    }
+  }
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -237,21 +268,21 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Column _titleSection() {
-    return const Column(
+    return Column(
       children: [
         Text(
-          'Demah Abu-Rumman',
+           "${firstNameController.text} ${lastNameController.text}",
           style: TextStyle(
             fontFamily: 'gilory',
             fontWeight: FontWeight.w700,
             fontSize: 30,
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 8,
         ),
-        Text(
-          'Student',
+         Text(
+          "${selectedRole}",
           style: TextStyle(
             fontFamily: 'gilory',
             fontStyle: FontStyle.italic,
