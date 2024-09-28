@@ -7,9 +7,9 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ju_event_managment_planner/Util/app_color.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import '../../controller/data_controller.dart';
-import '../../widgets/my_widgets.dart';
-import 'Model/event_model.dart';
+import '../../../controller/data_controller.dart';
+import '../../../widgets/my_widgets.dart';
+import '../Model/event_model.dart';
 
 class CreateEventView extends StatefulWidget {
   const CreateEventView({super.key});
@@ -175,7 +175,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                             ),
 
                         // borderRadius: BorderRadius.circular(10),
-                        icon: Image.asset('lib/asset/arrowDown.png'),
+                        icon: Image.asset('lib/assets/arrowDown.png'),
                         elevation: 16,
                         style: TextStyle(
                           fontWeight: FontWeight.w400,
@@ -225,7 +225,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                           SizedBox(
                             width: 76,
                             height: 59,
-                            child: Image.asset('lib/asset/uploadIcon.png'),
+                            child: Image.asset('lib/assets/uploadIcon.png'),
                           ),
                           myText(
                             text: 'Click and upload image/video',
@@ -357,7 +357,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                 ),
                 myTextField(
                     bool: false,
-                    icon: 'lib/asset/4DotIcon.png',
+                    icon: 'lib/assets/4DotIcon.png',
                     text: 'Event Name',
                     controller: titleController,
                     validator: (String input) {
@@ -383,7 +383,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                 ),
                 myTextField(
                     bool: false,
-                    icon: 'lib/asset/location.png',
+                    icon: 'lib/assets/location.png',
                     text: 'Location',
                     controller: locationController,
                     validator: (String input) {
@@ -410,7 +410,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                   children: [
                     iconTitleContainer(
                       isReadOnly: true,
-                      path: 'lib/asset/Frame1.png',
+                      path: 'lib/assets/Frame1.png',
                       text: 'Date',
                       controller: dateController,
                       validator: (input) {
@@ -427,7 +427,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                       },
                     ),
                     iconTitleContainer(
-                        path: 'lib/asset/#.png',
+                        path: 'lib/assets/#.png',
                         text: 'Max Entries',
                         controller: maxEntries,
                         type: TextInputType.number,
@@ -448,7 +448,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                 ),
 
                 iconTitleContainer(
-                    path: 'lib/asset/#.png',
+                    path: 'lib/assets/#.png',
                     text: 'Enter tags that will go with event.',
                     width: double.infinity,
                     controller: tagsController,
@@ -723,7 +723,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                       border: InputBorder.none,
                       hintText: 'Frequency of event',
                       prefixIcon: Image.asset(
-                        'lib/asset/repeat.png',
+                        'lib/assets/repeat.png',
                         cacheHeight: 20,
                       ),
                       // border: OutlineInputBorder(
@@ -751,7 +751,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     iconTitleContainer(
-                        path: 'lib/asset/time.png',
+                        path: 'lib/assets/time.png',
                         text: 'Start Time',
                         controller: startTimeController,
                         isReadOnly: true,
@@ -760,7 +760,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                           startTimeMethod(context);
                         }),
                     iconTitleContainer(
-                        path: 'lib/asset/time.png',
+                        path: 'lib/assets/time.png',
                         text: 'End Time',
                         isReadOnly: true,
                         controller: endTimeController,
@@ -861,7 +861,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                         isExpanded: true,
                         underline: Container(),
                         //borderRadius: BorderRadius.circular(10),
-                        icon: Image.asset('lib/asset/arrowDown.png'),
+                        icon: Image.asset('lib/assets/arrowDown.png'),
                         elevation: 16,
                         style: TextStyle(
                           fontWeight: FontWeight.w400,
@@ -892,7 +892,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                       ),
                     ),
                     iconTitleContainer(
-                        path: 'lib/asset/dollarLogo.png',
+                        path: 'lib/assets/dollarLogo.png',
                         text: 'price',
                         type: TextInputType.number,
                         height: 40,

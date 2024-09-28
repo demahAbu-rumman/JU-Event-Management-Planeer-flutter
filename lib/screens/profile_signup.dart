@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ju_event_managment_planner/Util/app_color.dart';
 import 'package:ju_event_managment_planner/controller/auth_controller.dart';
-import 'package:ju_event_managment_planner/home_page.dart';
-import '../../widgets/my_widgets.dart';
+import 'package:ju_event_managment_planner/screens/home_page.dart';
+import '../../../widgets/my_widgets.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -75,7 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   }
                 },
                 child: Image.asset(
-                  'lib/asset/gallary.png',
+                  'lib/assets/gallary.png',
                   width: 25,
                   height: 25,
                 ),

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:ju_event_managment_planner/drawer.dart';
+import 'package:ju_event_managment_planner/screens/drawer.dart';
 import 'package:ju_event_managment_planner/util/app_color.dart';
-import 'package:ju_event_managment_planner/add_event.dart';
-import 'package:ju_event_managment_planner/calender.dart';
-import 'package:ju_event_managment_planner/profile_page.dart';
+import 'package:ju_event_managment_planner/screens/add_event.dart';
+import 'package:ju_event_managment_planner/screens/calender.dart';
+import 'package:ju_event_managment_planner/screens/profile_page.dart';
 import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 
-import 'widgets/event_fetch.dart';
+import '../widgets/event_fetch.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
             height: 250,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('lib/asset/2.png'),
+                image: AssetImage('lib/assets/2.png'),
                 fit: BoxFit.cover,
                 opacity: 0.7,
               ),

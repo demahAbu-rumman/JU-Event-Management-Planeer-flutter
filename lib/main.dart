@@ -1,12 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:ju_event_managment_planner/notification_service.dart';
+import 'package:ju_event_managment_planner/screens/notification_service.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:get/get.dart';
 import 'Util/app_constrens.dart';
 import 'firebase_options.dart';
-import 'login_and_signup.dart';
+import 'screens/login_and_signup.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';  // Add Firebase App Check package
 
 
@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               children: [
                 const SizedBox(height: 90),
-                Image.asset("lib/asset/1.png",height: 400,width: 400,),
+                Image.asset("lib/assets/1.png",height: 400,width: 400,),
                 const SizedBox(height: 49),
                   const Text(
                     "Welcome to JU Event\n Management Planeer",
@@ -119,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               children: [
                 const SizedBox(height: 90),
-                Image.asset("lib/asset/2.png",height: 400,width: 400,),
+                Image.asset("lib/assets/2.png",height: 400,width: 400,),
                 const SizedBox(height: 50),
                 const Text(
                   "Time Management",
@@ -173,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
               children: [
                 const SizedBox(height: 90),
-                Image.asset("lib/asset/3.png",height: 400,width: 400,),
+                Image.asset("lib/assets/3.png",height: 400,width: 400,),
                 const SizedBox(height: 50),
                 const Text(
                   "Collaboration and Sharing",

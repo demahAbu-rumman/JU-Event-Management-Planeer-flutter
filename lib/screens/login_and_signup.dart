@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ju_event_managment_planner/widgets/my_widgets.dart';
-import 'Util/app_color.dart';
-import 'controller/auth_controller.dart';
+import '../Util/app_color.dart';
+import '../controller/auth_controller.dart';
 import 'profile_signup.dart';
 
 
@@ -77,7 +77,7 @@ class _LoginViewState extends State<LoginView> {
                     ? Container(
                   alignment: Alignment.center, // Centers the image within the container
                   child: Image.asset(
-                    'lib/asset/JU.png', // Image path
+                    'lib/assets/JU.png', // Image path
                     width: Get.width * 0.4, // Set width to 40% of the screen width
                     height: Get.height * 0.2, // Set height to 20% of the screen height
                     fit: BoxFit.contain, // Ensures the image maintains its aspect ratio
@@ -87,7 +87,7 @@ class _LoginViewState extends State<LoginView> {
               :Container(
                   alignment: Alignment.center, // Centers the image within the container
                   child: Image.asset(
-                    'lib/asset/JU.png', // Image path
+                    'lib/assets/JU.png', // Image path
                     width: Get.width * 0.4, // Set width to 40% of the screen width
                     height: Get.height * 0.2, // Set height to 20% of the screen height
                     fit: BoxFit.contain, // Ensures the image maintains its aspect ratio
@@ -163,7 +163,7 @@ class _LoginViewState extends State<LoginView> {
             children: [
               myTextField(
                 bool: false,
-                icon: 'lib/asset/mail.png',
+                icon: 'lib/assets/mail.png',
                 text: 'hubgfyedfb@ju.edu.jo',
                 validator: (String input) {
                   if (input.isEmpty) {
@@ -185,7 +185,7 @@ class _LoginViewState extends State<LoginView> {
               ),
               myTextField(
                 bool: true,
-                icon: 'lib/asset/lock.png',
+                icon: 'lib/assets/lock.png',
                 text: 'password',
                 validator: (String input) {
                   if (input.isEmpty) {
@@ -212,7 +212,7 @@ class _LoginViewState extends State<LoginView> {
                           children: [
                             myTextField(
                               bool: false,
-                              icon: 'lib/asset/lock.png',
+                              icon: 'lib/assets/lock.png',
                               text: 'enter your email...',
                               controller: forgetEmailController,
                             ),
@@ -285,13 +285,13 @@ class _LoginViewState extends State<LoginView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               socialAppsIcons(
-                text: 'lib/asset/facebook.png.png',
+                text: 'lib/assets/facebook.png.png',
                 onPressed: () {
                    Get.to(()=>   ProfileScreen());
                 },
               ),
               socialAppsIcons(
-                text: 'lib/asset/googleg.png',
+                text: 'lib/assets/googleg.png',
                 onPressed: () {
                   authController.signInWithGoogle();
                 },
@@ -309,7 +309,7 @@ class _LoginViewState extends State<LoginView> {
         children: [
           myTextField(
             bool: false,
-            icon: 'lib/asset/mail.png',
+            icon: 'lib/assets/mail.png',
             text: 'hubgfyedfb@ju.edu.jo',
             validator: (String input) {
               if (input.isEmpty) {
@@ -331,7 +331,7 @@ class _LoginViewState extends State<LoginView> {
           ),
           myTextField(
             bool: true,
-            icon: 'lib/asset/lock.png',
+            icon: 'lib/assets/lock.png',
             text: 'password',
             validator: (String input) {
               if (input.isEmpty) {
@@ -353,7 +353,7 @@ class _LoginViewState extends State<LoginView> {
           ),
           myTextField(
             bool: true,
-            icon: 'lib/asset/lock.png',
+            icon: 'lib/assets/lock.png',
             text: 'Confirm Password',
             validator: (String input) {
               if (input != passwordController.text) {
@@ -405,13 +405,13 @@ class _LoginViewState extends State<LoginView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               socialAppsIcons(
-                text: 'lib/asset/facebook.png.png',
+                text: 'lib/assets/facebook.png.png',
                 onPressed: () {
                    Get.to(()=>   ProfileScreen());
                 },
               ),
               socialAppsIcons(
-                text: 'lib/asset/googleg.png',
+                text: 'lib/assets/googleg.png',
                 onPressed: () {
                   authController.signInWithGoogle();
                 },

@@ -111,7 +111,7 @@ Future<Widget> EventsFeed() async {
                 child: SizedBox(
                   width: 16,
                   height: 19,
-                  child: Image.asset(
+                  child: Image.assets(
                     'assets/boomMark.png',
                     fit: BoxFit.contain,
                     color: eventSavedByUsers.contains(FirebaseAuth.instance.currentUser!.uid)
@@ -194,7 +194,7 @@ Future<Widget> EventsFeed() async {
               padding: const EdgeInsets.all(0.5),
               width: 17,
               height: 17,
-              child: Image.asset(
+              child: Image.assets(
                 'assets/message.png',
                 color: AppColors.black,
               ),
@@ -213,7 +213,7 @@ Future<Widget> EventsFeed() async {
               padding: const EdgeInsets.all(0.5),
               width: 16,
               height: 16,
-              child: Image.asset(
+              child: Image.assets(
                 'assets/send.png',
                 fit: BoxFit.contain,
                 color: AppColors.black,
@@ -227,7 +227,7 @@ Future<Widget> EventsFeed() async {
 }
 
 */
-// Function for individual event item
+
 // Function for individual event item
 Widget EventItem(DocumentSnapshot event) {
   DataController dataController = Get.find<DataController>();
@@ -306,6 +306,7 @@ Widget EventItem(DocumentSnapshot event) {
     ),
   );
 }
+
 
 
 

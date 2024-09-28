@@ -20,22 +20,22 @@ class _ProfilePageState extends State<ProfilePage> {
 
   late PanelController _panelController = PanelController();
   var _imageList = [
-    'lib/asset/eventsPic1.jpg',
-    'lib/asset/eventsPic2.jpg',
-    'lib/asset/eventsPic3.jpg',
-    'lib/asset/eventsPic4.jpg',
-    'lib/asset/eventsPic5.jpg',
-    'lib/asset/eventPic6.jpg',
-    'lib/asset/eventPic7.jpg',
-    'lib/asset/eventPic8.jpg',
-    'lib/asset/eventPic9.jpg',
-    'lib/asset/eventPic10.jpg',
-    'lib/asset/eventPic11.jpg',
-    'lib/asset/eventPicc12.jpg',
-    'lib/asset/eventPic13.jpg',
-    'lib/asset/eventPic14.jpg',
-    'lib/asset/eventPic15.jpg',
-    'lib/asset/eventPic16.jpg',
+    'lib/assets/eventsPic1.jpg',
+    'lib/assets/eventsPic2.jpg',
+    'lib/assets/eventsPic3.jpg',
+    'lib/assets/eventsPic4.jpg',
+    'lib/assets/eventsPic5.jpg',
+    'lib/assets/eventPic6.jpg',
+    'lib/assets/eventPic7.jpg',
+    'lib/assets/eventPic8.jpg',
+    'lib/assets/eventPic9.jpg',
+    'lib/assets/eventPic10.jpg',
+    'lib/assets/eventPic11.jpg',
+    'lib/assets/eventPicc12.jpg',
+    'lib/assets/eventPic13.jpg',
+    'lib/assets/eventPic14.jpg',
+    'lib/assets/eventPic15.jpg',
+    'lib/assets/eventPic16.jpg',
   ];
   bool isNotEditable = true;
   DataController? dataController;
@@ -78,7 +78,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Container(
               decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('lib/asset/profilePic.png'),
+                  image: AssetImage('lib/assets/profilePic.png'),
                 ),
               ),
             ),
