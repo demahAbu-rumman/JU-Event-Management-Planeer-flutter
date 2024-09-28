@@ -8,6 +8,8 @@ import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 
+import 'widgets/event_fetch.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -30,7 +32,6 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           Container(
-
             height: 250,
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -128,28 +129,20 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(height: 8),
-      Expanded(
-        child: Obx(() {
-          // Check if there are events available
-          if (dataController.allEvents.isEmpty) {
-            return Center(child: Text("No events available.")); // Notify user
-          }
-          return ListView.builder(
-            itemCount: dataController.allEvents.length,
-            itemBuilder: (context, index) {
-              final event = dataController.allEvents[index];
-              return EventCard(
-                eventName: event.get('name') ?? 'No Name',
-                eventTime: event.get('time') ?? 'No Time',
-                location: event.get('location') ?? 'No Location',
-                icon: Icons.event,
-                iconColor: Colors.blue,
+          Expanded(
+            child: Obx(() {
+              if (dataController.isEventsLoading.value) {
+                return Center(child: CircularProgressIndicator());
+              }
+              return ListView.builder(
+                itemCount: dataController.allEvents.length,
+                itemBuilder: (context, index) {
+                  return EventItem(dataController.allEvents[index]); // Make sure EventItem is correctly implemented
+                },
               );
-            },
-          );
-        }),
-
-      )],
+            }),
+          )
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: AppColors.white,
@@ -237,7 +230,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class EventCard extends StatelessWidget {
+/*class EventCard extends StatelessWidget {
   final String eventName;
   final String eventTime;
   final String location;
@@ -312,4 +305,4 @@ class EventCard extends StatelessWidget {
     );
   }
 }
-
+*/

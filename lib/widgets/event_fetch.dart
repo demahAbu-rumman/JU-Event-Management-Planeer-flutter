@@ -1,11 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:ju_event_managment_planner/controller/data_controller.dart';
-import 'package:ju_event_managment_planner/event_page.dart';
-import 'package:ju_event_managment_planner/profile_signup.dart';
 
 import '../util/app_color.dart';
 
@@ -34,14 +30,14 @@ Future<Widget> EventsFeed() async {
 }
 
 // Card builder for displaying events
-Widget buildCard({String? image, String? text, Function? func, DocumentSnapshot? eventData}) {
+/*Widget buildCard({String? image, String? text, Function? func, DocumentSnapshot? eventData}) {
   DataController dataController = Get.find<DataController>();
 
-  List joinedUsers = eventData?.get('joined') ?? [];
+  List joinedUsers = (eventData?.get('joined') ?? []).cast<String>();
   List<String> dateInformation = (eventData?.get('date')?.toString().split('-') ?? []);
-  int comments = eventData?.get('comments')?.length ?? 0;
-  List userLikes = eventData?.get('likes') ?? [];
-  List eventSavedByUsers = eventData?.get('saves') ?? [];
+  int comments = (eventData?.get('comments') as List?)?.length ?? 0;
+  List userLikes = (eventData?.get('likes') ?? []).cast<String>();
+  List eventSavedByUsers = (eventData?.get('saves') ?? []).cast<String>();
 
   return Container(
     padding: const EdgeInsets.only(left: 5, right: 5, top: 5, bottom: 10),
@@ -66,11 +62,16 @@ Widget buildCard({String? image, String? text, Function? func, DocumentSnapshot?
           },
           child: Container(
             decoration: BoxDecoration(
-              image: DecorationImage(image: NetworkImage(image ?? ''), fit: BoxFit.fill),
+              image: image != null && image.isNotEmpty
+                  ? DecorationImage(image: NetworkImage(image), fit: BoxFit.fill)
+                  : null,
               borderRadius: BorderRadius.circular(10),
             ),
             width: double.infinity,
             height: Get.width * 0.5,
+            child: image == null || image.isEmpty
+                ? const Center(child: Text('No Image Available'))
+                : null,
           ),
         ),
         const SizedBox(height: 10),
@@ -92,18 +93,19 @@ Widget buildCard({String? image, String? text, Function? func, DocumentSnapshot?
                 ),
               ),
               const SizedBox(width: 18),
-              Text(text ?? '', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
-              const Spacer(),
+              Expanded(
+                child: Text(text ?? '', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
+              ),
               InkWell(
                 onTap: () {
                   if (eventSavedByUsers.contains(FirebaseAuth.instance.currentUser!.uid)) {
-                    FirebaseFirestore.instance.collection('events').doc(eventData!.id).set({
+                    FirebaseFirestore.instance.collection('events').doc(eventData!.id).update({
                       'saves': FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
-                    }, SetOptions(merge: true));
+                    });
                   } else {
-                    FirebaseFirestore.instance.collection('events').doc(eventData!.id).set({
+                    FirebaseFirestore.instance.collection('events').doc(eventData!.id).update({
                       'saves': FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
-                    }, SetOptions(merge: true));
+                    });
                   }
                 },
                 child: SizedBox(
@@ -121,31 +123,36 @@ Widget buildCard({String? image, String? text, Function? func, DocumentSnapshot?
             ],
           ),
         ),
-        // Joined users section
-        Row(
-          children: [
-            SizedBox(
-              width: Get.width * 0.6,
-              height: 50,
-              child: ListView.builder(
-                itemBuilder: (ctx, index) {
-                  DocumentSnapshot user = dataController.allUsers.firstWhere((e) => e.id == joinedUsers[index]);
-                  String image = user.get('image') ?? '';
+        // Display joined users
+        if (joinedUsers.isNotEmpty)
+          Row(
+            children: [
+              SizedBox(
+                width: Get.width * 0.6,
+                height: 50,
+                child: ListView.builder(
+                  itemBuilder: (ctx, index) {
+                    try {
+                      DocumentSnapshot user = dataController.allUsers.firstWhere((e) => e.id == joinedUsers[index]);
+                      String image = user.get('image') ?? '';
 
-                  return Container(
-                    margin: const EdgeInsets.only(left: 10),
-                    child: CircleAvatar(
-                      minRadius: 13,
-                      backgroundImage: NetworkImage(image),
-                    ),
-                  );
-                },
-                itemCount: joinedUsers.length,
-                scrollDirection: Axis.horizontal,
+                      return Container(
+                        margin: const EdgeInsets.only(left: 10),
+                        child: CircleAvatar(
+                          minRadius: 13,
+                          backgroundImage: NetworkImage(image),
+                        ),
+                      );
+                    } catch (e) {
+                      return Container();
+                    }
+                  },
+                  itemCount: joinedUsers.length,
+                  scrollDirection: Axis.horizontal,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         const SizedBox(height: 15),
         Row(
           children: [
@@ -153,13 +160,13 @@ Widget buildCard({String? image, String? text, Function? func, DocumentSnapshot?
             InkWell(
               onTap: () {
                 if (userLikes.contains(FirebaseAuth.instance.currentUser!.uid)) {
-                  FirebaseFirestore.instance.collection('events').doc(eventData!.id).set({
+                  FirebaseFirestore.instance.collection('events').doc(eventData!.id).update({
                     'likes': FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid]),
-                  }, SetOptions(merge: true));
+                  });
                 } else {
-                  FirebaseFirestore.instance.collection('events').doc(eventData!.id).set({
+                  FirebaseFirestore.instance.collection('events').doc(eventData!.id).update({
                     'likes': FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid]),
-                  }, SetOptions(merge: true));
+                  });
                 }
               },
               child: Container(
@@ -219,51 +226,89 @@ Widget buildCard({String? image, String? text, Function? func, DocumentSnapshot?
   );
 }
 
+*/
+// Function for individual event item
 // Function for individual event item
 Widget EventItem(DocumentSnapshot event) {
   DataController dataController = Get.find<DataController>();
-  DocumentSnapshot user = dataController.allUsers.firstWhere((e) => event.get('uid') == e.id);
 
-  String image = user.get('image') ?? '';
+  String userImage = '';
   String eventImage = '';
+
+  // Fetch user data
   try {
-    List media = event.get('media') as List;
-    Map mediaItem = media.firstWhere((element) => element['isImage'] == true) as Map;
-    eventImage = mediaItem['url'];
+    DocumentSnapshot user = dataController.allUsers.firstWhere((e) => event.get('uid') == e.id);
+    userImage = user.get('image') ?? '';
   } catch (e) {
-    eventImage = '';
+    userImage = ''; // Default image if user not found
   }
 
-  return Column(
-    children: [
-      Row(
+  // Fetch event image
+  try {
+    List media = event.get('media') as List;
+    Map? mediaItem = media.firstWhere((element) => element['isImage'] == true, orElse: () => null);
+    eventImage = mediaItem != null ? mediaItem['url'] : '';
+  } catch (e) {
+    eventImage = ''; // Default if no media
+  }
+
+  // Get the tags as a List<String>
+  List<String> tags = List<String>.from(event.get('tags') ?? []);
+
+  // Check if event data is valid
+  return Card(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    elevation: 4,
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-            onTap: () {
-              Get.to(() => ProfileScreen());
-            },
-            child: CircleAvatar(
-              radius: 25,
-              backgroundColor: Colors.blue,
-              backgroundImage: NetworkImage(image),
-            ),
+          Row(
+            children: [
+              const Icon(Icons.event, color: Colors.blue),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  event.get('event_name'),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              // Display tags as a comma-separated string
+              if (tags.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(8)),
+                  child: Text(
+                    tags.join(', '), // Join the tags into a single string
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(width: 12),
+          const SizedBox(height: 4),
           Text(
-            '${user.get('first')} ${user.get('last')}',
-            style: GoogleFonts.raleway(fontWeight: FontWeight.w700, fontSize: 18),
+            event.get('location') ?? '',
+            style: TextStyle(color: AppColors.grey),
           ),
+          const SizedBox(height: 8),
+          if (eventImage.isNotEmpty)
+            Container(
+              height: 150,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                image: DecorationImage(image: NetworkImage(eventImage), fit: BoxFit.cover),
+              ),
+            ),
         ],
       ),
-      const SizedBox(height: 10),
-      buildCard(
-          image: eventImage,
-          text: event.get('event_name'),
-          eventData: event,
-          func: () {
-            Get.to(() => EventPageView(event, user));
-          }),
-      const SizedBox(height: 15),
-    ],
+    ),
   );
 }
+
+
+
+
+
+
