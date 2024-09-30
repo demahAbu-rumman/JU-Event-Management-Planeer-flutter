@@ -5,13 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
+
 class LocalNotificationService {
-
-
   static String serverKey = '';
-
   static final FlutterLocalNotificationsPlugin
   _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
   static void initialize() {
     const InitializationSettings initializationSettings =
     InitializationSettings(
@@ -78,7 +77,7 @@ class LocalNotificationService {
 
       print(r.body);
       if (r.statusCode == 200) {
-        print('DOne');
+        print('Done');
       } else {
         print(r.statusCode);
       }
@@ -107,13 +106,15 @@ class LocalNotificationService {
     required String body,
     required String userId,
   }) async {
-    await FirebaseFirestore.instance.collection('notifications').add({
+    await FirebaseFirestore.instance
+        .collection('notifications')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('userNotifications')
+        .add({
       'title': title,
       'body': body,
       'timestamp': FieldValue.serverTimestamp(),
       'isRead': false,
-      'userId': userId,
+      'userId': FirebaseAuth.instance.currentUser!.uid,
     });
-  }
-
-}
+  }}

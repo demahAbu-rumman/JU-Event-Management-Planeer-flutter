@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as Path;
+import 'package:http/http.dart' as http;
 
 class DataController extends GetxController {
   final FirebaseAuth auth = FirebaseAuth.instance;
@@ -168,9 +170,11 @@ class DataController extends GetxController {
     required Map<String, dynamic> data,
     required String lastMessage,
     required String groupId,
+    required String recipientToken, // The FCM token of the recipient
   }) async {
     isMessageSending(true);
 
+    // Add the message to Firestore
     await FirebaseFirestore.instance
         .collection('chats')
         .doc(groupId)
@@ -184,21 +188,67 @@ class DataController extends GetxController {
     }, SetOptions(merge: true));
 
     isMessageSending(false);
+
+    // Send the FCM notification to the recipient
+    await sendFCMNotification(
+      title: 'New Message',
+      body: lastMessage,
+      token: recipientToken,
+    );
+  }
+  Future<void> sendFCMNotification({
+    required String title,
+    required String body,
+    required String token,
+  }) async {
+    const String serverKey = 'AIzaSyCAMFJ190lUpBvY3od1dA-vPBDbxEWDyBg';
+
+    try {
+      await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'key=$serverKey',
+        },
+        body: jsonEncode(
+          <String, dynamic>{
+            'notification': <String, dynamic>{'body': body, 'title': title},
+            'priority': 'high',
+            'to': token,
+          },
+        ),
+      );
+    } catch (e) {
+      print('Error sending FCM notification: $e');
+    }
+  }
+  /// Create a notification
+  Future<void> createNotification(String recipientUid, String recipientToken) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('notifications')
+          .doc(recipientUid)
+          .collection('myNotifications')
+          .add({
+        'message': "Sent you a message.",
+        'image': myDocument?.get('image') ?? '',
+        'name': "${myDocument?.get('first') ?? ''} ${myDocument?.get('last') ?? ''}",
+        'time': DateTime.now(),
+      });
+      print('Notification added successfully');
+    } catch (e) {
+      print('Error creating notification: $e');
+    }
+
+    // Send the FCM notification to the recipient
+    await sendFCMNotification(
+      title: 'New Message',
+      body: 'You have a new message from ${myDocument?.get('first') ?? ''}',
+      token: recipientToken,
+    );
   }
 
-  /// Create a notification
-  Future<void> createNotification(String recipientUid) async {
-    await FirebaseFirestore.instance
-        .collection('notifications')
-        .doc(recipientUid)
-        .collection('myNotifications')
-        .add({
-      'message': "Send you a message.",
-      'image': myDocument?.get('image') ?? '',
-      'name': "${myDocument?.get('first') ?? ''} ${myDocument?.get('last') ?? ''}",
-      'time': DateTime.now(),
-    });
-  }
+
 
   /// Create an event
   Future<bool> createEvent(Map<String, dynamic> eventData) async {

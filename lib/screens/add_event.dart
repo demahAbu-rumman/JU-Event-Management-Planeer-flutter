@@ -69,8 +69,6 @@ class _CreateEventViewState extends State<CreateEventView> {
     }
   }
 
-
-
   var isCreatingEvent = false.obs;
 
   _selectDate(BuildContext context) async {
@@ -133,10 +131,6 @@ class _CreateEventViewState extends State<CreateEventView> {
   List<Map<String, dynamic>> mediaUrls = [];
 
   List<EventMediaModel> media = [];
-
-  // List<File> media = [];
-  // List thumbnail = [];
-  // List<bool> isImage = [];
 
   @override
   void initState() {
