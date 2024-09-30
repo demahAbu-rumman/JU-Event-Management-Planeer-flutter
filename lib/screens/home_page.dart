@@ -7,7 +7,6 @@ import 'package:ju_event_managment_planner/screens/profile_page.dart';
 import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
-
 import '../widgets/event_fetch.dart';
 
 class HomePage extends StatefulWidget {
@@ -24,7 +23,14 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final DataController dataController = Get.put(DataController());
     final DateTime now = DateTime.now();
-    final String formattedDate = DateFormat('EEEE, d MMMM').format(now);
+    final String formattedDate = DateFormat('dd-MM-yyyy').format(now);
+
+    // Call the filter method whenever the selected tab changes
+    dataController.filterEventsBy(
+      _selectedFilterIndex == 0 ? 'Today' :
+      _selectedFilterIndex == 1 ? 'Week' :
+      _selectedFilterIndex == 2 ? 'Month' : 'Year',
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -105,10 +111,10 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        buildFilterTab(0, "Today"),
-                        buildFilterTab(1, "Week"),
-                        buildFilterTab(2, "Month"),
-                        buildFilterTab(3, "Year"),
+                        buildFilterTab(0, "Today", dataController),
+                        buildFilterTab(1, "Week", dataController),
+                        buildFilterTab(2, "Month", dataController),
+                        buildFilterTab(3, "Year", dataController),
                       ],
                     ),
                   ),
@@ -132,16 +138,19 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: Obx(() {
               if (dataController.isEventsLoading.value) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (dataController.filteredEvents.isEmpty) {
+                return const Center(child: Text("There's no event available"));
               }
               return ListView.builder(
-                itemCount: dataController.allEvents.length,
+                itemCount: dataController.filteredEvents.length,
                 itemBuilder: (context, index) {
-                  return EventItem(dataController.allEvents[index]); // Make sure EventItem is correctly implemented
+                  return EventItem(dataController.filteredEvents[index]);
                 },
               );
             }),
-          )
+          ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -198,12 +207,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget buildFilterTab(int index, String text) {
+  Widget buildFilterTab(int index, String text, DataController dataController) {
     bool isSelected = index == _selectedFilterIndex;
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedFilterIndex = index;
+          // Call the filter method here to update the filtered events
+          dataController.filterEventsBy(
+            index == 0 ? 'Today' : index == 1 ? 'Week' : index == 2 ? 'Month' : 'Year',
+          );
         });
       },
       child: Column(
@@ -229,80 +242,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-/*class EventCard extends StatelessWidget {
-  final String eventName;
-  final String eventTime;
-  final String location;
-  final String? tag; // Optional tag like "Soon!"
-  final IconData icon;
-  final Color iconColor;
-
-  const EventCard({
-    super.key,
-    required this.eventName,
-    required this.eventTime,
-    required this.location,
-    this.tag,
-    required this.icon,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: iconColor),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    eventName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                if (tag != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      tag!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              eventTime,
-              style: TextStyle(color: AppColors.grey),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              location,
-              style: TextStyle(color: AppColors.grey),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-*/

@@ -4,10 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:ju_event_managment_planner/screens/notification_service.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:get/get.dart';
-import 'Util/app_constrens.dart';
 import 'firebase_options.dart';
 import 'screens/login_and_signup.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';  // Add Firebase App Check package
 
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -106,11 +104,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20,),
+                const SizedBox(height: 20,),
                 AnimatedSmoothIndicator(
                   activeIndex: _currentPage,
                   count: 3,
-                  effect: WormEffect(activeDotColor: Colors.green,type: WormType.thin,dotHeight: 10,dotWidth: 10),
+                  effect: const WormEffect(activeDotColor: Colors.green,type: WormType.thin,dotHeight: 10,dotWidth: 10),
                 )
               ],
             ),
@@ -160,11 +158,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20,),
+                const SizedBox(height: 20,),
                 AnimatedSmoothIndicator(
                   activeIndex: _currentPage,
                   count: 3,
-                  effect: WormEffect(activeDotColor: Colors.green,type: WormType.thin,dotHeight: 10,dotWidth: 10),
+                  effect: const WormEffect(activeDotColor: Colors.green,type: WormType.thin,dotHeight: 10,dotWidth: 10),
                 )
               ],
             ),
@@ -217,11 +215,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20,),
+                const SizedBox(height: 20,),
                 AnimatedSmoothIndicator(
                   activeIndex: _currentPage,
                   count: 3,
-                  effect: WormEffect(activeDotColor: Colors.green,type: WormType.thin,dotHeight: 10,dotWidth: 10),
+                  effect: const WormEffect(activeDotColor: Colors.green,type: WormType.thin,dotHeight: 10,dotWidth: 10),
                 )
               ],
             ),

@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,162 +8,215 @@ import 'package:get/get.dart';
 import 'package:path/path.dart' as Path;
 
 class DataController extends GetxController {
-  @override
-
-  FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   DocumentSnapshot? myDocument;
-
   var allUsers = <DocumentSnapshot>[].obs;
   var filteredUsers = <DocumentSnapshot>[].obs;
   var allEvents = <DocumentSnapshot>[].obs;
   var filteredEvents = <DocumentSnapshot>[].obs;
   var joinedEvents = <DocumentSnapshot>[].obs;
 
-  var isEventsLoading = false.obs;
+  var isEventsLoading = true.obs;
   var isMessageSending = false.obs;
+  var isUsersLoading = false.obs;
 
   // Controller for the selected role
   var selectedRole = ''.obs;
 
-  sendMessageToFirebase({
-    Map<String, dynamic>? data,
-    String? lastMessage,
-    String? grouid
-  }) async {
-    isMessageSending(true);
-
-    await FirebaseFirestore.instance.collection('chats').doc(grouid).collection('chatroom').add(data!);
-    await FirebaseFirestore.instance.collection('chats').doc(grouid).set({
-      'lastMessage': lastMessage,
-      'groupId': grouid,
-      'group': grouid!.split('-'),
-    }, SetOptions(merge: true));
-
-    isMessageSending(false);
-  }
-
-  createNotification(String recUid) {
-    FirebaseFirestore.instance.collection('notifications').doc(recUid).collection('myNotifications').add({
-      'message': "Send you a message.",
-      'image': myDocument!.get('image'),
-      'name': myDocument!.get('first') + " " + myDocument!.get('last'),
-      'time': DateTime.now()
-    });
-  }
-
-  void getMyDocument() {
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(auth.currentUser!.uid)
-        .snapshots()
-        .listen((event) {
-      myDocument = event;
-      if (myDocument != null) {
-        update(); // This will notify the listeners about the data change
-      }
-    });
-  }
-
-  Future<String> uploadImageToFirebase(File file) async {
-    String fileUrl = '';
-    String fileName = Path.basename(file.path);
-    var reference = FirebaseStorage.instance.ref().child('myfiles/$fileName');
-    UploadTask uploadTask = reference.putFile(file);
-    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
-    await taskSnapshot.ref.getDownloadURL().then((value) {
-      fileUrl = value;
-    });
-    print("Url $fileUrl");
-    return fileUrl;
-  }
-
-  Future<String> uploadThumbnailToFirebase(Uint8List file) async {
-    String fileUrl = '';
-    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    var reference = FirebaseStorage.instance.ref().child('myfiles/$fileName.jpg');
-    UploadTask uploadTask = reference.putData(file);
-    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
-    await taskSnapshot.ref.getDownloadURL().then((value) {
-      fileUrl = value;
-    });
-
-    print("Thumbnail $fileUrl");
-
-    return fileUrl;
-  }
-
-  Future<bool> createEvent(Map<String, dynamic> eventData) async {
-    bool isCompleted = false;
-
-    await FirebaseFirestore.instance.collection('events')
-        .add(eventData)
-        .then((value) {
-      isCompleted = true;
-      Get.snackbar('Event Uploaded', 'Event is uploaded successfully.',
-          colorText: Colors.white, backgroundColor: Colors.lightGreen);
-    }).catchError((e) {
-      isCompleted = false;
-    });
-
-    return isCompleted;
-  }
-
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
     getMyDocument();
     getUsers();
     getEvents();
 
     // Listening for changes in the selectedRole
-    selectedRole.listen((role) {
+    ever(selectedRole, (role) {
       if (role == 'Student') {
         hideEventCreatedSection();
+      } else {
+        // Show all events when the role is not "Student"
+        filteredEvents.assignAll(allEvents);
       }
     });
   }
+  void filterEventsBy(String filter) {
+    isEventsLoading.value = true;
+    DateTime now = DateTime.now();
+    List<DocumentSnapshot> filteredList;
 
-  var isUsersLoading = false.obs;
 
-  getUsers() {
+    switch (filter) {
+      case 'Today':
+        filteredList = allEvents.where((event) {
+          String eventDateStr = event.get('date') as String; // Get date as String
+          DateTime eventDate = _parseDateString(eventDateStr); // Parse string to DateTime
+          return eventDate.year == now.year &&
+              eventDate.month == now.month &&
+              eventDate.day == now.day;
+        }).toList();
+        break;
+
+      case 'Week':
+        DateTime weekStart = now.subtract(Duration(days: now.weekday - 1));
+        DateTime weekEnd = weekStart.add(const Duration(days: 6));
+        filteredList = allEvents.where((event) {
+          String eventDateStr = event.get('date') as String; // Get date as String
+          DateTime eventDate = _parseDateString(eventDateStr); // Parse string to DateTime
+          return eventDate.isAfter(weekStart) && eventDate.isBefore(weekEnd.add(const Duration(days: 1)));
+        }).toList();
+        break;
+
+      case 'Month':
+        filteredList = allEvents.where((event) {
+          String eventDateStr = event.get('date') as String; // Get date as String
+          DateTime eventDate = _parseDateString(eventDateStr); // Parse string to DateTime
+          return eventDate.year == now.year && eventDate.month == now.month;
+        }).toList();
+        break;
+
+      case 'Year':
+        filteredList = allEvents.where((event) {
+          String eventDateStr = event.get('date') as String; // Get date as String
+          DateTime eventDate = _parseDateString(eventDateStr); // Parse string to DateTime
+          return eventDate.year == now.year;
+        }).toList();
+        break;
+
+      default:
+        filteredList = allEvents;
+    }
+
+    filteredEvents.assignAll(filteredList);
+    isEventsLoading.value = false;
+  }
+
+// Helper method to parse date string formatted as "DD-MM-YYYY"
+  DateTime _parseDateString(String dateStr) {
+    List<String> parts = dateStr.split('-');
+    if (parts.length == 3) {
+      int day = int.parse(parts[0]);
+      int month = int.parse(parts[1]);
+      int year = int.parse(parts[2]);
+      return DateTime(year, month, day);
+    }
+    throw const FormatException("Invalid date format");
+  }
+
+
+
+  /// Fetch the current user's document
+  void getMyDocument() {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(auth.currentUser?.uid)
+        .snapshots()
+        .listen((event) {
+      myDocument = event;
+      update();
+    });
+  }
+
+  /// Fetch all users
+  void getUsers() {
     isUsersLoading(true);
     FirebaseFirestore.instance.collection('users').snapshots().listen((event) {
       allUsers.assignAll(event.docs);
-      print('Fetched users: ${allUsers.length}'); // Log user count
-
-      for (var user in allUsers) {
-        print('User ID: ${user.id}, Data: ${user.data()}'); // Log user data
-      }
-
-      filteredUsers.value.assignAll(allUsers);
+      filteredUsers.assignAll(allUsers);
       isUsersLoading(false);
     });
   }
 
-
-  getEvents(){
+  /// Fetch all events
+  void getEvents() {
     isEventsLoading(true);
     FirebaseFirestore.instance.collection('events').snapshots().listen((event) {
       allEvents.assignAll(event.docs);
       filteredEvents.assignAll(event.docs);
 
-      print('Fetched events: ${allEvents.length}'); // Log the number of events fetched
-
-      joinedEvents.value = allEvents.where((e) {
-        List joinedIds = e.get('joined');
-        return joinedIds.contains(FirebaseAuth.instance.currentUser!.uid);
-      }).toList();
+      // Populate joined events for the current user
+      joinedEvents.assignAll(allEvents.where((e) {
+        List joinedIds = e.get('joined') ?? [];
+        return joinedIds.contains(auth.currentUser?.uid);
+      }).toList());
 
       isEventsLoading(false);
     });
   }
 
+  /// Upload image to Firebase Storage
+  Future<String> uploadImageToFirebase(File file) async {
+    String fileName = Path.basename(file.path);
+    var reference = FirebaseStorage.instance.ref().child('myfiles/$fileName');
+    UploadTask uploadTask = reference.putFile(file);
+    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
+    return await taskSnapshot.ref.getDownloadURL();
+  }
 
-  // Function to hide the Event Created section
+  /// Upload thumbnail to Firebase Storage
+  Future<String> uploadThumbnailToFirebase(Uint8List file) async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    var reference = FirebaseStorage.instance.ref().child('myfiles/$fileName.jpg');
+    UploadTask uploadTask = reference.putData(file);
+    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
+    return await taskSnapshot.ref.getDownloadURL();
+  }
+
+  /// Send message to Firebase
+  Future<void> sendMessageToFirebase({
+    required Map<String, dynamic> data,
+    required String lastMessage,
+    required String groupId,
+  }) async {
+    isMessageSending(true);
+
+    await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(groupId)
+        .collection('chatroom')
+        .add(data);
+
+    await FirebaseFirestore.instance.collection('chats').doc(groupId).set({
+      'lastMessage': lastMessage,
+      'groupId': groupId,
+      'group': groupId.split('-'),
+    }, SetOptions(merge: true));
+
+    isMessageSending(false);
+  }
+
+  /// Create a notification
+  Future<void> createNotification(String recipientUid) async {
+    await FirebaseFirestore.instance
+        .collection('notifications')
+        .doc(recipientUid)
+        .collection('myNotifications')
+        .add({
+      'message': "Send you a message.",
+      'image': myDocument?.get('image') ?? '',
+      'name': "${myDocument?.get('first') ?? ''} ${myDocument?.get('last') ?? ''}",
+      'time': DateTime.now(),
+    });
+  }
+
+  /// Create an event
+  Future<bool> createEvent(Map<String, dynamic> eventData) async {
+    try {
+      await FirebaseFirestore.instance.collection('events').add(eventData);
+      Get.snackbar('Event Uploaded', 'Event is uploaded successfully.',
+          colorText: Colors.white, backgroundColor: Colors.lightGreen);
+      return true;
+    } catch (e) {
+      print('Error creating event: $e');
+      return false;
+    }
+  }
+
+  /// Hide the Event Created section for students
   void hideEventCreatedSection() {
-    // Logic to hide the "Event Created" section
-    filteredEvents.value.clear(); // Clear the events list to hide them
+    filteredEvents.assignAll(allEvents.where((event) {
+      return event.get('creatorRole') != 'Student';
+    }).toList());
   }
 }

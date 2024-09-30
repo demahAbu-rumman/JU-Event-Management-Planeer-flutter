@@ -231,7 +231,6 @@ Future<Widget> EventsFeed() async {
 // Function for individual event item
 Widget EventItem(DocumentSnapshot event) {
   DataController dataController = Get.find<DataController>();
-
   String userImage = '';
   String eventImage = '';
 
