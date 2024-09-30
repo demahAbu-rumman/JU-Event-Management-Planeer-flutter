@@ -102,4 +102,18 @@ class LocalNotificationService {
     }
   }
 
+  static Future<void> storeNotification({
+    required String title,
+    required String body,
+    required String userId,
+  }) async {
+    await FirebaseFirestore.instance.collection('notifications').add({
+      'title': title,
+      'body': body,
+      'timestamp': FieldValue.serverTimestamp(),
+      'isRead': false,
+      'userId': userId,
+    });
+  }
+
 }

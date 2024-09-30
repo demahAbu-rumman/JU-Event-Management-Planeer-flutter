@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:ju_event_managment_planner/screens/notification_page.dart';
 import 'add_event.dart'; // Import your event creation page
 import 'calender.dart'; // Import your calendar page
 import 'profile_page.dart'; // Import your profile page
@@ -74,7 +75,10 @@ class CustomDrawer extends StatelessWidget {
             onTap: () {
               // Handle notifications action
               Navigator.pop(context);
-              // Add notification handling here if needed
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => NotificationPage()),
+              );
             },
           ),
           const Divider(),

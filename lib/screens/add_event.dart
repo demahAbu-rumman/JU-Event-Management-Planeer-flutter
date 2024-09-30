@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ju_event_managment_planner/Util/app_color.dart';
+import 'package:ju_event_managment_planner/screens/notification_service.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../../controller/data_controller.dart';
 import '../../../widgets/my_widgets.dart';
@@ -53,6 +54,22 @@ class _CreateEventViewState extends State<CreateEventView> {
     endTime = const TimeOfDay(hour: 0, minute: 0);
     setState(() {});
   }
+  void publishEvent() async {
+    // After publishing, notify users
+    String? userId = FirebaseAuth.instance.currentUser?.uid; // Get the current user ID
+
+    if (userId != null) {
+      await LocalNotificationService.storeNotification(
+        title: 'New Event Published!',
+        body: 'A new event has been published. Check it out!',
+        userId: userId, // Use the current user's ID
+      );
+    } else {
+      print('No user is currently signed in.');
+    }
+  }
+
+
 
   var isCreatingEvent = false.obs;
 
