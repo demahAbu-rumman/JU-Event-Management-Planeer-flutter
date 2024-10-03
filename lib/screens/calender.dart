@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../Util/app_color.dart';
+import '../controller/data_controller.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({Key? key}) : super(key: key);
@@ -12,21 +14,38 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  final dataController = Get.find<DataController>(); // Find the DataController
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch events for the initial day (today)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchEventsForSelectedDate(_focusedDay);
+    });
+  }
+
+  void _fetchEventsForSelectedDate(DateTime selectedDay) {
+    // Use the new method to filter events by the selected date
+    dataController.filterEventsByDate(selectedDay);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.lightgreen,
-        title: const Text('Calendar', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Calendar',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
-        elevation: 0,  // Remove AppBar shadow for a cleaner look
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         child: Column(
           children: [
-            // Calendar widget with updated padding
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -51,19 +70,20 @@ class _CalendarPageState extends State<CalendarPage> {
                     _selectedDay = selectedDay;
                     _focusedDay = focusedDay;
                   });
+                  _fetchEventsForSelectedDate(selectedDay);
                 },
                 calendarStyle: CalendarStyle(
                   selectedDecoration: BoxDecoration(
-                    color: AppColors.lightGreen,
+                    color: AppColors.lightgreen,
                     shape: BoxShape.circle,
                   ),
                   todayDecoration: BoxDecoration(
-                    color: AppColors.darkGreen,
+                    color: AppColors.lightgreen.withOpacity(0.5),
                     shape: BoxShape.circle,
                   ),
                   defaultTextStyle: TextStyle(color: AppColors.black),
                   weekendTextStyle: TextStyle(color: AppColors.black),
-                  outsideDaysVisible: false,  // Hide days from outside the current month
+                  outsideDaysVisible: false,
                 ),
                 headerStyle: HeaderStyle(
                   formatButtonVisible: false,
@@ -73,37 +93,40 @@ class _CalendarPageState extends State<CalendarPage> {
                     fontWeight: FontWeight.bold,
                     color: AppColors.black,
                   ),
-                  leftChevronIcon: Icon(Icons.chevron_left, color: AppColors.black),
-                  rightChevronIcon: Icon(Icons.chevron_right, color: AppColors.black),
+                  leftChevronIcon: Icon(
+                      Icons.chevron_left, color: AppColors.black),
+                  rightChevronIcon: Icon(
+                      Icons.chevron_right, color: AppColors.black),
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            // Event list display with more structure and styling
             Expanded(
-              child: ListView(
-                children: [
-                  _buildEventCard(
-                    context,
-                    title: "Design Meeting",
-                    time: "Saturday, July 04th\n09:50 - 10:20 AM",
-                    priority: "Priority: Very High",
-                    priorityColor: Colors.redAccent,
-                    additionalInfo: null,
-                  ),
-                  const SizedBox(height: 16),
-                  _buildEventCard(
-                    context,
-                    title: "Analytics Meeting",
-                    time: "Monday, July 05th\n10:30 - 12:00 PM",
-                    priority: null,
-                    priorityColor: null,
-                    additionalInfo: "Project Marshmallow Website Handover\n"
-                        "Client Daniel Web App Design Handover\n"
-                        "Fintech Web App Re-design Handover",
-                  ),
-                ],
-              ),
+              child: Obx(() {
+                // Observe changes in filteredEvents from dataController
+                if (dataController.isEventsLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (dataController.filteredEvents.isEmpty) {
+                  return const Center(
+                      child: Text("There's no event available for this date."));
+                }
+                final events = dataController.filteredEvents;
+                return ListView.builder(
+                  itemCount: events.length,
+                  itemBuilder: (context, index) {
+                    final event = events[index];
+                    return _buildEventCard(
+                      context,
+                      name: event.get('event_name') ?? 'No Name',
+                      location: event.get('location') ?? 'No Location',
+                      time: "${event.get('start_time')} - ${event.get(
+                          'end_time')}",
+                      description: event.get('description') ?? 'No Description',
+                    );
+                  },
+                );
+              }),
             ),
           ],
         ),
@@ -111,73 +134,92 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
-  Widget _buildEventCard(
-      BuildContext context, {
-        required String title,
+  Widget _buildEventCard(BuildContext context,
+      {required String name,
+        required String location,
         required String time,
-        String? priority,
-        Color? priorityColor,
-        String? additionalInfo,
-      }) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        required String description}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16), // Modern shape
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16), // Ensure child widgets follow the rounded corners
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.black,
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.lightgreen, // Background color for the header
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, color: Colors.white70, size: 16),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          location,
+                          style: TextStyle(color: Colors.white70),
+                          overflow: TextOverflow.ellipsis, // Prevent text overflow
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.access_time, color: AppColors.lightGreen, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  time,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.grey,
-                  ),
-                ),
-              ],
-            ),
-            if (priority != null) ...[
-              const SizedBox(height: 8),
-              Row(
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.priority_high, color: priorityColor, size: 20),
-                  const SizedBox(width: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.access_time, color: AppColors.lightgreen, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        "Time: $time",
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
                   Text(
-                    priority,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.black,
+                    "Description: $description",
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      color: Colors.black54,
                     ),
                   ),
                 ],
               ),
-            ],
-            if (additionalInfo != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                additionalInfo,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.grey,
-                ),
-              ),
-            ],
+            ),
           ],
         ),
       ),
     );
-  }
-}
+  }}

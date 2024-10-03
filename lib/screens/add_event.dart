@@ -259,109 +259,103 @@ class _CreateEventViewState extends State<CreateEventView> {
                     ),
                   ),
                 ),
+                // This widget checks if media is empty and conditionally displays the media uploader or a message
                 media.isEmpty
-                    ? Container()
-                    : const SizedBox(
-                        height: 20,
-                      ),
+                    ? Container(
+                  // You can provide a message here or leave it empty
+                  child: const Text("No media uploaded. You can upload images or videos."),
+                )
+                    : const SizedBox(height: 20), // Spacing when media is present
 
                 media.isEmpty
-                    ? Container()
+                    ? Container() // No media, do nothing
                     : SizedBox(
-                        width: Get.width,
+                  width: Get.width,
+                  height: Get.width * 0.3,
+                  child: ListView.builder(
+                    itemBuilder: (ctx, i) {
+                      // If the media item is a video
+                      return media[i].isVideo!
+                          ? Container(
+                        width: Get.width * 0.3,
                         height: Get.width * 0.3,
-                        child: ListView.builder(
-                            itemBuilder: (ctx, i) {
-                              return media[i].isVideo!
-                                  //!isImage[i]
-                                  ? Container(
-                                      width: Get.width * 0.3,
-                                      height: Get.width * 0.3,
-                                      margin: const EdgeInsets.only(
-                                          right: 15, bottom: 10, top: 10),
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                            image: MemoryImage(
-                                                media[i].thumbnail!),
-                                            fit: BoxFit.fill),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(5),
-                                                child: CircleAvatar(
-                                                  child: IconButton(
-                                                    onPressed: () {
-                                                      media.removeAt(i);
-                                                      // media.removeAt(i);
-                                                      // isImage.removeAt(i);
-                                                      // thumbnail.removeAt(i);
-                                                      setState(() {});
-                                                    },
-                                                    icon:
-                                                        const Icon(Icons.close),
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                          const Align(
-                                            alignment: Alignment.center,
-                                            child: Icon(
-                                              Icons.slow_motion_video_rounded,
-                                              color: Colors.white,
-                                              size: 40,
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    )
-                                  : Container(
-                                      width: Get.width * 0.3,
-                                      height: Get.width * 0.3,
-                                      margin: const EdgeInsets.only(
-                                          right: 15, bottom: 10, top: 10),
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                            image: FileImage(media[i].image!),
-                                            fit: BoxFit.fill),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(5),
-                                            child: CircleAvatar(
-                                              child: IconButton(
-                                                onPressed: () {
-                                                  media.removeAt(i);
-                                                  // isImage.removeAt(i);
-                                                  // thumbnail.removeAt(i);
-                                                  setState(() {});
-                                                },
-                                                icon: const Icon(Icons.close),
-                                              ),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    );
-                            },
-                            itemCount: media.length,
-                            scrollDirection: Axis.horizontal),
-                      ),
+                        margin: const EdgeInsets.only(
+                            right: 15, bottom: 10, top: 10),
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: MemoryImage(media[i].thumbnail!),
+                            fit: BoxFit.fill,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Stack(
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: CircleAvatar(
+                                    child: IconButton(
+                                      onPressed: () {
+                                        media.removeAt(i);
+                                        setState(() {});
+                                      },
+                                      icon: const Icon(Icons.close),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                            const Align(
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.slow_motion_video_rounded,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                      // If the media item is an image
+                          : Container(
+                        width: Get.width * 0.3,
+                        height: Get.width * 0.3,
+                        margin: const EdgeInsets.only(
+                            right: 15, bottom: 10, top: 10),
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: FileImage(media[i].image!),
+                            fit: BoxFit.fill,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: CircleAvatar(
+                                child: IconButton(
+                                  onPressed: () {
+                                    media.removeAt(i);
+                                    setState(() {});
+                                  },
+                                  icon: const Icon(Icons.close),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                    itemCount: media.length,
+                    scrollDirection: Axis.horizontal,
+                  ),
+                ),
 
                 const SizedBox(
                   height: 20,
@@ -935,13 +929,13 @@ class _CreateEventViewState extends State<CreateEventView> {
                                 return;
                               }
 
-                              if (media.isEmpty) {
+                              /*if (media.isEmpty) {
                                 Get.snackbar('Opps', "Media is required.",
                                     colorText: Colors.white,
                                     backgroundColor: Colors.blue);
 
                                 return;
-                              }
+                              }*/
 
                               if (tagsController.text.isEmpty) {
                                 Get.snackbar('Opps', "Tags is required.",

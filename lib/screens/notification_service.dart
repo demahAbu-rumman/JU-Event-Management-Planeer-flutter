@@ -18,7 +18,7 @@ class LocalNotificationService {
     _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  static void display(RemoteMessage message) async{
+  static void display(RemoteMessage message) async {
     try {
       print("In Notification method");
       Random random = Random();
@@ -88,15 +88,14 @@ class LocalNotificationService {
 
 
   static storeToken() async {
-    try{
+    try {
       String? token = await FirebaseMessaging.instance.getToken();
       print(token);
       FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .set({'fcmToken': token!}, SetOptions(merge: true));
-
-    }catch(e){
+    } catch (e) {
       print("error is $e");
     }
   }
@@ -106,15 +105,22 @@ class LocalNotificationService {
     required String body,
     required String userId,
   }) async {
-    await FirebaseFirestore.instance
-        .collection('notifications')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection('userNotifications')
-        .add({
-      'title': title,
-      'body': body,
-      'timestamp': FieldValue.serverTimestamp(),
-      'isRead': false,
-      'userId': FirebaseAuth.instance.currentUser!.uid,
-    });
-  }}
+    try {
+      print("Storing notification for user: $userId");
+      await FirebaseFirestore.instance
+          .collection('notifications')
+          .doc(userId)
+          .collection('userNotifications')
+          .add({
+        'title': title,
+        'body': body,
+        'timestamp': FieldValue.serverTimestamp(),
+        'isRead': false,
+        'userId': userId,
+      });
+      print("Notification stored successfully");
+    } catch (e) {
+      print("Error storing notification: $e");
+    }
+  }
+}

@@ -116,7 +116,8 @@ class _LoginViewState extends State<LoginView> {
                         style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w500,
-                            color: AppColors.lightgreen), // Dark Green text
+                            color: AppColors.lightgreen),
+                        // Dark Green text
                       ),
                       myText(
                         text: 'Sign Up',

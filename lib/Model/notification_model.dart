@@ -21,23 +21,8 @@ class NotificationModel {
       id: doc.id,
       title: data['title'] ?? '',
       body: data['body'] ?? '',
-      timestamp: _parseDate(data['date'] ?? ''), // Parse the date string here
+      timestamp: (data['timestamp'] as Timestamp).toDate(), // Directly convert Timestamp to DateTime
       isRead: data['isRead'] ?? false,
     );
-  }
-
-  // Helper method to parse the date string into a DateTime object
-  static DateTime _parseDate(String dateString) {
-    // Check if the date string is empty
-    if (dateString.isEmpty) {
-      return DateTime.now(); // or return a default date
-    }
-
-    // Split the string by '-' and convert to integers
-    List<String> parts = dateString.split('-');
-    int day = int.parse(parts[0]);
-    int month = int.parse(parts[1]);
-    int year = int.parse(parts[2]);
-    return DateTime(year, month, day);
   }
 }

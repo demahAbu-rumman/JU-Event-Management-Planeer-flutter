@@ -2,18 +2,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ju_event_managment_planner/Model/notification_model.dart';
+import '../Util/app_color.dart';
 
 class NotificationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notifications'),
+        backgroundColor: AppColors.lightgreen,
+        title: Text('Notifications', style: TextStyle(color: Colors.white)),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('notifications')
-            .where('userId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection('userNotifications')
             .orderBy('timestamp', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
@@ -34,17 +38,30 @@ class NotificationPage extends StatelessWidget {
             itemBuilder: (context, index) {
               final notification = notifications[index];
               return Card(
-                margin: EdgeInsets.all(8),
+                color: notification.isRead ? Colors.white : AppColors.lightgreen.withOpacity(0.1),
+                margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: ListTile(
-                  title: Text(notification.title),
-                  subtitle: Text(notification.body),
+                  leading: Icon(Icons.notifications, color: AppColors.lightgreen),
+                  title: Text(
+                    notification.title,
+                    style: TextStyle(
+                      color: AppColors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    notification.body,
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
                   trailing: Text(
                     "${notification.timestamp.day}/${notification.timestamp.month}/${notification.timestamp.year}",
                     style: TextStyle(color: Colors.grey),
                   ),
-                  onTap: () {
-                    // Mark as read or navigate to the relevant page
-                    // You can also update the notification in Firestore to mark it as read
+                  onTap: () async {
+                    await _markAsRead(notification);
                   },
                 ),
               );
@@ -53,5 +70,14 @@ class NotificationPage extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _markAsRead(NotificationModel notification) async {
+    await FirebaseFirestore.instance
+        .collection('notifications')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('userNotifications')
+        .doc(notification.id)
+        .update({'isRead': true});
   }
 }
