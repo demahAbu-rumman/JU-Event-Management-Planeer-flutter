@@ -18,12 +18,6 @@ Future<void> main() async {
 
   //Stripe.publishableKey = publishableKey;
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
 
   LocalNotificationService.initialize();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
