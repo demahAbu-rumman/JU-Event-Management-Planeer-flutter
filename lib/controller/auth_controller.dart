@@ -14,10 +14,32 @@ class AuthController extends GetxController {
   FirebaseAuth auth = FirebaseAuth.instance;
   var isLoading = false.obs;
 
+  // Private variable to hold user data
+  Map<String, dynamic>? _userData;
+
+  // Method to retrieve user data
+  Map<String, dynamic>? getUserData() {
+    return _userData;
+  }
+
+  // Method to save user data
+  void saveUserData(String name, String mobile, String role,
+      String organizationName, String imageUrl) {
+    _userData = {
+      'name': name,
+      'mobile': mobile,
+      'role': role,
+      'organizationName': organizationName,
+      'imageUrl': imageUrl,
+    };
+  }
+
+  // Login method
   void login({String? email, String? password}) {
     isLoading(true);
 
-    auth.signInWithEmailAndPassword(email: email!, password: password!)
+    auth
+        .signInWithEmailAndPassword(email: email!, password: password!)
         .then((value) async {
       // Fetch user data after successful login
       await fetchUserData();
@@ -30,6 +52,8 @@ class AuthController extends GetxController {
       Get.snackbar('Error', "$e");
     });
   }
+
+  // Store FCM token
   static storeToken() async {
     try {
       String? token = await FirebaseMessaging.instance.getToken();
@@ -42,14 +66,20 @@ class AuthController extends GetxController {
       print("error is $e");
     }
   }
-  void signUp({String? email, String? password}) {
+
+  // SignUp method with role parameter
+  void signUp({String? email, String? password, String? role}) {
     isLoading(true);
 
-    auth.createUserWithEmailAndPassword(email: email!, password: password!)
+    auth
+        .createUserWithEmailAndPassword(email: email!, password: password!)
         .then((value) async {
-      // After successful signup, call uploadProfileData
+      // After successful signup, save the role to Firestore
       String uid = value.user!.uid;
-     // uploadProfileData("", "FirstName", "LastName", "1234567890", "01/01/2000", "Gender");
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'email': email,
+        'role': role,
+      });
 
       // Fetch user data after successful signup
       await fetchUserData();
@@ -62,7 +92,7 @@ class AuthController extends GetxController {
     });
   }
 
-
+  // Forget password method
   void forgetPassword(String email) {
     auth.sendPasswordResetEmail(email: email).then((value) {
       Get.back();
@@ -72,6 +102,7 @@ class AuthController extends GetxController {
     });
   }
 
+  // Google Sign-In method
   signInWithGoogle() async {
     isLoading(true);
     // Trigger the authentication flow
@@ -79,7 +110,7 @@ class AuthController extends GetxController {
 
     // Obtain the auth details from the request
     final GoogleSignInAuthentication? googleAuth =
-    await googleUser?.authentication;
+        await googleUser?.authentication;
 
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
@@ -91,7 +122,7 @@ class AuthController extends GetxController {
     FirebaseAuth.instance.signInWithCredential(credential).then((value) {
       isLoading(false);
 
-      ///SuccessFull loged in
+      ///Successfully logged in
       // Get.to(() => BottomBarView());
     }).catchError((e) {
       /// Error in getting Login
@@ -100,51 +131,57 @@ class AuthController extends GetxController {
     });
   }
 
-
   var isProfileInformationLoading = false.obs;
 
+  // Upload image to Firebase Storage
   Future<String> uploadImageToFirebaseStorage(File image) async {
     String imageUrl = '';
     String fileName = Path.basename(image.path);
 
     var reference =
-    FirebaseStorage.instance.ref().child('profileImages/$fileName');
+        FirebaseStorage.instance.ref().child('profileImages/$fileName');
     UploadTask uploadTask = reference.putFile(image);
     TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
     await taskSnapshot.ref.getDownloadURL().then((value) {
       imageUrl = value;
     }).catchError((e) {
-      print("Error happen $e");
+      print("Error happened $e");
     });
 
     return imageUrl;
   }
 
-  uploadProfileData(String imageUrl, String firstName, String lastName,
-      String mobileNumber, String gender,String role,String eventOrganizationName) {
-
+  // Upload profile data to Firestore
+  uploadProfileData(
+      String imageUrl,
+      String firstName,
+      String lastName,
+      String mobileNumber,
+      String gender,
+      String role,
+      String eventOrganizationName) {
     String uid = FirebaseAuth.instance.currentUser!.uid;
 
     FirebaseFirestore.instance.collection('users').doc(uid).set({
       'image': imageUrl,
       'first': firstName,
       'last': lastName,
-      'phone':mobileNumber,
+      'phone': mobileNumber,
       'gender': gender,
-      'role':role,
-      'eventOrganizationName' :eventOrganizationName
-
+      'role': role,
+      'eventOrganizationName': eventOrganizationName,
     }).then((value) {
       isProfileInformationLoading(false);
-      Get.offAll(()=> HomePage());
-    });}
+      Get.offAll(() => HomePage());
+    });
+  }
 
-// Add this method in AuthController
+  // Fetch user data from Firestore
   Future<void> fetchUserData() async {
     try {
       String uid = auth.currentUser!.uid;
       DocumentSnapshot userSnapshot =
-      await FirebaseFirestore.instance.collection('users').doc(uid).get();
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
       if (userSnapshot.exists) {
         _userData = userSnapshot.data() as Map<String, dynamic>;
@@ -153,22 +190,4 @@ class AuthController extends GetxController {
       print("Error fetching user data: $e");
     }
   }
-
-// Method to save user data
-void saveUserData(String name, String mobile, String role, String organizationName, String imageUrl) {
-  _userData = {
-    'name': name,
-    'mobile': mobile,
-    'role': role,
-    'organizationName': organizationName,
-    'imageUrl': imageUrl,
-  };
 }
-
-// Method to retrieve user data
-Map<String, dynamic>? getUserData() {
-  return _userData;
-}
-
-// Private variable to hold user data
-Map<String, dynamic>? _userData;}

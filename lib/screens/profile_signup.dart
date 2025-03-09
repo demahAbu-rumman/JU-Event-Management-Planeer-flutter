@@ -20,7 +20,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController mobileNumberController = TextEditingController();
-  TextEditingController eventOrganizationNameController = TextEditingController();
+  TextEditingController eventOrganizationNameController =
+      TextEditingController();
   //TextEditingController role = TextEditingController();
   TextEditingController gender = TextEditingController();
 
@@ -49,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onTap: () async {
                   final ImagePicker picker0 = ImagePicker();
                   final XFile? image =
-                  await picker0.pickImage(source: ImageSource.camera);
+                      await picker0.pickImage(source: ImageSource.camera);
                   if (image != null) {
                     profileImage = File(image.path);
                     setState(() {});
@@ -121,21 +122,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: profileImage == null
                         ? const CircleAvatar(
-                      radius: 56,
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                        Icons.camera_alt,
-                        color: Colors.blue,
-                        size: 50,
-                      ),
-                    )
+                            radius: 56,
+                            backgroundColor: Colors.white,
+                            child: Icon(
+                              Icons.camera_alt,
+                              color: Colors.blue,
+                              size: 50,
+                            ),
+                          )
                         : CircleAvatar(
-                      radius: 56,
-                      backgroundColor: Colors.white,
-                      backgroundImage: FileImage(
-                        profileImage!,
-                      ),
-                    ),
+                            radius: 56,
+                            backgroundColor: Colors.white,
+                            backgroundImage: FileImage(
+                              profileImage!,
+                            ),
+                          ),
                   ),
                 ),
                 SizedBox(height: Get.width * 0.1),
@@ -170,24 +171,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
                       return null;
                     }),
-
                 Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.black), // Black line
                     borderRadius: BorderRadius.circular(8.0), // Matching shape
                     color: Colors.white, // Matching color
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12), // Padding to align text properly
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12), // Padding to align text properly
                   child: DropdownButtonFormField<String>(
                     value: selectedRole,
                     hint: const Text('Select your role'),
-                    decoration: const InputDecoration.collapsed(hintText: ''), // Removes the underline
+                    decoration: const InputDecoration.collapsed(
+                        hintText: ''), // Removes the underline
                     onChanged: (value) {
                       setState(() {
                         selectedRole = value;
                         isEventOrganizer = value == "Event Organizer";
                         if (!isEventOrganizer) {
-                          eventOrganizationNameController.clear(); // Clear the organization name
+                          eventOrganizationNameController
+                              .clear(); // Clear the organization name
                         }
                       });
                     },
@@ -197,8 +200,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Text("Student"),
                       ),
                       DropdownMenuItem(
-                        value: "Administrator",
-                        child: Text("Administrator"),
+                        value: "Instructor",
+                        child: Text("Instructor"),
                       ),
                       DropdownMenuItem(
                         value: "Event Organizer",
@@ -217,8 +220,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 16),
                   textField(
                     text: 'Name of the Event Organization',
-                    controller: eventOrganizationNameController
-                    ,
+                    controller: eventOrganizationNameController,
                     validator: (String input) {
                       if (input.isEmpty) {
                         return 'Event Organization Name is required.';
@@ -227,52 +229,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                   ),
                 ],
-
                 Obx(() => authController!.isProfileInformationLoading.value
                     ? const Center(child: CircularProgressIndicator())
                     : Container(
-                  height: 50,
-                  margin: EdgeInsets.only(top: Get.height * 0.02),
-                  width: Get.width,
-                  child: elevatedButton(
-                    text: 'Save',
-                    onpress: () async {
-                      if (!formKey.currentState!.validate()) {
-                        return;
-                      }
+                        height: 50,
+                        margin: EdgeInsets.only(top: Get.height * 0.02),
+                        width: Get.width,
+                        child: elevatedButton(
+                          text: 'Save',
+                          onpress: () async {
+                            if (!formKey.currentState!.validate()) {
+                              return;
+                            }
 
-                      authController!.isProfileInformationLoading(true);
+                            authController!.isProfileInformationLoading(true);
 
-                      String? imageUrl;
-                      if (profileImage != null) {
-                        imageUrl = await authController!
-                            .uploadImageToFirebaseStorage(profileImage!);
-                      }
+                            String? imageUrl;
+                            if (profileImage != null) {
+                              imageUrl = await authController!
+                                  .uploadImageToFirebaseStorage(profileImage!);
+                            }
 
+                            authController!.saveUserData(
+                              firstNameController.text.trim() +
+                                  " " +
+                                  lastNameController.text.trim(),
+                              mobileNumberController.text.trim(),
+                              selectedRole!.toString().trim(),
+                              isEventOrganizer
+                                  ? eventOrganizationNameController.text.trim()
+                                  : "",
+                              profileImage != null
+                                  ? await authController!
+                                      .uploadImageToFirebaseStorage(
+                                          profileImage!)
+                                  : '',
+                            );
 
-                      authController!.saveUserData(
-                        firstNameController.text.trim() + " " + lastNameController.text.trim(),
-                        mobileNumberController.text.trim(),
-                        selectedRole!.toString().trim(),
-                        isEventOrganizer ? eventOrganizationNameController.text.trim() : "",
-                        profileImage != null ? await authController!.uploadImageToFirebaseStorage(profileImage!) : '',
-                      );
+                            authController!.uploadProfileData(
+                              imageUrl ?? '',
+                              firstNameController.text.trim(),
+                              lastNameController.text.trim(),
+                              mobileNumberController.text.trim(),
+                              // selectedRole!,
+                              eventOrganizationNameController.text.trim(),
+                              selectedRole!.toString().trim(),
+                              gender.text.trim(),
+                            );
 
-                      authController!.uploadProfileData(
-                        imageUrl ?? '',
-                        firstNameController.text.trim(),
-                        lastNameController.text.trim(),
-                        mobileNumberController.text.trim(),
-                       // selectedRole!,
-                       eventOrganizationNameController.text.trim(),
-                        selectedRole!.toString().trim(),
-                        gender.text.trim(),
-                      );
-
-                      Get.to(()=>   const HomePage());
-                    },
-                  ),
-                )),
+                            Get.to(() => const HomePage());
+                          },
+                        ),
+                      )),
                 SizedBox(height: Get.height * 0.03),
                 SizedBox(
                   width: Get.width * 0.8,

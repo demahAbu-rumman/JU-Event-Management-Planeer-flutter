@@ -6,7 +6,6 @@ import '../Util/app_color.dart';
 import '../controller/auth_controller.dart';
 import 'profile_signup.dart';
 
-
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -15,7 +14,6 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   TextEditingController emailController = TextEditingController();
@@ -55,46 +53,43 @@ class _LoginViewState extends State<LoginView> {
                 ),
                 isSignUp
                     ? myText(
-                  text: 'Sign Up',
-                  style: TextStyle(
-                    fontSize: 23,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.lightgreen, // Dark Green emphasis
-                  ),
-                )
+                        text: 'Sign Up',
+                        style: TextStyle(
+                          fontSize: 23,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.lightgreen,
+                        ),
+                      )
                     : myText(
-                  text: 'Login',
-                  style: GoogleFonts.poppins(
-                    fontSize: 23,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.lightgreen, // Dark Green emphasis
-                  ),
-                ),
+                        text: 'Login',
+                        style: GoogleFonts.poppins(
+                          fontSize: 23,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.lightgreen,
+                        ),
+                      ),
                 SizedBox(
                   height: Get.height * 0.03,
                 ),
                 isSignUp
                     ? Container(
-                  alignment: Alignment.center, // Centers the image within the container
-                  child: Image.asset(
-                    'lib/assets/JU.png', // Image path
-                    width: Get.width * 0.4, // Set width to 40% of the screen width
-                    height: Get.height * 0.2, // Set height to 20% of the screen height
-                    fit: BoxFit.contain, // Ensures the image maintains its aspect ratio
-                  ),
-                )
-
-              :Container(
-                  alignment: Alignment.center, // Centers the image within the container
-                  child: Image.asset(
-                    'lib/assets/JU.png', // Image path
-                    width: Get.width * 0.4, // Set width to 40% of the screen width
-                    height: Get.height * 0.2, // Set height to 20% of the screen height
-                    fit: BoxFit.contain, // Ensures the image maintains its aspect ratio
-                  ),
-                ),
-
-
+                        alignment: Alignment.center,
+                        child: Image.asset(
+                          'lib/assets/JU.png',
+                          width: Get.width * 0.4,
+                          height: Get.height * 0.2,
+                          fit: BoxFit.contain,
+                        ),
+                      )
+                    : Container(
+                        alignment: Alignment.center,
+                        child: Image.asset(
+                          'lib/assets/JU.png',
+                          width: Get.width * 0.4,
+                          height: Get.height * 0.2,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                 SizedBox(
                   height: Get.height * 0.03,
                 ),
@@ -102,9 +97,9 @@ class _LoginViewState extends State<LoginView> {
                   width: Get.width * 0.55,
                   child: TabBar(
                     labelPadding: EdgeInsets.all(Get.height * 0.01),
-                    unselectedLabelColor: AppColors.lightGreen, // Light Green for unselected tabs
-                    labelColor: AppColors.darkGreen, // Dark Green for selected tabs
-                    indicatorColor: AppColors.darkGreen, // Dark Green indicator
+                    unselectedLabelColor: AppColors.lightGreen,
+                    labelColor: AppColors.darkGreen,
+                    indicatorColor: AppColors.darkGreen,
                     onTap: (v) {
                       setState(() {
                         isSignUp = !isSignUp;
@@ -117,14 +112,13 @@ class _LoginViewState extends State<LoginView> {
                             fontSize: 22,
                             fontWeight: FontWeight.w500,
                             color: AppColors.lightgreen),
-                        // Dark Green text
                       ),
                       myText(
                         text: 'Sign Up',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.lightgreen, // Dark Green text
+                          color: AppColors.lightgreen,
                         ),
                       ),
                     ],
@@ -169,13 +163,15 @@ class _LoginViewState extends State<LoginView> {
                 validator: (String input) {
                   if (input.isEmpty) {
                     Get.snackbar('Warning', 'Email is required.',
-                        colorText: AppColors.white, backgroundColor: AppColors.darkGreen); // Dark Green Snackbar background
+                        colorText: AppColors.white,
+                        backgroundColor: AppColors.darkGreen);
                     return '';
                   }
 
                   if (!input.contains('@')) {
                     Get.snackbar('Warning', 'Email is invalid.',
-                        colorText: AppColors.white, backgroundColor: AppColors.darkGreen); // Dark Green Snackbar background
+                        colorText: AppColors.white,
+                        backgroundColor: AppColors.darkGreen);
                     return '';
                   }
                 },
@@ -191,13 +187,15 @@ class _LoginViewState extends State<LoginView> {
                 validator: (String input) {
                   if (input.isEmpty) {
                     Get.snackbar('Warning', 'Password is required.',
-                        colorText: AppColors.white, backgroundColor: AppColors.darkGreen); // Dark Green Snackbar background
+                        colorText: AppColors.white,
+                        backgroundColor: AppColors.darkGreen);
                     return '';
                   }
 
                   if (input.length < 6) {
                     Get.snackbar('Warning', 'Password should be 6+ characters.',
-                        colorText: AppColors.white, backgroundColor: AppColors.darkGreen); // Dark Green Snackbar background
+                        colorText: AppColors.white,
+                        backgroundColor: AppColors.darkGreen);
                     return '';
                   }
                 },
@@ -221,7 +219,7 @@ class _LoginViewState extends State<LoginView> {
                               height: 10,
                             ),
                             MaterialButton(
-                              color: AppColors.lightgreen, // Dark Green button
+                              color: AppColors.lightgreen,
                               onPressed: () {
                                 authController.forgetPassword(
                                     forgetEmailController.text.trim());
@@ -242,7 +240,7 @@ class _LoginViewState extends State<LoginView> {
                       style: TextStyle(
                         fontSize: 19,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.lightGreen, // Dark Green text
+                        color: AppColors.lightGreen,
                       )),
                 ),
               ),
@@ -250,24 +248,24 @@ class _LoginViewState extends State<LoginView> {
           ),
           Obx(() => authController.isLoading.value
               ? const Center(
-            child: CircularProgressIndicator(),
-          )
+                  child: CircularProgressIndicator(),
+                )
               : Container(
-            height: 50,
-            margin: EdgeInsets.symmetric(vertical: Get.height * 0.04),
-            width: Get.width,
-            child: elevatedButton(
-              text: 'Login',
-              onpress: () {
-                if (!formKey.currentState!.validate()) {
-                  return;
-                }
-                authController.login(
-                    email: emailController.text.trim(),
-                    password: passwordController.text.trim());
-              },
-            ),
-          )),
+                  height: 50,
+                  margin: EdgeInsets.symmetric(vertical: Get.height * 0.04),
+                  width: Get.width,
+                  child: elevatedButton(
+                    text: 'Login',
+                    onpress: () {
+                      if (!formKey.currentState!.validate()) {
+                        return;
+                      }
+                      authController.login(
+                          email: emailController.text.trim(),
+                          password: passwordController.text.trim());
+                    },
+                  ),
+                )),
           SizedBox(
             height: Get.height * 0.02,
           ),
@@ -276,7 +274,7 @@ class _LoginViewState extends State<LoginView> {
             style: TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.w400,
-              color: AppColors.darkGreen, // Dark Green text
+              color: AppColors.darkGreen,
             ),
           ),
           SizedBox(
@@ -288,7 +286,7 @@ class _LoginViewState extends State<LoginView> {
               socialAppsIcons(
                 text: 'lib/assets/facebook.png.png',
                 onPressed: () {
-                   Get.to(()=>   ProfileScreen());
+                  Get.to(() => ProfileScreen());
                 },
               ),
               socialAppsIcons(
@@ -315,13 +313,15 @@ class _LoginViewState extends State<LoginView> {
             validator: (String input) {
               if (input.isEmpty) {
                 Get.snackbar('Warning', 'Email is required.',
-                    colorText: AppColors.white, backgroundColor: AppColors.darkGreen); // Dark Green Snackbar background
+                    colorText: AppColors.white,
+                    backgroundColor: AppColors.darkGreen);
                 return '';
               }
 
               if (!input.contains('@')) {
                 Get.snackbar('Warning', 'Email is invalid.',
-                    colorText: AppColors.white, backgroundColor: AppColors.darkGreen); // Dark Green Snackbar background
+                    colorText: AppColors.white,
+                    backgroundColor: AppColors.darkGreen);
                 return '';
               }
             },
@@ -337,13 +337,15 @@ class _LoginViewState extends State<LoginView> {
             validator: (String input) {
               if (input.isEmpty) {
                 Get.snackbar('Warning', 'Password is required.',
-                    colorText: AppColors.white, backgroundColor: AppColors.darkGreen); // Dark Green Snackbar background
+                    colorText: AppColors.white,
+                    backgroundColor: AppColors.darkGreen);
                 return '';
               }
 
               if (input.length < 6) {
                 Get.snackbar('Warning', 'Password should be 6+ characters.',
-                    colorText: AppColors.white, backgroundColor: AppColors.darkGreen); // Dark Green Snackbar background
+                    colorText: AppColors.white,
+                    backgroundColor: AppColors.darkGreen);
                 return '';
               }
             },
@@ -359,7 +361,8 @@ class _LoginViewState extends State<LoginView> {
             validator: (String input) {
               if (input != passwordController.text) {
                 Get.snackbar('Warning', 'Password mismatch.',
-                    colorText: AppColors.white, backgroundColor: AppColors.darkGreen); // Dark Green Snackbar background
+                    colorText: AppColors.white,
+                    backgroundColor: AppColors.darkGreen);
                 return '';
               }
             },
@@ -370,24 +373,25 @@ class _LoginViewState extends State<LoginView> {
           ),
           Obx(() => authController.isLoading.value
               ? const Center(
-            child: CircularProgressIndicator(),
-          )
+                  child: CircularProgressIndicator(),
+                )
               : Container(
-            height: 50,
-            margin: EdgeInsets.symmetric(vertical: Get.height * 0.04),
-            width: Get.width,
-            child: elevatedButton(
-              text: 'Sign Up',
-              onpress: () {
-                if (!formKey.currentState!.validate()) {
-                  return;
-                }
-                authController.signUp(
-                    email: emailController.text.trim(),
-                    password: passwordController.text.trim());
-              },
-            ),
-          )),
+                  height: 50,
+                  margin: EdgeInsets.symmetric(vertical: Get.height * 0.04),
+                  width: Get.width,
+                  child: elevatedButton(
+                    text: 'Sign Up',
+                    onpress: () {
+                      if (!formKey.currentState!.validate()) {
+                        return;
+                      }
+                      authController.signUp(
+                        email: emailController.text.trim(),
+                        password: passwordController.text.trim(),
+                      );
+                    },
+                  ),
+                )),
           SizedBox(
             height: Get.height * 0.02,
           ),
@@ -396,7 +400,7 @@ class _LoginViewState extends State<LoginView> {
             style: TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.w400,
-              color: AppColors.darkGreen, // Dark Green text
+              color: AppColors.darkGreen,
             ),
           ),
           SizedBox(
@@ -408,7 +412,7 @@ class _LoginViewState extends State<LoginView> {
               socialAppsIcons(
                 text: 'lib/assets/facebook.png.png',
                 onPressed: () {
-                   Get.to(()=>   ProfileScreen());
+                  Get.to(() => ProfileScreen());
                 },
               ),
               socialAppsIcons(
@@ -416,7 +420,6 @@ class _LoginViewState extends State<LoginView> {
                 onPressed: () {
                   authController.signInWithGoogle();
                 },
-
               ),
             ],
           )

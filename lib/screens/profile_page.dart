@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ju_event_managment_planner/controller/auth_controller.dart';
 import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -11,9 +12,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-
-  //TextEditingController role = TextEditingController();
- // TextEditingController descriptionController = TextEditingController();
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   bool _isOpen = false;
@@ -42,43 +40,43 @@ class _ProfilePageState extends State<ProfilePage> {
   String image = '';
   String? selectedRole; // Add this variable to hold the selected role
 
+  AuthController authController = Get.put(AuthController());
 
   @override
-  initState(){
+  void initState() {
     super.initState();
     dataController = Get.find<DataController>();
 
-    firstNameController.text = dataController!.myDocument!.get('first');
-    lastNameController.text = dataController!.myDocument!.get('last');
+    // Fetch user data from AuthController
+    Map<String, dynamic>? userData = authController.getUserData();
 
-    try{
-      image = dataController!.myDocument!.get('image');
-    }catch(e){
-      image = '';
-    }
-
-    try {
-      selectedRole = dataController!.myDocument!.get('role');
-    } catch (e) {
-      selectedRole = 'Role not set'; // Default value if no role is fetched
+    if (userData != null) {
+      firstNameController.text = userData['first'] ?? '';
+      lastNameController.text = userData['last'] ?? '';
+      selectedRole = userData['role'] ?? 'Role not set';
+      image = userData['image'] ?? '';
     }
   }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,  // Remove AppBar shadow for a cleaner look
+        elevation: 0, // Remove AppBar shadow for a cleaner look
       ),
-      body:
-      Stack(
+      body: Stack(
         fit: StackFit.expand,
         children: <Widget>[
           FractionallySizedBox(
             alignment: Alignment.topCenter,
             heightFactor: 0.7,
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('lib/assets/profilePic.png'),
+                  image: image.isNotEmpty
+                      ? NetworkImage(image) as ImageProvider
+                      : const AssetImage('lib/assets/profilePic.png'),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -91,7 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           SlidingUpPanel(
-            controller: _panelController,  // ربط PanelController
+            controller: _panelController,
             borderRadius: const BorderRadius.only(
               topRight: Radius.circular(32),
               topLeft: Radius.circular(32),
@@ -104,23 +102,23 @@ class _ProfilePageState extends State<ProfilePage> {
                 color: Colors.transparent,
               ),
             ),
-            panelBuilder: (ScrollController controller)=>
+            panelBuilder: (ScrollController controller) =>
                 _panelBody(controller),
-            onPanelSlide: (value){
-              if (value >= 0.2){
-                if(!_isOpen){
+            onPanelSlide: (value) {
+              if (value >= 0.2) {
+                if (!_isOpen) {
                   setState(() {
                     _isOpen = true;
                   });
                 }
               }
             },
-            onPanelClosed: (){
+            onPanelClosed: () {
               setState(() {
                 _isOpen = false;
               });
             },
-          )
+          ),
         ],
       ),
     );
@@ -208,9 +206,10 @@ class _ProfilePageState extends State<ProfilePage> {
         Expanded(
           child: Container(
             alignment: Alignment.center,
-
             child: SizedBox(
-              width: _isOpen ? MediaQuery.of(context).size.width - (2*hPadding) / 1.6:double.infinity,
+              width: _isOpen
+                  ? MediaQuery.of(context).size.width - (2 * hPadding) / 1.6
+                  : double.infinity,
               child: TextButton(
                 onPressed: () => print('Message tapped'),
                 style: TextButton.styleFrom(
@@ -231,7 +230,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -274,7 +273,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       children: [
         Text(
-           "${firstNameController.text} ${lastNameController.text}",
+          "${firstNameController.text} ${lastNameController.text}",
           style: TextStyle(
             fontFamily: 'gilory',
             fontWeight: FontWeight.w700,
@@ -284,8 +283,8 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(
           height: 8,
         ),
-         Text(
-          "${selectedRole}",
+        Text(
+          "$selectedRole",
           style: TextStyle(
             fontFamily: 'gilory',
             fontStyle: FontStyle.italic,
