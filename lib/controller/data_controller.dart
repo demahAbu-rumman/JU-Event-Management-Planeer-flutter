@@ -13,6 +13,7 @@ import '../screens/notification_service.dart';
 
 class DataController extends GetxController {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   DocumentSnapshot? myDocument;
   var allUsers = <DocumentSnapshot>[].obs;
@@ -27,6 +28,35 @@ class DataController extends GetxController {
 
   // Controller for the selected role
   var selectedRole = ''.obs;
+  Future<void> updateEvent(
+      String eventId, Map<String, dynamic> eventData) async {
+    try {
+      // تأكد من أن eventData لا يحتوي على قيم null
+      eventData.forEach((key, value) {
+        if (value == null) {
+          print("Warning: Field '$key' is null. Setting default value.");
+          eventData[key] = ''; // أو أي قيمة افتراضية أخرى
+        }
+      });
+
+      await FirebaseFirestore.instance
+          .collection('events')
+          .doc(eventId)
+          .update(eventData);
+      print("Event updated successfully");
+    } catch (e) {
+      print("Error updating event: $e");
+      throw e; // إعادة رمي الخطأ للتعامل معه في الواجهة
+    }
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    try {
+      await firestore.collection('events').doc(eventId).delete();
+    } catch (e) {
+      throw e;
+    }
+  }
 
   @override
   void onInit() {
@@ -45,6 +75,7 @@ class DataController extends GetxController {
       }
     });
   }
+
   void filterEventsBy(String filter) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       isEventsLoading.value = true;
@@ -68,7 +99,8 @@ class DataController extends GetxController {
           filteredList = allEvents.where((event) {
             String eventDateStr = event.get('date') as String;
             DateTime eventDate = _parseDateString(eventDateStr);
-            return eventDate.isAfter(weekStart) && eventDate.isBefore(weekEnd.add(const Duration(days: 1)));
+            return eventDate.isAfter(weekStart) &&
+                eventDate.isBefore(weekEnd.add(const Duration(days: 1)));
           }).toList();
           break;
 
@@ -97,7 +129,6 @@ class DataController extends GetxController {
     });
   }
 
-
 // Helper method to parse date string formatted as "DD-MM-YYYY"
   DateTime _parseDateString(String dateStr) {
     List<String> parts = dateStr.split('-');
@@ -109,15 +140,18 @@ class DataController extends GetxController {
     }
     throw const FormatException("Invalid date format");
   }
+
   void filterEventsByDate(DateTime selectedDate) {
     isEventsLoading.value = true; // Set loading state to true
 
-    String formattedDate = "${selectedDate.day.toString().padLeft(2, '0')}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.year}";
+    String formattedDate =
+        "${selectedDate.day.toString().padLeft(2, '0')}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.year}";
 
     // Filter the events that match the selected date
     List<DocumentSnapshot> filteredList = allEvents.where((event) {
       String eventDateStr = event.get('date') as String; // Get date as String
-      DateTime eventDate = _parseDateString(eventDateStr); // Parse string to DateTime
+      DateTime eventDate =
+          _parseDateString(eventDateStr); // Parse string to DateTime
       return eventDate.year == selectedDate.year &&
           eventDate.month == selectedDate.month &&
           eventDate.day == selectedDate.day;
@@ -153,6 +187,7 @@ class DataController extends GetxController {
   /// Fetch all events
   void getEvents() {
     isEventsLoading(true);
+
     FirebaseFirestore.instance.collection('events').snapshots().listen((event) {
       allEvents.assignAll(event.docs);
       filteredEvents.assignAll(event.docs);
@@ -179,7 +214,8 @@ class DataController extends GetxController {
   /// Upload thumbnail to Firebase Storage
   Future<String> uploadThumbnailToFirebase(Uint8List file) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    var reference = FirebaseStorage.instance.ref().child('myfiles/$fileName.jpg');
+    var reference =
+        FirebaseStorage.instance.ref().child('myfiles/$fileName.jpg');
     UploadTask uploadTask = reference.putData(file);
     TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
     return await taskSnapshot.ref.getDownloadURL();
@@ -216,6 +252,7 @@ class DataController extends GetxController {
       token: recipientToken,
     );
   }
+
   Future<void> sendFCMNotification({
     required String title,
     required String body,
@@ -242,8 +279,10 @@ class DataController extends GetxController {
       print('Error sending FCM notification: $e');
     }
   }
+
   /// Create a notification
-  Future<void> createNotification(String recipientUid, String recipientToken) async {
+  Future<void> createNotification(
+      String recipientUid, String recipientToken) async {
     try {
       await FirebaseFirestore.instance
           .collection('notifications')
@@ -252,7 +291,8 @@ class DataController extends GetxController {
           .add({
         'message': "Sent you a message.",
         'image': myDocument?.get('image') ?? '',
-        'name': "${myDocument?.get('first') ?? ''} ${myDocument?.get('last') ?? ''}",
+        'name':
+            "${myDocument?.get('first') ?? ''} ${myDocument?.get('last') ?? ''}",
         'time': DateTime.now(),
       });
       print('Notification added successfully');
@@ -279,9 +319,10 @@ class DataController extends GetxController {
         .where('date', isLessThan: endOfDay)
         .get();
 
-    return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    return snapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
   }
-
 
   Future<bool> createEvent(Map<String, dynamic> eventData) async {
     try {
@@ -315,7 +356,6 @@ class DataController extends GetxController {
     }
     return tokens;
   }
-
 
   /// Hide the Event Created section for students
   void hideEventCreatedSection() {

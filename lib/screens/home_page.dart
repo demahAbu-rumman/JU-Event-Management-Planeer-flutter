@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:ju_event_managment_planner/screens/EventDetailsView.dart';
 import 'package:ju_event_managment_planner/screens/drawer.dart';
+
 import 'package:ju_event_managment_planner/util/app_color.dart';
 import 'package:ju_event_managment_planner/screens/add_event.dart';
 import 'package:ju_event_managment_planner/screens/calender.dart';
@@ -10,7 +12,7 @@ import 'package:get/get.dart';
 import '../widgets/event_fetch.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -27,9 +29,13 @@ class _HomePageState extends State<HomePage> {
 
     // Call the filter method whenever the selected tab changes
     dataController.filterEventsBy(
-      _selectedFilterIndex == 0 ? 'Today' :
-      _selectedFilterIndex == 1 ? 'Week' :
-      _selectedFilterIndex == 2 ? 'Month' : 'Year',
+      _selectedFilterIndex == 0
+          ? 'Today'
+          : _selectedFilterIndex == 1
+              ? 'Week'
+              : _selectedFilterIndex == 2
+                  ? 'Month'
+                  : 'Year',
     );
 
     return Scaffold(
@@ -146,7 +152,13 @@ class _HomePageState extends State<HomePage> {
               return ListView.builder(
                 itemCount: dataController.filteredEvents.length,
                 itemBuilder: (context, index) {
-                  return EventItem(dataController.filteredEvents[index]);
+                  final event = dataController.filteredEvents[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Get.to(() => EventDetailsView(event: event));
+                    },
+                    child: EventItem(event),
+                  );
                 },
               );
             }),
@@ -162,11 +174,13 @@ class _HomePageState extends State<HomePage> {
         onTap: (index) {
           if (index == 1) {
             Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const CreateEventView(),
-              ),
-            );
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateEventView(
+                    event: null, // DocumentSnapshot
+                    isEditing: false,
+                  ),
+                ));
           }
           if (index == 2) {
             Navigator.push(
@@ -215,7 +229,13 @@ class _HomePageState extends State<HomePage> {
           _selectedFilterIndex = index;
           // Call the filter method here to update the filtered events
           dataController.filterEventsBy(
-            index == 0 ? 'Today' : index == 1 ? 'Week' : index == 2 ? 'Month' : 'Year',
+            index == 0
+                ? 'Today'
+                : index == 1
+                    ? 'Week'
+                    : index == 2
+                        ? 'Month'
+                        : 'Year',
           );
         });
       },

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:ju_event_managment_planner/screens/Academycalender.dart';
 import 'package:ju_event_managment_planner/screens/notification_page.dart';
 import 'add_event.dart'; // Import your event creation page
 import 'calender.dart'; // Import your calendar page
@@ -37,13 +38,28 @@ class CustomDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.add),
-            title: const Text('Adding Events'),
+              leading: const Icon(Icons.add),
+              title: const Text('Adding Events'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CreateEventView(
+                        event: null, // DocumentSnapshot
+                        isEditing: true,
+                      ),
+                    ));
+              }),
+          ListTile(
+            leading: const Icon(Icons.calendar_month_sharp),
+            title: const Text('AcademyCalendder'),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CreateEventView()),
+                MaterialPageRoute(
+                    builder: (context) => const AcademyCalendarPage()),
               );
             },
           ),

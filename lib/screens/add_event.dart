@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,12 @@ import '../../../widgets/my_widgets.dart';
 import '../Model/event_model.dart';
 
 class CreateEventView extends StatefulWidget {
-  const CreateEventView({super.key});
+  final DocumentSnapshot? event;
+  final bool isEditing; // هل الصفحة في وضع التعديل؟
+
+  const CreateEventView(
+      {Key? key, required this.event, required this.isEditing})
+      : super(key: key);
 
   @override
   State<CreateEventView> createState() => _CreateEventViewState();
@@ -54,9 +60,11 @@ class _CreateEventViewState extends State<CreateEventView> {
     endTime = const TimeOfDay(hour: 0, minute: 0);
     setState(() {});
   }
+
   void publishEvent() async {
     // After publishing, notify users
-    String? userId = FirebaseAuth.instance.currentUser?.uid; // Get the current user ID
+    String? userId =
+        FirebaseAuth.instance.currentUser?.uid; // Get the current user ID
 
     if (userId != null) {
       await LocalNotificationService.storeNotification(
@@ -133,11 +141,29 @@ class _CreateEventViewState extends State<CreateEventView> {
   List<EventMediaModel> media = [];
 
   @override
+  @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     timeController.text = '${date!.hour}:${date!.minute}:${date!.second}';
     dateController.text = '${date!.day}-${date!.month}-${date!.year}';
+
+    if (widget.event != null) {
+      // تعبئة الحقول بقيم الحدث المحدد
+      final eventData = widget.event!.data()
+          as Map<String, dynamic>; // تحويل البيانات إلى Map
+      titleController.text = eventData['event_name'];
+      locationController.text = eventData['location'];
+      dateController.text = eventData['date'];
+      startTimeController.text = eventData['start_time'];
+      endTimeController.text = eventData['end_time'];
+      maxEntries.text = eventData['max_entries'].toString();
+      frequencyEventController.text = eventData['frequency_of_event'];
+      descriptionController.text = eventData['description'];
+      priceController.text = eventData['price'];
+      tagsController.text = eventData['tags'].join(',');
+      accessModifier = eventData['who_can_invite'];
+      event_type = eventData['event'];
+    }
   }
 
   @override
@@ -262,100 +288,105 @@ class _CreateEventViewState extends State<CreateEventView> {
                 // This widget checks if media is empty and conditionally displays the media uploader or a message
                 media.isEmpty
                     ? Container(
-                  // You can provide a message here or leave it empty
-                  child: const Text("No media uploaded. You can upload images or videos."),
-                )
-                    : const SizedBox(height: 20), // Spacing when media is present
+                        // You can provide a message here or leave it empty
+                        child: const Text(
+                            "No media uploaded. You can upload images or videos."),
+                      )
+                    : const SizedBox(
+                        height: 20), // Spacing when media is present
 
                 media.isEmpty
                     ? Container() // No media, do nothing
                     : SizedBox(
-                  width: Get.width,
-                  height: Get.width * 0.3,
-                  child: ListView.builder(
-                    itemBuilder: (ctx, i) {
-                      // If the media item is a video
-                      return media[i].isVideo!
-                          ? Container(
-                        width: Get.width * 0.3,
+                        width: Get.width,
                         height: Get.width * 0.3,
-                        margin: const EdgeInsets.only(
-                            right: 15, bottom: 10, top: 10),
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: MemoryImage(media[i].thumbnail!),
-                            fit: BoxFit.fill,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Stack(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(5),
-                                  child: CircleAvatar(
-                                    child: IconButton(
-                                      onPressed: () {
-                                        media.removeAt(i);
-                                        setState(() {});
-                                      },
-                                      icon: const Icon(Icons.close),
+                        child: ListView.builder(
+                          itemBuilder: (ctx, i) {
+                            // If the media item is a video
+                            return media[i].isVideo!
+                                ? Container(
+                                    width: Get.width * 0.3,
+                                    height: Get.width * 0.3,
+                                    margin: const EdgeInsets.only(
+                                        right: 15, bottom: 10, top: 10),
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: MemoryImage(media[i].thumbnail!),
+                                        fit: BoxFit.fill,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                  ),
-                                )
-                              ],
-                            ),
-                            const Align(
-                              alignment: Alignment.center,
-                              child: Icon(
-                                Icons.slow_motion_video_rounded,
-                                color: Colors.white,
-                                size: 40,
-                              ),
-                            )
-                          ],
+                                    child: Stack(
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(5),
+                                              child: CircleAvatar(
+                                                child: IconButton(
+                                                  onPressed: () {
+                                                    media.removeAt(i);
+                                                    setState(() {});
+                                                  },
+                                                  icon: const Icon(Icons.close),
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        const Align(
+                                          alignment: Alignment.center,
+                                          child: Icon(
+                                            Icons.slow_motion_video_rounded,
+                                            color: Colors.white,
+                                            size: 40,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  )
+                                // If the media item is an image
+                                : Container(
+                                    width: Get.width * 0.3,
+                                    height: Get.width * 0.3,
+                                    margin: const EdgeInsets.only(
+                                        right: 15, bottom: 10, top: 10),
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: FileImage(media[i].image!),
+                                        fit: BoxFit.fill,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(5),
+                                          child: CircleAvatar(
+                                            child: IconButton(
+                                              onPressed: () {
+                                                media.removeAt(i);
+                                                setState(() {});
+                                              },
+                                              icon: const Icon(Icons.close),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  );
+                          },
+                          itemCount: media.length,
+                          scrollDirection: Axis.horizontal,
                         ),
-                      )
-                      // If the media item is an image
-                          : Container(
-                        width: Get.width * 0.3,
-                        height: Get.width * 0.3,
-                        margin: const EdgeInsets.only(
-                            right: 15, bottom: 10, top: 10),
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: FileImage(media[i].image!),
-                            fit: BoxFit.fill,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(5),
-                              child: CircleAvatar(
-                                child: IconButton(
-                                  onPressed: () {
-                                    media.removeAt(i);
-                                    setState(() {});
-                                  },
-                                  icon: const Icon(Icons.close),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      );
-                    },
-                    itemCount: media.length,
-                    scrollDirection: Axis.horizontal,
-                  ),
-                ),
+                      ),
 
                 const SizedBox(
                   height: 20,
@@ -929,19 +960,10 @@ class _CreateEventViewState extends State<CreateEventView> {
                                 return;
                               }
 
-                              /*if (media.isEmpty) {
-                                Get.snackbar('Opps', "Media is required.",
-                                    colorText: Colors.white,
-                                    backgroundColor: Colors.blue);
-
-                                return;
-                              }*/
-
                               if (tagsController.text.isEmpty) {
                                 Get.snackbar('Opps', "Tags is required.",
                                     colorText: Colors.white,
                                     backgroundColor: Colors.blue);
-
                                 return;
                               }
 
@@ -952,9 +974,6 @@ class _CreateEventViewState extends State<CreateEventView> {
                               if (media.isNotEmpty) {
                                 for (int i = 0; i < media.length; i++) {
                                   if (media[i].isVideo!) {
-                                    /// if video then first upload video file and then upload thumbnail and
-                                    /// store it in the map
-
                                     String thumbnailUrl = await dataController
                                         .uploadThumbnailToFirebase(
                                             media[i].thumbnail!);
@@ -968,8 +987,6 @@ class _CreateEventViewState extends State<CreateEventView> {
                                       'isImage': false
                                     });
                                   } else {
-                                    /// just upload image
-
                                     String imageUrl = await dataController
                                         .uploadImageToFirebase(media[i].image!);
                                     mediaUrls.add(
@@ -982,39 +999,71 @@ class _CreateEventViewState extends State<CreateEventView> {
                                   tagsController.text.split(',');
 
                               Map<String, dynamic> eventData = {
-                                'event': event_type,
-                                'event_name': titleController.text,
-                                'location': locationController.text,
-                                'date':
-                                    '${date!.day}-${date!.month}-${date!.year}',
-                                'start_time': startTimeController.text,
-                                'end_time': endTimeController.text,
-                                'max_entries': int.parse(maxEntries.text),
+                                'event': event_type ??
+                                    'Public', // استخدام قيمة افتراضية إذا كانت null
+                                'event_name': titleController.text ??
+                                    '', // استخدام قيمة افتراضية إذا كانت null
+                                'location': locationController.text ?? '',
+                                'date': date != null
+                                    ? '${date!.day}-${date!.month}-${date!.year}'
+                                    : '',
+                                'start_time': startTimeController.text ?? '',
+                                'end_time': endTimeController.text ?? '',
+                                'max_entries': int.tryParse(maxEntries.text) ??
+                                    0, // استخدام قيمة افتراضية إذا كانت null
                                 'frequency_of_event':
-                                    frequencyEventController.text,
-                                'description': descriptionController.text,
-                                'who_can_invite': accessModifier,
+                                    frequencyEventController.text ?? '',
+                                'description': descriptionController.text ?? '',
+                                'who_can_invite': accessModifier ?? 'Closed',
                                 'joined': [
                                   FirebaseAuth.instance.currentUser!.uid
                                 ],
-                                'price': priceController.text,
+                                'price': priceController.text ?? '',
                                 'media': mediaUrls,
                                 'uid': FirebaseAuth.instance.currentUser!.uid,
-                                'tags': tags,
+                                'tags': tagsController.text?.split(',') ??
+                                    [], // استخدام قيمة افتراضية إذا كانت null
                                 'inviter': [
                                   FirebaseAuth.instance.currentUser!.uid
                                 ]
                               };
 
-                              await dataController
-                                  .createEvent(eventData)
-                                  .then((value) {
-                                print("Event is done");
-                                isCreatingEvent(false);
-                                resetControllers();
-                              });
+                              if (widget.isEditing && widget.event != null) {
+                                // إذا كان في وضع التعديل، قومي بتحديث الحدث
+                                await dataController
+                                    .updateEvent(widget.event!.id, eventData)
+                                    .then((value) {
+                                  print("Event updated");
+                                  isCreatingEvent(false);
+                                  resetControllers();
+
+                                  Get.back();
+                                  Get.snackbar(
+                                      'Success', 'Event update successfully',
+                                      colorText: Colors.white,
+                                      backgroundColor: Colors.green);
+                                  setState(() {});
+                                  // العودة إلى الشاشة السابقة بعد التحديث
+                                });
+                              } else {
+                                // إذا كان في وضع الإنشاء، قومي بإنشاء حدث جديد
+                                await dataController
+                                    .createEvent(eventData)
+                                    .then((value) {
+                                  print("Event is done");
+                                  Get.snackbar(
+                                      'Success', 'Event created successfully',
+                                      colorText: Colors.white,
+                                      backgroundColor: Colors.green);
+                                  isCreatingEvent(false);
+                                  resetControllers();
+                                  Get.back(); // العودة إلى الشاشة السابقة بعد الإنشاء
+                                });
+                              }
                             },
-                            text: 'Create Event'),
+                            text: widget.isEditing
+                                ? 'Update Event'
+                                : 'Create Event'), // تغيير نص الزر
                       )),
                 SizedBox(
                   height: Get.height * 0.03,

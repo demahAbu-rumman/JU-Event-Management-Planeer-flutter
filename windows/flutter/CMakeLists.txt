@@ -1,3 +1,5 @@
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
 # This file controls Flutter-level build steps. It should not be edited.
 cmake_minimum_required(VERSION 3.14)
 
@@ -107,3 +109,5 @@ add_custom_target(flutter_assemble DEPENDS
   ${CPP_WRAPPER_SOURCES_PLUGIN}
   ${CPP_WRAPPER_SOURCES_APP}
 )
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+زززززز
