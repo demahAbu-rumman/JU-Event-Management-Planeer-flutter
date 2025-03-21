@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:ju_event_managment_planner/screens/notification_service.dart';
+import 'package:ju_event_managment_planner/screens/verify_email_page.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:get/get.dart';
 import 'firebase_options.dart';

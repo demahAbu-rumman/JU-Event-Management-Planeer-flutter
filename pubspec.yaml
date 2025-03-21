@@ -37,22 +37,22 @@ dependencies:
   cupertino_icons: ^1.0.6
   smooth_page_indicator: ^1.2.0+3
   get: ^4.6.6
-  firebase_core: ^2.28.0
-  firebase_auth: ^4.19.0
-  google_sign_in: 6.2.1
+  firebase_core: ^3.12.1
+  firebase_auth: ^5.5.1
+  google_sign_in: ^6.3.0
   flutter_svg: ^2.0.10+1
-  firebase_messaging: ^14.8.0
+  firebase_messaging: ^15.2.4
   google_fonts: ^6.2.1
-  flutter_local_notifications: ^17.0.0
-  firebase_storage: ^11.7.0
-  cloud_firestore: ^4.16.0
-  firebase_app_check: ^0.2.2+7
+  flutter_local_notifications: ^19.0.0
+  firebase_storage: ^12.4.4
+  cloud_firestore: ^5.6.5
+  firebase_app_check: ^0.3.2+4
   table_calendar: ^3.1.2
   video_thumbnail: ^0.5.3
   dotted_border: ^2.1.0
   image_picker: ^1.0.7
   sliding_up_panel: ^2.0.0+1
-  intl: ^0.19.0
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -129,7 +129,7 @@ flutter:
       - lib/assets/gallary.png
       - lib/assets/calender.png
       - lib/assets/Academy.jpg
-
+      - lib/assets/verified-icon.png
 
   # An image assets can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

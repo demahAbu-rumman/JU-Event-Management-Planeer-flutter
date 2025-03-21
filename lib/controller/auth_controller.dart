@@ -8,7 +8,10 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ju_event_managment_planner/screens/home_page.dart';
 import 'package:ju_event_managment_planner/screens/profile_signup.dart';
+import 'package:ju_event_managment_planner/screens/verify_email_page.dart';
 import 'package:path/path.dart' as Path;
+
+
 
 class AuthController extends GetxController {
   FirebaseAuth auth = FirebaseAuth.instance;
@@ -85,7 +88,7 @@ class AuthController extends GetxController {
       await fetchUserData();
 
       isLoading(false);
-      Get.to(() => const ProfileScreen());
+      Get.to(() => const VerifyEmailPage());
     }).catchError((e) {
       print("Error in authentication $e");
       isLoading(false);
