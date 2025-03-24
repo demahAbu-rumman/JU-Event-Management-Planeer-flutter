@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import '../Util/app_color.dart';
 import 'add_event.dart'; // Import your event creation page
 import 'calender.dart'; // Import your calendar page
 import 'profile_page.dart'; // Import your profile page
@@ -42,8 +43,14 @@ class CustomDrawer extends StatelessWidget {
               Navigator.pop(context);
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const CreateEventView()),
+                MaterialPageRoute(
+                  builder: (context) => const CreateEventView(
+                    event: null, // No event since it's a new event
+                    isEditing: false, // False since it's a new event
+                  ),
+                ),
               );
+
             },
           ),
           ListTile(

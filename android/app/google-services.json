@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "333188318051",
+    "firebase_url": "https://ju-event-management-planner-default-rtdb.firebaseio.com",
     "project_id": "ju-event-management-planner",
     "storage_bucket": "ju-event-management-planner.appspot.com"
   },
@@ -29,6 +30,48 @@
       "api_key": [
         {
           "current_key": "AIzaSyCAMFJ190lUpBvY3od1dA-vPBDbxEWDyBg"
+        },
+        {
+          "current_key": "AIzaSyA1PU3ilq6YoK-rUNLg7l025ktYR55LhnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "333188318051-plnlr9qdtjtgaddp7qcvdql3mkglubkq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "333188318051-ees1k9qejevqprs3tfq8oni1pqp127rs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.juEventManagmentPlanner"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:333188318051:android:c034298f6d3b7cea1a0956",
+        "android_client_info": {
+          "package_name": "com.JU_Event_Management.ju_event_managment_planner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "333188318051-plnlr9qdtjtgaddp7qcvdql3mkglubkq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAMFJ190lUpBvY3od1dA-vPBDbxEWDyBg"
+        },
+        {
+          "current_key": "AIzaSyA1PU3ilq6YoK-rUNLg7l025ktYR55LhnA"
         }
       ],
       "services": {
