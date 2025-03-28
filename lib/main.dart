@@ -139,8 +139,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   onTap: () {
                     if (_currentPage < 2) {
                       _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
+                        duration: const Duration(milliseconds: 2000),
+                       curve: Curves.linear,
                       );
                     }
                   },

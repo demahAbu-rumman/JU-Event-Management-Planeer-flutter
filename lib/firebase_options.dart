@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '333188318051',
     projectId: 'ju-event-management-planner',
     storageBucket: 'ju-event-management-planner.appspot.com',
-    iosBundleId: 'com.example.juEventManagmentPlanner',
+    iosBundleId: 'com.JU_Event_Management.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '333188318051',
     projectId: 'ju-event-management-planner',
     storageBucket: 'ju-event-management-planner.appspot.com',
-    iosBundleId: 'com.example.juEventManagmentPlanner',
+    iosBundleId: 'com.JU_Event_Management.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

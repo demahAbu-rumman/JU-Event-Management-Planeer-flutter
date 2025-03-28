@@ -46,7 +46,7 @@
               "client_id": "333188318051-ees1k9qejevqprs3tfq8oni1pqp127rs.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.juEventManagmentPlanner"
+                "bundle_id": "com.JU_Event_Management.app"
               }
             }
           ]
@@ -85,7 +85,7 @@
               "client_id": "333188318051-ees1k9qejevqprs3tfq8oni1pqp127rs.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.juEventManagmentPlanner"
+                "bundle_id": "com.JU_Event_Management.app"
               }
             }
           ]
