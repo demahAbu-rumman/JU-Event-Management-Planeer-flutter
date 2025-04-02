@@ -80,7 +80,7 @@ class _LocationState extends State<Location> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Image.asset('lib/assets/loc.png'),
+            Image.asset('lib/assets/loc.jpg'),
             DropdownButton<String>(
               hint: Text('   Choose the college'),
               value: selectedCollege,
