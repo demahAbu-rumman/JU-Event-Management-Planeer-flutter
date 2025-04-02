@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ju_event_managment_planner/Util/app_color.dart';
+import 'package:ju_event_managment_planner/screens/Location.dart';
 import 'package:ju_event_managment_planner/screens/notification_service.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../../controller/data_controller.dart';
@@ -41,6 +42,7 @@ class _CreateEventViewState extends State<CreateEventView> {
   TextEditingController frequencyEventController = TextEditingController();
   TimeOfDay startTime = const TimeOfDay(hour: 0, minute: 0);
   TimeOfDay endTime = const TimeOfDay(hour: 0, minute: 0);
+  TextEditingController collegeController = TextEditingController();
 
   var selectedFrequency = -2;
 
@@ -171,8 +173,11 @@ class _CreateEventViewState extends State<CreateEventView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.lightgreen,
-        title: const Text('Create Events',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Create Events',
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
         centerTitle: true,
         elevation: 0, // Remove AppBar shadow for a cleaner look
       ),
@@ -187,55 +192,46 @@ class _CreateEventViewState extends State<CreateEventView> {
                 SizedBox(
                   height: Get.height * 0.02,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.only(left: 10, right: 10),
-                      width: 90,
-                      height: 33,
-                      decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  color: Colors.black.withOpacity(0.6),
-                                  width: 0.6))),
-                      child: DropdownButton(
-                        isExpanded: true,
-                        underline: Container(
-                            // decoration: BoxDecoration(
-                            //   border: Border.all(
-                            //     width: 0,
-                            //     color: Colors.white,
-                            //   ),
-                            // ),
-                            ),
-
-                        // borderRadius: BorderRadius.circular(10),
-                        icon: Image.asset('lib/assets/arrowDown.png'),
-                        elevation: 16,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.black,
-                        ),
-                        value: event_type,
-                        onChanged: (String? newValue) {
-                          setState(
-                            () {
-                              event_type = newValue!;
+                Card(
+                  elevation: 6, // درجة ظل الكارد
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Event Type',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        SizedBox(height: 8),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            border:
+                                Border.all(color: Colors.grey.withOpacity(0.5)),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: event_type,
+                            underline: SizedBox(),
+                            items: list_item.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              setState(() => event_type = newValue!);
                             },
-                          );
-                        },
-                        items: list_item
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
                 SizedBox(
                   height: Get.height * 0.03,
@@ -391,379 +387,542 @@ class _CreateEventViewState extends State<CreateEventView> {
                 const SizedBox(
                   height: 20,
                 ),
-                myTextField(
-                    bool: false,
-                    icon: 'lib/assets/4DotIcon.png',
-                    text: 'Event Name',
-                    controller: titleController,
-                    validator: (String input) {
-                      if (input.isEmpty) {
-                        Get.snackbar('Opps', "Event name is required.",
-                            colorText: Colors.white,
-                            backgroundColor: Colors.blue);
-                        return '';
-                      }
-
-                      if (input.length < 3) {
-                        Get.snackbar(
-                            'Opps', "Event name is should be 3+ characters.",
-                            colorText: Colors.white,
-                            backgroundColor: Colors.blue);
-                        return '';
-                      }
-                      return null;
-                    }),
-
-                const SizedBox(
-                  height: 20,
-                ),
-                myTextField(
-                    bool: false,
-                    icon: 'lib/assets/location.png',
-                    text: 'Location',
-                    controller: locationController,
-                    validator: (String input) {
-                      if (input.isEmpty) {
-                        Get.snackbar('Opps', "Location is required.",
-                            colorText: Colors.white,
-                            backgroundColor: Colors.blue);
-                        return '';
-                      }
-
-                      if (input.length < 3) {
-                        Get.snackbar('Opps', "Location is Invalid.",
-                            colorText: Colors.white,
-                            backgroundColor: Colors.blue);
-                        return '';
-                      }
-                      return null;
-                    }),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    iconTitleContainer(
-                      isReadOnly: true,
-                      path: 'lib/assets/Frame1.png',
-                      text: 'Date',
-                      controller: dateController,
-                      validator: (input) {
-                        if (date == null) {
-                          Get.snackbar('Opps', "Date is required.",
-                              colorText: Colors.white,
-                              backgroundColor: Colors.blue);
-                          return '';
-                        }
-                        return null;
-                      },
-                      onPress: () {
-                        _selectDate(context);
-                      },
-                    ),
-                    iconTitleContainer(
-                        path: 'lib/assets/#.png',
-                        text: 'Max Entries',
-                        controller: maxEntries,
-                        type: TextInputType.number,
-                        onPress: () {},
-                        validator: (String input) {
-                          if (input.isEmpty) {
-                            Get.snackbar('Opps', "Entries is required.",
-                                colorText: Colors.white,
-                                backgroundColor: Colors.blue);
-                            return '';
-                          }
-                          return null;
-                        }),
-                  ],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-
-                iconTitleContainer(
-                    path: 'lib/assets/#.png',
-                    text: 'Enter tags that will go with event.',
-                    width: double.infinity,
-                    controller: tagsController,
-                    type: TextInputType.text,
-                    onPress: () {},
-                    validator: (String input) {
-                      if (input.isEmpty) {
-                        Get.snackbar('Opps', "Entries is required.",
-                            colorText: Colors.white,
-                            backgroundColor: Colors.blue);
-                        return '';
-                      }
-                      return null;
-                    }),
-
-                const SizedBox(
-                  height: 20,
-                ),
-
-                Container(
-                  height: 42,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border:
-                        Border.all(width: 1, color: AppColors.genderTextColor),
+                Card(
+                  elevation: 6, // درجة ظل الكارد
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: TextFormField(
-                    readOnly: true,
-                    onTap: () {
-                      Get.bottomSheet(StatefulBuilder(builder: (ctx, state) {
-                        return Container(
-                          width: double.infinity,
-                          height: Get.width * 0.6,
-                          decoration: const BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(10),
-                                  topLeft: Radius.circular(10))),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Row(
-                                // mainAxisAlignment:
-                                //     MainAxisAlignment.spaceAround,
-                                children: [
-                                  selectedFrequency == 10
-                                      ? Container()
-                                      : const SizedBox(
-                                          width: 5,
-                                        ),
-                                  Expanded(
-                                      child: InkWell(
-                                    onTap: () {
-                                      selectedFrequency = -1;
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Basic Information',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        SizedBox(height: 16),
+                        myTextField(
+                            bool: false,
+                            icon: 'lib/assets/4DotIcon.png',
+                            text: 'Event Name',
+                            controller: titleController,
+                            validator: (String input) {
+                              if (input.isEmpty) {
+                                Get.snackbar('Opps', "Event name is required.",
+                                    colorText: Colors.white,
+                                    backgroundColor: Colors.blue);
+                                return '';
+                              }
 
-                                      state(() {});
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 10),
-                                      decoration: BoxDecoration(
-                                        color: selectedFrequency == -1
-                                            ? Colors.blue
-                                            : Colors.black.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          "Once",
-                                          style: TextStyle(
-                                              color: selectedFrequency != -1
-                                                  ? Colors.black
-                                                  : Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                  )),
-                                  selectedFrequency == 10
-                                      ? Container()
-                                      : const SizedBox(
-                                          width: 5,
-                                        ),
-                                  Expanded(
-                                      child: InkWell(
-                                    onTap: () {
-                                      selectedFrequency = 0;
+                              if (input.length < 3) {
+                                Get.snackbar('Opps',
+                                    "Event name is should be 3+ characters.",
+                                    colorText: Colors.white,
+                                    backgroundColor: Colors.blue);
+                                return '';
+                              }
+                              return null;
+                            }),
+                      ],
+                    ),
+                  ),
+                ),
 
-                                      state(() {});
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 10),
-                                      decoration: BoxDecoration(
-                                        color: selectedFrequency == 0
-                                            ? Colors.blue
-                                            : Colors.black.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          "Daily",
-                                          style: TextStyle(
-                                              color: selectedFrequency != 0
-                                                  ? Colors.black
-                                                  : Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                  )),
-                                  selectedFrequency == 10
-                                      ? Container()
-                                      : const SizedBox(
-                                          width: 10,
-                                        ),
-                                  Expanded(
-                                      child: InkWell(
-                                    onTap: () {
-                                      state(() {
-                                        selectedFrequency = 1;
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 10),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: selectedFrequency == 1
-                                            ? Colors.blue
-                                            : Colors.black.withOpacity(0.1),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          "Weekly",
-                                          style: TextStyle(
-                                              color: selectedFrequency != 1
-                                                  ? Colors.black
-                                                  : Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                  )),
-                                  selectedFrequency == 10
-                                      ? Container()
-                                      : const SizedBox(
-                                          width: 10,
-                                        ),
-                                ],
+                const SizedBox(
+                  height: 20,
+                ),
+                Card(
+                  elevation: 6, // درجة ظل الكارد
+                  shadowColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin: EdgeInsets.only(bottom: 16), // تباعد من الأسفل
+                  child: Padding(
+                    padding: EdgeInsets.all(16), // تباعد داخلي
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Location',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        SizedBox(height: 10), // مسافة بين العنوان والحقل
+                        GestureDetector(
+                          onTap: () async {
+                            var result = await Get.to(() => Location());
+                            if (result != null && result is String) {
+                              setState(() {
+                                locationController.text = result;
+                              });
+                            }
+                          },
+                          child: AbsorbPointer(
+                            child: TextFormField(
+                              controller: locationController,
+                              decoration: InputDecoration(
+                                hintText: 'Select Location',
+                                prefixIcon: Image.asset(
+                                    'lib/assets/location.png'), // أيقونة الموقع
+                                border: OutlineInputBorder(), // حدود للحقل
                               ),
-                              Row(
-                                // mainAxisAlignment:
-                                //     MainAxisAlignment.spaceAround,
-                                children: [
-                                  selectedFrequency == 10
-                                      ? Container()
-                                      : const SizedBox(
-                                          width: 10,
-                                        ),
-                                  Expanded(
-                                      child: InkWell(
-                                    onTap: () {
-                                      state(() {
-                                        selectedFrequency = 2;
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 10),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: selectedFrequency == 2
-                                            ? Colors.blue
-                                            : Colors.black.withOpacity(0.1),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          "Monthly",
-                                          style: TextStyle(
-                                              color: selectedFrequency != 2
-                                                  ? Colors.black
-                                                  : Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                  )),
-                                  selectedFrequency == 10
-                                      ? Container()
-                                      : const SizedBox(
-                                          width: 10,
-                                        ),
-                                  Expanded(
-                                      child: InkWell(
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 5, vertical: 10),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: selectedFrequency == 3
-                                            ? Colors.blue
-                                            : Colors.black.withOpacity(0.1),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          "Yearly",
-                                          style: TextStyle(
-                                              color: selectedFrequency != 3
-                                                  ? Colors.black
-                                                  : Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                    onTap: () {
-                                      state(() {
-                                        selectedFrequency = 3;
-                                      });
-                                    },
-                                  )),
-                                  selectedFrequency == 10
-                                      ? Container()
-                                      : const SizedBox(
-                                          width: 5,
-                                        ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  MaterialButton(
-                                    minWidth: Get.width * 0.8,
-                                    onPressed: () {
-                                      frequencyEventController.text =
-                                          selectedFrequency == -1
-                                              ? 'Once'
-                                              : selectedFrequency == 0
-                                                  ? 'Daily'
-                                                  : selectedFrequency == 1
-                                                      ? 'Weekly'
-                                                      : selectedFrequency == 2
-                                                          ? 'Monthly'
-                                                          : 'Yearly';
-                                      Get.back();
-                                    },
-                                    color: Colors.blue,
-                                    child: const Text(
-                                      "Select",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ],
+                              validator: (String? value) {
+                                if (value == null || value.isEmpty) {
+                                  Get.snackbar('Opps', "Location is required.",
+                                      colorText: Colors.white,
+                                      backgroundColor: Colors.blue);
+                                  return '';
+                                }
+                                if (value.length < 3) {
+                                  Get.snackbar('Opps', "Location is Invalid.",
+                                      colorText: Colors.white,
+                                      backgroundColor: Colors.blue);
+                                  return '';
+                                }
+                                return null;
+                              },
+                            ),
                           ),
-                        );
-                      }));
-                    },
-                    validator: (String? input) {
-                      if (input!.isEmpty) {
-                        Get.snackbar('Opps', "Frequency is required.",
-                            colorText: Colors.white,
-                            backgroundColor: Colors.blue);
-                        return '';
-                      }
-                      return null;
-                    },
-                    controller: frequencyEventController,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.only(top: 3),
-                      errorStyle: const TextStyle(fontSize: 0),
-                      hintStyle: TextStyle(
-                        color: AppColors.genderTextColor,
-                      ),
-                      border: InputBorder.none,
-                      hintText: 'Frequency of event',
-                      prefixIcon: Image.asset(
-                        'lib/assets/repeat.png',
-                        cacheHeight: 20,
-                      ),
-                      // border: OutlineInputBorder(
-                      //     borderRadius: BorderRadius.circular(8.0)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(
+                  height: 20,
+                ),
+
+                Card(
+                  elevation: 6, // درجة ظل الكارد
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin: EdgeInsets.only(bottom: 16),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Event Date',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        SizedBox(height: 10),
+                        InkWell(
+                          onTap: () => _selectDate(context),
+                          child: AbsorbPointer(
+                            child: TextFormField(
+                              controller: dateController,
+                              readOnly: true,
+                              decoration: InputDecoration(
+                                hintText: 'Select Date',
+                                prefixIcon:
+                                    Image.asset('lib/assets/Frame1.png'),
+                                border: OutlineInputBorder(),
+                                errorStyle: TextStyle(height: 0),
+                              ),
+                              validator: (value) {
+                                if (date == null) {
+                                  return ' '; // مسافة فارغة لإظهار الخطأ
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(
+                  height: 20,
+                ),
+                Card(
+                  elevation: 6, // درجة ظل الكارد
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin: EdgeInsets.only(bottom: 16), // التباعد الخارجي
+                  child: Padding(
+                    padding: EdgeInsets.all(16), // التباعد الداخلي
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Event Tags',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 12), // مسافة بين العنوان والحقل
+                        iconTitleContainer(
+                          path: 'lib/assets/#.png',
+                          text:
+                              'Enter tags separated by commas (e.g. music,art,food)',
+                          width: double.infinity,
+                          controller: tagsController,
+                          type: TextInputType.text,
+                          onPress:
+                              () {}, // يمكنك إضافة وظيفة عند الضغط إذا لزم الأمر
+                          validator: (String input) {
+                            if (input.isEmpty) {
+                              Get.snackbar(
+                                'Opps',
+                                "Tags are required.",
+                                colorText: Colors.white,
+                                backgroundColor: Colors.blue,
+                              );
+                              return '';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(
+                  height: 20,
+                ),
+
+                Card(
+                  elevation: 6, // درجة ظل الكارد
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin: EdgeInsets.only(bottom: 16),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Event Frequency',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        Container(
+                          height: 42,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              width: 1,
+                              color: AppColors.genderTextColor,
+                            ),
+                          ),
+                          child: TextFormField(
+                            readOnly: true,
+                            onTap: () {
+                              Get.bottomSheet(
+                                StatefulBuilder(builder: (ctx, state) {
+                                  return Container(
+                                    width: double.infinity,
+                                    height: Get.width * 0.6,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(10),
+                                        topLeft: Radius.circular(10),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            selectedFrequency == 10
+                                                ? Container()
+                                                : SizedBox(width: 5),
+                                            Expanded(
+                                              child: InkWell(
+                                                onTap: () {
+                                                  selectedFrequency = -1;
+                                                  state(() {});
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 5,
+                                                    vertical: 10,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: selectedFrequency ==
+                                                            -1
+                                                        ? Colors.blue
+                                                        : Colors.black
+                                                            .withOpacity(0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      "Once",
+                                                      style: TextStyle(
+                                                        color:
+                                                            selectedFrequency !=
+                                                                    -1
+                                                                ? Colors.black
+                                                                : Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            selectedFrequency == 10
+                                                ? Container()
+                                                : SizedBox(width: 5),
+                                            Expanded(
+                                              child: InkWell(
+                                                onTap: () {
+                                                  selectedFrequency = 0;
+                                                  state(() {});
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 5,
+                                                    vertical: 10,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: selectedFrequency ==
+                                                            0
+                                                        ? Colors.blue
+                                                        : Colors.black
+                                                            .withOpacity(0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      "Daily",
+                                                      style: TextStyle(
+                                                        color:
+                                                            selectedFrequency !=
+                                                                    0
+                                                                ? Colors.black
+                                                                : Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            selectedFrequency == 10
+                                                ? Container()
+                                                : SizedBox(width: 10),
+                                            Expanded(
+                                              child: InkWell(
+                                                onTap: () {
+                                                  state(() {
+                                                    selectedFrequency = 1;
+                                                  });
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 5,
+                                                    vertical: 10,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    color: selectedFrequency ==
+                                                            1
+                                                        ? Colors.blue
+                                                        : Colors.black
+                                                            .withOpacity(0.1),
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      "Weekly",
+                                                      style: TextStyle(
+                                                        color:
+                                                            selectedFrequency !=
+                                                                    1
+                                                                ? Colors.black
+                                                                : Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            selectedFrequency == 10
+                                                ? Container()
+                                                : SizedBox(width: 10),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            selectedFrequency == 10
+                                                ? Container()
+                                                : SizedBox(width: 10),
+                                            Expanded(
+                                              child: InkWell(
+                                                onTap: () {
+                                                  state(() {
+                                                    selectedFrequency = 2;
+                                                  });
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 5,
+                                                    vertical: 10,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    color: selectedFrequency ==
+                                                            2
+                                                        ? Colors.blue
+                                                        : Colors.black
+                                                            .withOpacity(0.1),
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      "Monthly",
+                                                      style: TextStyle(
+                                                        color:
+                                                            selectedFrequency !=
+                                                                    2
+                                                                ? Colors.black
+                                                                : Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            selectedFrequency == 10
+                                                ? Container()
+                                                : SizedBox(width: 10),
+                                            Expanded(
+                                              child: InkWell(
+                                                onTap: () {
+                                                  state(() {
+                                                    selectedFrequency = 3;
+                                                  });
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 5,
+                                                    vertical: 10,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    color: selectedFrequency ==
+                                                            3
+                                                        ? Colors.blue
+                                                        : Colors.black
+                                                            .withOpacity(0.1),
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      "Yearly",
+                                                      style: TextStyle(
+                                                        color:
+                                                            selectedFrequency !=
+                                                                    3
+                                                                ? Colors.black
+                                                                : Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            selectedFrequency == 10
+                                                ? Container()
+                                                : SizedBox(width: 5),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            MaterialButton(
+                                              minWidth: Get.width * 0.8,
+                                              onPressed: () {
+                                                frequencyEventController
+                                                    .text = selectedFrequency ==
+                                                        -1
+                                                    ? 'Once'
+                                                    : selectedFrequency == 0
+                                                        ? 'Daily'
+                                                        : selectedFrequency == 1
+                                                            ? 'Weekly'
+                                                            : selectedFrequency ==
+                                                                    2
+                                                                ? 'Monthly'
+                                                                : 'Yearly';
+                                                Get.back();
+                                              },
+                                              color: Colors.blue,
+                                              child: Text(
+                                                "Select",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                              );
+                            },
+                            validator: (String? input) {
+                              if (input!.isEmpty) {
+                                Get.snackbar(
+                                  'Opps',
+                                  "Frequency is required.",
+                                  colorText: Colors.white,
+                                  backgroundColor: Colors.blue,
+                                );
+                                return '';
+                              }
+                              return null;
+                            },
+                            controller: frequencyEventController,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.only(top: 3),
+                              errorStyle: TextStyle(fontSize: 0),
+                              hintStyle: TextStyle(
+                                color: AppColors.genderTextColor,
+                              ),
+                              border: InputBorder.none,
+                              hintText: 'Frequency of event',
+                              prefixIcon: Image.asset(
+                                'lib/assets/repeat.png',
+                                cacheHeight: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -783,166 +942,233 @@ class _CreateEventViewState extends State<CreateEventView> {
                 const SizedBox(
                   height: 20,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    iconTitleContainer(
-                        path: 'lib/assets/time.png',
-                        text: 'Start Time',
-                        controller: startTimeController,
-                        isReadOnly: true,
-                        validator: (input) {},
-                        onPress: () {
-                          startTimeMethod(context);
-                        }),
-                    iconTitleContainer(
-                        path: 'lib/assets/time.png',
-                        text: 'End Time',
-                        isReadOnly: true,
-                        controller: endTimeController,
-                        validator: (input) {},
-                        onPress: () {
-                          endTimeMethod(context);
-                        }),
-                  ],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  children: [
-                    myText(
-                        text: 'Description/Instruction',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ))
-                  ],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  height: 149,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border:
-                        Border.all(width: 1, color: AppColors.genderTextColor),
+                Card(
+                  elevation: 6, // درجة ظل الكارد
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: TextFormField(
-                    maxLines: 5,
-                    controller: descriptionController,
-                    validator: (input) {
-                      if (input!.isEmpty) {
-                        Get.snackbar('Opps', "Description is required.",
-                            colorText: Colors.white,
-                            backgroundColor: Colors.blue);
-                        return '';
-                      }
-                      return null;
-                    },
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      contentPadding:
-                          const EdgeInsets.only(top: 25, left: 15, right: 15),
-                      hintStyle: TextStyle(
-                        color: AppColors.genderTextColor,
-                      ),
-                      hintText:
-                          'Write a summary and any details your invitee should know about the event...',
-                      // border: OutlineInputBorder(
-                      //   borderRadius: BorderRadius.circular(8.0),
-                      // ),
+                  margin: EdgeInsets.only(bottom: 16),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Event Time',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: iconTitleContainer(
+                                path: 'lib/assets/time.png',
+                                text: 'Start Time',
+                                controller: startTimeController,
+                                isReadOnly: true,
+                                validator: (input) {},
+                                onPress: () {
+                                  startTimeMethod(context);
+                                },
+                              ),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: iconTitleContainer(
+                                path: 'lib/assets/time.png',
+                                text: 'End Time',
+                                isReadOnly: true,
+                                controller: endTimeController,
+                                validator: (input) {},
+                                onPress: () {
+                                  endTimeMethod(context);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Card(
+                  elevation: 6, // درجة ظل الكارد
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  margin:
+                      EdgeInsets.only(bottom: 16), // التباعد الخارجي من الأسفل
+                  child: Padding(
+                    padding: EdgeInsets.all(16), // التباعد الداخلي
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Description/Instruction',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 12), // مسافة بين العنوان وحقل الوصف
+                        Container(
+                          height: 149,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              width: 1,
+                              color: AppColors.genderTextColor,
+                            ),
+                          ),
+                          child: TextFormField(
+                            maxLines: 5,
+                            controller: descriptionController,
+                            validator: (input) {
+                              if (input!.isEmpty) {
+                                Get.snackbar(
+                                  'Opps',
+                                  "Description is required.",
+                                  colorText: Colors.white,
+                                  backgroundColor: Colors.blue,
+                                );
+                                return '';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              contentPadding:
+                                  EdgeInsets.only(top: 25, left: 15, right: 15),
+                              hintStyle: TextStyle(
+                                color: AppColors.genderTextColor,
+                              ),
+                              hintText:
+                                  'Write a summary and any details your invitee should know about the event...',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
                 SizedBox(
                   height: Get.height * 0.02,
                 ),
-                Container(
-                  alignment: Alignment.topLeft,
-                  child: myText(
-                    text: 'Who can invite?',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                Card(
+                  elevation: 6, // درجة ظل الكارد
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                SizedBox(
-                  height: Get.height * 0.005,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.only(left: 10, right: 10),
-                      width: 150,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                            width: 1, color: AppColors.genderTextColor),
-                      ),
-                      // decoration: BoxDecoration(
-                      //
-                      //   // borderRadius: BorderRadius.circular(8),
-                      //    border: Border(
-                      //         bottom: BorderSide(color: Colors.black.withOpacity(0.8),width: 0.6)
-                      //     )
-                      //
-                      // ),
-                      child: DropdownButton(
-                        isExpanded: true,
-                        underline: Container(),
-                        //borderRadius: BorderRadius.circular(10),
-                        icon: Image.asset('lib/assets/arrowDown.png'),
-                        elevation: 16,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.black,
+                  margin: EdgeInsets.only(bottom: 16),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Invitation & Pricing',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                        value: accessModifier,
-                        onChanged: (String? newValue) {
-                          setState(
-                            () {
-                              accessModifier = newValue!;
-                            },
-                          );
-                        },
-                        items: close_list
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xffA6A6A6),
+                        SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Dropdown for "Who can invite?"
+                            Expanded(
+                              child: Container(
+                                height: 40,
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    width: 1,
+                                    color: AppColors.genderTextColor,
+                                  ),
+                                ),
+                                child: DropdownButton<String>(
+                                  isExpanded: true,
+                                  underline: SizedBox(),
+                                  icon: Image.asset('lib/assets/arrowDown.png'),
+                                  elevation: 16,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColors.black,
+                                  ),
+                                  value: accessModifier,
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      accessModifier = newValue!;
+                                    });
+                                  },
+                                  items: close_list.map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(
+                                        value,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xffA6A6A6),
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
                               ),
                             ),
-                          );
-                        }).toList(),
-                      ),
+
+                            SizedBox(width: 16),
+
+                            // Price Field
+                            Expanded(
+                              child: Container(
+                                height: 40,
+                                child: TextFormField(
+                                  controller: priceController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    hintText: 'Price',
+                                    prefixIcon: Image.asset(
+                                        'lib/assets/dollarLogo.png'),
+                                    border: OutlineInputBorder(),
+                                    contentPadding: EdgeInsets.only(bottom: 10),
+                                  ),
+                                  validator: (String? value) {
+                                    if (value == null || value.isEmpty) {
+                                      Get.snackbar(
+                                        'Opps',
+                                        "Price is required.",
+                                        colorText: Colors.white,
+                                        backgroundColor: Colors.blue,
+                                      );
+                                      return '';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    iconTitleContainer(
-                        path: 'lib/assets/dollarLogo.png',
-                        text: 'price',
-                        type: TextInputType.number,
-                        height: 40,
-                        controller: priceController,
-                        onPress: () {},
-                        validator: (String input) {
-                          if (input.isEmpty) {
-                            Get.snackbar('Opps', "Price is required.",
-                                colorText: Colors.white,
-                                backgroundColor: Colors.blue);
-                            return '';
-                          }
-                        })
-                  ],
+                  ),
                 ),
                 SizedBox(
                   height: Get.height * 0.03,

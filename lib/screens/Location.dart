@@ -70,7 +70,8 @@ class _LocationState extends State<Location> {
         backgroundColor: AppColors.lightgreen,
         title: const Text(
           'Location',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
         elevation: 0,

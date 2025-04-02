@@ -37,7 +37,8 @@ class _CalendarPageState extends State<CalendarPage> {
         backgroundColor: AppColors.lightgreen,
         title: const Text(
           'Calendar',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         centerTitle: true,
         elevation: 0,
@@ -93,10 +94,10 @@ class _CalendarPageState extends State<CalendarPage> {
                     fontWeight: FontWeight.bold,
                     color: AppColors.black,
                   ),
-                  leftChevronIcon: Icon(
-                      Icons.chevron_left, color: AppColors.black),
-                  rightChevronIcon: Icon(
-                      Icons.chevron_right, color: AppColors.black),
+                  leftChevronIcon:
+                      Icon(Icons.chevron_left, color: AppColors.black),
+                  rightChevronIcon:
+                      Icon(Icons.chevron_right, color: AppColors.black),
                 ),
               ),
             ),
@@ -120,8 +121,8 @@ class _CalendarPageState extends State<CalendarPage> {
                       context,
                       name: event.get('event_name') ?? 'No Name',
                       location: event.get('location') ?? 'No Location',
-                      time: "${event.get('start_time')} - ${event.get(
-                          'end_time')}",
+                      time:
+                          "${event.get('start_time')} - ${event.get('end_time')}",
                       description: event.get('description') ?? 'No Description',
                     );
                   },
@@ -136,9 +137,9 @@ class _CalendarPageState extends State<CalendarPage> {
 
   Widget _buildEventCard(BuildContext context,
       {required String name,
-        required String location,
-        required String time,
-        required String description}) {
+      required String location,
+      required String time,
+      required String description}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -153,7 +154,8 @@ class _CalendarPageState extends State<CalendarPage> {
       ),
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16), // Ensure child widgets follow the rounded corners
+        borderRadius: BorderRadius.circular(
+            16), // Ensure child widgets follow the rounded corners
         child: Column(
           children: [
             Container(
@@ -168,21 +170,23 @@ class _CalendarPageState extends State<CalendarPage> {
                   Text(
                     name,
                     style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.location_on, color: Colors.white70, size: 16),
+                      const Icon(Icons.location_on,
+                          color: Colors.white70, size: 16),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           location,
                           style: TextStyle(color: Colors.white70),
-                          overflow: TextOverflow.ellipsis, // Prevent text overflow
+                          overflow:
+                              TextOverflow.ellipsis, // Prevent text overflow
                         ),
                       ),
                     ],
@@ -197,14 +201,15 @@ class _CalendarPageState extends State<CalendarPage> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.access_time, color: AppColors.lightgreen, size: 16),
+                      Icon(Icons.access_time,
+                          color: AppColors.lightgreen, size: 16),
                       const SizedBox(width: 4),
                       Text(
                         "Time: $time",
                         style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w600,
-                        ),
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                     ],
                   ),
@@ -212,8 +217,8 @@ class _CalendarPageState extends State<CalendarPage> {
                   Text(
                     "Description: $description",
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                      color: Colors.black54,
-                    ),
+                          color: Colors.black54,
+                        ),
                   ),
                 ],
               ),
@@ -222,4 +227,5 @@ class _CalendarPageState extends State<CalendarPage> {
         ),
       ),
     );
-  }}
+  }
+}
