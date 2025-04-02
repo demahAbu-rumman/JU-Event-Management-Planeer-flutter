@@ -173,6 +173,7 @@ class _CreateEventViewState extends State<CreateEventView> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.lightgreen,
+        iconTheme: IconThemeData(color: Colors.white),
         title: const Text(
           'Create Events',
           style: TextStyle(
@@ -249,35 +250,46 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Container(
                       alignment: Alignment.center,
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        // mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(
-                            height: Get.height * 0.05,
+                          SizedBox(height: Get.height * 0.05),
+                          Center(
+                            child: Column(
+                              children: [
+                                SizedBox(height: Get.height * 0.00),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 76,
+                                      height: 59,
+                                      child: Image.asset('lib/assets/uploadIcon.png'),
+                                    ),
+                                    myText(
+                                      text: 'Click and upload image/video',
+                                      style: TextStyle(
+                                        color: AppColors.lightGreen, // Keeping original color
+                                        fontSize: 19,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    elevatedButton(
+                                      onpress: () async {
+                                        mediaDialog(context);
+                                      },
+                                      text: 'Upload',
+                                      // Assuming elevatedButton preserves your original button styling
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
                           ),
-                          SizedBox(
-                            width: 76,
-                            height: 59,
-                            child: Image.asset('lib/assets/uploadIcon.png'),
-                          ),
-                          myText(
-                            text: 'Click and upload image/video',
-                            style: TextStyle(
-                              color: AppColors.lightGreen,
-                              fontSize: 19,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          elevatedButton(
-                              onpress: () async {
-                                mediaDialog(context);
-                              },
-                              text: 'Upload')
                         ],
-                      ),
+                      )
                     ),
                   ),
                 ),

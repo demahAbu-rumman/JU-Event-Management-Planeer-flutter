@@ -12,24 +12,31 @@ class _AcademyCalendarPage extends State<AcademyCalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: AppColors.lightgreen,
-          title: const Text(
-            'AcademyCalendar',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      appBar: AppBar(
+        backgroundColor: AppColors.lightgreen,
+        title: const Text(
+          'Academic Calendar',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-          centerTitle: true,
-          elevation: 0,
         ),
-        body: Container(
-          width: double.infinity, // عرض كامل الشاشة
-          // أي ارتفاع تريده
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('lib/assets/Academy.jpg'),
-              fit: BoxFit.fill, // يجعل الصورة تملأ المساحة بالكامل
-            ),
+        centerTitle: true,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('lib/assets/Academy.jpg'),
+            fit: BoxFit.contain, // Changed back to contain
+            alignment: Alignment.topCenter, // Ensures top alignment
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

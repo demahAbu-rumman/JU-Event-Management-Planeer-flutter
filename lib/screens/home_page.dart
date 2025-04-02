@@ -23,21 +23,20 @@ class _HomePageState extends State<HomePage> {
   int _selectedFilterIndex = 0;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final DataController dataController = Get.find<DataController>();
+      dataController.filterEventsBy('Today'); // Default to Today's events
+    });
+  }
+  @override
   Widget build(BuildContext context) {
     final DataController dataController = Get.put(DataController());
     final DateTime now = DateTime.now();
     final String formattedDate = DateFormat('dd-MM-yyyy').format(now);
 
     // Call the filter method whenever the selected tab changes
-    dataController.filterEventsBy(
-      _selectedFilterIndex == 0
-          ? 'Today'
-          : _selectedFilterIndex == 1
-              ? 'Week'
-              : _selectedFilterIndex == 2
-                  ? 'Month'
-                  : 'Year',
-    );
 
     return Scaffold(
       backgroundColor: AppColors.background,

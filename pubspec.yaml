@@ -94,6 +94,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
       - lib/assets/1.png
+      - lib/assets/green_loc.png
       - lib/assets/2.png
       - lib/assets/3.png
       - lib/assets/lock.png
@@ -116,27 +117,12 @@ flutter:
       - lib/assets/dollarLogo.png
       - lib/assets/profile.png
       - lib/assets/profilePic.png
-      - lib/assets/eventsPic1.jpg
-      - lib/assets/eventsPic2.jpg
       - lib/assets/eventsPic3.jpg
-      - lib/assets/eventsPic4.jpg
       - lib/assets/eventsPic5.jpg
-      - lib/assets/eventPic6.jpg
-      - lib/assets/eventPic7.jpg
-      - lib/assets/eventPic8.jpg
-      - lib/assets/eventPic9.jpg
-      - lib/assets/eventPic10.jpg
-      - lib/assets/eventPic11.jpg
-      - lib/assets/eventPicc12.jpg
-      - lib/assets/eventPic13.jpg
-      - lib/assets/eventPic14.jpg
-      - lib/assets/eventPic15.jpg
-      - lib/assets/eventPic16.jpg
       - lib/assets/gallary.png
       - lib/assets/calender.png
       - lib/assets/Academy.jpg
       - lib/assets/verified-icon.png
-      - lib/assets/loc.jpg
       
 
   # An image assets can refer to one or more resolution-specific "variants", see
