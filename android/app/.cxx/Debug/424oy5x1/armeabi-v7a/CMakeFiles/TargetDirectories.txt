@@ -1,0 +1,2 @@
+C:/Users/USER/Desktop/JU-Event-Management-Planeer-flutter/android/app/.cxx/Debug/424oy5x1/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/USER/Desktop/JU-Event-Management-Planeer-flutter/android/app/.cxx/Debug/424oy5x1/armeabi-v7a/CMakeFiles/rebuild_cache.dir
