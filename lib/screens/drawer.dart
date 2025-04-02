@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:ju_event_managment_planner/screens/MessagesPage.dart';
+import 'package:ju_event_managment_planner/screens/notification_page.dart';
+import 'package:ju_event_managment_planner/screens/profiles_page.dart';
 import '../Util/app_color.dart';
 import 'add_event.dart'; // Import your event creation page
 import 'calender.dart'; // Import your calendar page
-import 'profile_page.dart'; // Import your profile page
 import 'login_and_signup.dart'; // Import your login page
-import 'Util/app_color.dart'; // Import your app colors
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
@@ -19,13 +20,23 @@ class CustomDrawer extends StatelessWidget {
         children: [
           DrawerHeader(
             decoration: BoxDecoration(
-              color: AppColors.darkGreen,
+              color: AppColors.lightGreen,
             ),
             child: const Text(
               'Menu',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: 26,
+                fontWeight: FontWeight.w900, // Extra bold
+                fontFamily: 'Roboto', // Or any other modern font
+                shadows: [
+                  Shadow(
+                    blurRadius: 6.0,
+                    color: Colors.black87,
+                    offset: Offset(2.0, 2.0),
+                  ),
+                ],
+                letterSpacing: 1.5,
               ),
             ),
           ),
@@ -65,13 +76,24 @@ class CustomDrawer extends StatelessWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.message),
+            title: const Text('Messages'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MessagesPage()),
+              );
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.person),
             title: const Text('Profile'),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ProfilePage()),
+                MaterialPageRoute(builder: (context) => const Profiles_Page()),
               );
             },
           ),
@@ -82,6 +104,10 @@ class CustomDrawer extends StatelessWidget {
               // Handle notifications action
               Navigator.pop(context);
               // Add notification handling here if needed
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) =>  NotificationPage()),
+              );
             },
           ),
           const Divider(),

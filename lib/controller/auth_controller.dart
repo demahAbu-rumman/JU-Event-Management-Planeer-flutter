@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:ju_event_managment_planner/screens/home_page.dart';
+import 'package:ju_event_managment_planner/screens/notification_service.dart';
 import 'package:ju_event_managment_planner/screens/verify_email_page.dart';
 import 'package:path/path.dart' as Path;
 
@@ -70,14 +71,17 @@ class AuthController extends GetxController {
   }
 
   // SignUp method with role parameter
-  void signUp({String? email, String? password, String? role}) {
+  void signUp({String? email, String? password, String? role}) async {
     isLoading(true);
 
-    auth
-        .createUserWithEmailAndPassword(email: email!, password: password!)
-        .then((value) async {
-      // After successful signup, save the role to Firestore
-      String uid = value.user!.uid;
+    try {
+      UserCredential userCredential = await auth.createUserWithEmailAndPassword(
+        email: email!,
+        password: password!,
+      );
+
+      // Save user role to Firestore
+      String uid = userCredential.user!.uid;
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
         'email': email,
         'role': role,
@@ -87,11 +91,26 @@ class AuthController extends GetxController {
       await fetchUserData();
 
       isLoading(false);
-      Get.to(() => const VerifyEmailPage());
-    }).catchError((e) {
-      print("Error in authentication $e");
+
+      // Redirect user to the verify page unless the email is already in use
+      if (userCredential.user != null) {
+        Get.to(() => const VerifyEmailPage());
+      }
+
+    } on FirebaseAuthException catch (e) {
       isLoading(false);
-    });
+
+      if (e.code == 'email-already-in-use') {
+        // Trigger a local notification for the error
+        LocalNotificationService.sendNotification(
+          title: 'Signup Failed',
+          token: 'The email address is already in use by another account.',
+        );
+      }
+
+      // Show error message in Snackbar
+      Get.snackbar('Error', e.message ?? 'Something went wrong');
+    }
   }
 
   // Forget password method

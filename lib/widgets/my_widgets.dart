@@ -33,18 +33,21 @@ Widget textField(
   );
 }
 
-Widget myTextField(
-    {text,
-    String? icon,
-    bool,
-    TextEditingController? controller,
-    Function? validator}) {
+Widget myTextField({
+  text,
+  String? icon,
+  bool,
+  TextEditingController? controller,
+  Function? validator,
+  Function(String)? onChanged, // Add this optional parameter
+}) {
   return SizedBox(
     height: 45,
     child: TextFormField(
       validator: (input) => validator!(input),
       obscureText: bool,
       controller: controller,
+      onChanged: onChanged, // Add this line
       decoration: InputDecoration(
           contentPadding: const EdgeInsets.only(top: 5),
           errorStyle: const TextStyle(fontSize: 0),
@@ -60,6 +63,7 @@ Widget myTextField(
     ),
   );
 }
+
 
 Widget socialAppsIcons({text, Function? onPressed}) {
   return InkWell(

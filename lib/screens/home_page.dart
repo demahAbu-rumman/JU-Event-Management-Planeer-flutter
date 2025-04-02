@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:ju_event_managment_planner/screens/EventDetailsView.dart';
+import 'package:ju_event_managment_planner/screens/MessagesPage.dart';
 import 'package:ju_event_managment_planner/screens/drawer.dart';
+import 'package:ju_event_managment_planner/screens/profiles_page.dart';
 
 import 'package:ju_event_managment_planner/util/app_color.dart';
 import 'package:ju_event_managment_planner/screens/add_event.dart';
 import 'package:ju_event_managment_planner/screens/calender.dart';
-import 'package:ju_event_managment_planner/screens/profile_page.dart';
 import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
@@ -165,61 +166,72 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: AppColors.white,
-        selectedItemColor: AppColors.darkGreen,
-        unselectedItemColor: AppColors.grey,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.push(
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: AppColors.white,
+          selectedItemColor: AppColors.darkGreen,
+          unselectedItemColor: AppColors.grey,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          type: BottomNavigationBarType.fixed, // Add this to show all items
+          onTap: (index) {
+            if (index == 1) {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateEventView(
+                      event: null,
+                      isEditing: false,
+                    ),
+                  ));
+            }
+            if (index == 2) {
+              Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const CreateEventView(
-                    event: null, // DocumentSnapshot
-                    isEditing: false,
-                  ),
-                ));
-          }
-          if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const CalendarPage(),
-              ),
-            );
-          }
-          if (index == 3) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ProfilePage(),
-              ),
-            );
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Events',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
-    );
-  }
+                  builder: (context) => const CalendarPage(),
+                ),
+              );
+            }
+            if (index == 3) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MessagesPage(), // New messages page
+                ),
+              );
+            }
+            if (index == 4) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const Profiles_Page(),
+                ),
+              );
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add),
+              label: 'Events',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_today),
+              label: 'Calendar',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.message), // Message icon
+              label: 'Messages',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ],
+        ));}
 
   Widget buildFilterTab(int index, String text, DataController dataController) {
     bool isSelected = index == _selectedFilterIndex;
