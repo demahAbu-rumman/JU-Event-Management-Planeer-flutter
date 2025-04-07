@@ -76,31 +76,29 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 60),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "JU Planner",
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5,
+                    child: ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Builder(
+                        builder: (context) => IconButton(
+                          icon: const Icon(
+                            Icons.menu,
+                            color: Colors.white,
+                            size: 30,
                           ),
+                          onPressed: () {
+                            Scaffold.of(context).openDrawer();
+                          },
                         ),
-                        Builder(
-                          builder: (context) => IconButton(
-                            icon: const Icon(
-                              Icons.menu,
-                              color: Colors.white,
-                              size: 30,
-                            ),
-                            onPressed: () {
-                              Scaffold.of(context).openDrawer();
-                            },
-                          ),
+                      ),
+                      title: Text(
+                        "JU Planner",
+                        style: TextStyle(
+                          color: AppColors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
                         ),
-                      ],
+                      ),
                     ),
                   ),
                   const Spacer(),

@@ -20,8 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController mobileNumberController = TextEditingController();
-  TextEditingController eventOrganizationNameController =
-      TextEditingController();
+  TextEditingController eventOrganizationNameController = TextEditingController();
   //TextEditingController role = TextEditingController();
   TextEditingController gender = TextEditingController();
 
