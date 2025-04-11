@@ -248,14 +248,14 @@ class _CreateEventViewState extends State<CreateEventView> {
                     strokeWidth: 1.5,
                     dashPattern: const [6, 6],
                     child: Container(
-                      alignment: Alignment.center,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(height: Get.height * 0.05),
-                          Center(
-                            child: Column(
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(height: Get.height * 0.05),
+                            Center(
+                                child: Column(
                               children: [
                                 SizedBox(height: Get.height * 0.00),
                                 Column(
@@ -265,12 +265,14 @@ class _CreateEventViewState extends State<CreateEventView> {
                                     SizedBox(
                                       width: 76,
                                       height: 59,
-                                      child: Image.asset('lib/assets/uploadIcon.png'),
+                                      child: Image.asset(
+                                          'lib/assets/uploadIcon.png'),
                                     ),
                                     myText(
                                       text: 'Click and upload image/video',
                                       style: TextStyle(
-                                        color: AppColors.lightGreen, // Keeping original color
+                                        color: AppColors
+                                            .lightGreen, // Keeping original color
                                         fontSize: 19,
                                         fontWeight: FontWeight.w400,
                                       ),
@@ -286,11 +288,9 @@ class _CreateEventViewState extends State<CreateEventView> {
                                   ],
                                 ),
                               ],
-                            )
-                          ),
-                        ],
-                      )
-                    ),
+                            )),
+                          ],
+                        )),
                   ),
                 ),
                 // This widget checks if media is empty and conditionally displays the media uploader or a message
@@ -1275,7 +1275,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                                   isCreatingEvent(false);
                                   resetControllers();
 
-                                  Get.back();
+                                  Get.back(result: true);
                                   Get.snackbar(
                                       'Success', 'Event update successfully',
                                       colorText: Colors.white,
