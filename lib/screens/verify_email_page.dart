@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:ju_event_managment_planner/screens/profile_signup.dart';
+import 'package:ju_event_managment_planner/screens/profile_setup.dart';
 import 'login_and_signup.dart';
 import 'package:ju_event_managment_planner/Util/app_color.dart';
 
@@ -71,7 +71,7 @@ class _VerifyEmailPage extends State<VerifyEmailPage> {
     if (!hasNavigated && mounted) {
       hasNavigated = true;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        MaterialPageRoute(builder: (context) => const ProfileSetupScreen()),
       );
     }
   }
@@ -156,6 +156,7 @@ class _VerifyEmailPage extends State<VerifyEmailPage> {
         backgroundColor: AppColors.lightgreen,
         elevation: 0,
         centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: SafeArea(
         child: Padding(

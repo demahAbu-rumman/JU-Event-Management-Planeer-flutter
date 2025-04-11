@@ -5,7 +5,7 @@ import 'package:ju_event_managment_planner/screens/profiles_page.dart';
 import 'package:ju_event_managment_planner/widgets/my_widgets.dart';
 import '../Util/app_color.dart';
 import '../controller/auth_controller.dart';
-import 'profile_signup.dart';
+import 'profile_setup.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});

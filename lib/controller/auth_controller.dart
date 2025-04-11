@@ -26,17 +26,36 @@ class AuthController extends GetxController {
   }
 
   // Method to save user data
-  void saveUserData(String name, String mobile, String role,
-      String organizationName, String imageUrl) {
+  // In auth_controller.dart, modify the saveUserData method
+  Future<void> saveUserData(String name, String mobile, String role,
+      String organizationName, String imageUrl, String collegeName) async {
+    String uid = auth.currentUser!.uid;
+    DateTime joinedDate = DateTime.now(); // Get current date/time
+
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'name': name,
+      'mobile': mobile,
+      'role': role,
+      'organizationName': organizationName,
+      'imageUrl': imageUrl,
+      'collegeName': collegeName,
+      'joinedDate': FieldValue.serverTimestamp(), // Use server timestamp for accuracy
+      // Also include the first and last names separately for easy access
+      'first': name.split(' ').first,
+      'last': name.split(' ').length > 1 ? name.split(' ').last : '',
+    }, SetOptions(merge: true));
+
+    // Also store locally
     _userData = {
       'name': name,
       'mobile': mobile,
       'role': role,
       'organizationName': organizationName,
       'imageUrl': imageUrl,
+      'collegeName': collegeName,
+      'joinedDate': joinedDate,
     };
   }
-
   // Login method
   void login({String? email, String? password}) {
     isLoading(true);
@@ -173,29 +192,53 @@ class AuthController extends GetxController {
   }
 
   // Upload profile data to Firestore
+  // Update the uploadProfileData method to include joinedDate
   uploadProfileData(
       String imageUrl,
       String firstName,
       String lastName,
       String mobileNumber,
-      String gender,
+      String organizationName,
       String role,
-      String eventOrganizationName) {
+      String gender,
+      String collegeName,
+      ) async {
     String uid = FirebaseAuth.instance.currentUser!.uid;
+    final docRef = FirebaseFirestore.instance.collection('users').doc(uid);
 
-    FirebaseFirestore.instance.collection('users').doc(uid).set({
-      'image': imageUrl,
-      'first': firstName,
-      'last': lastName,
-      'phone': mobileNumber,
-      'gender': gender,
-      'role': role,
-      'eventOrganizationName': eventOrganizationName,
-    }).then((value) {
+    try {
+      // Upload profile info with merge to preserve existing fields like joinedDate
+      // In uploadProfileData method, update to use consistent field names
+      await docRef.set({
+        'image': imageUrl,
+        'first': firstName,
+        'last': lastName,
+        'name': '$firstName $lastName',
+        'mobile': mobileNumber,  // Changed from 'phone' to 'mobile'
+        'gender': gender,
+        'role': role,
+        'organizationName': organizationName,
+        'collegeName': collegeName,
+        'joinedDate': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      // Ensure joinedDate exists (add only if missing)
+      final doc = await docRef.get();
+      if (!doc.data()!.containsKey('joinedDate')) {
+        await docRef.set({
+          'joinedDate': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+
       isProfileInformationLoading(false);
       Get.offAll(() => HomePage());
-    });
+    } catch (e) {
+      isProfileInformationLoading(false);
+      Get.snackbar('Error', 'Failed to save profile: $e');
+      print("Error uploading profile data: $e");
+    }
   }
+
 
   // Fetch user data from Firestore
   Future<void> fetchUserData() async {

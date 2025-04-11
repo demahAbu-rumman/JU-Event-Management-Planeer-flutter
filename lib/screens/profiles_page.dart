@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ju_event_managment_planner/Util/app_color.dart';
@@ -15,9 +16,13 @@ class Profiles_Page extends StatefulWidget {
 class _ProfilePageState extends State<Profiles_Page> {
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
+  TextEditingController joinedDate = TextEditingController();
+
   bool _isOpen = false;
   late PanelController _panelController;
   String image = '';
+  String collegeName = '';
+
   String? selectedRole;
   final List<Activity> recentActivities = [
     Activity('Joined Tech Conference', '2 days ago', Icons.people),
@@ -33,37 +38,86 @@ class _ProfilePageState extends State<Profiles_Page> {
     _panelController = PanelController();
     dataController = Get.find<DataController>();
 
-    Map<String, dynamic>? userData = authController.getUserData();
-    if (userData != null) {
-      firstNameController.text = userData['first'] ?? '';
-      lastNameController.text = userData['last'] ?? '';
-      selectedRole = userData['role'] ?? 'Student';
-      image = userData['image'] ?? '';
+    // Initialize with current data first
+    _loadInitialData();
+
+    // Then listen for changes
+    dataController?.myDocument?.reference.snapshots().listen((doc) {
+      if (doc.exists) {
+        _updateProfileData(doc.data() as Map<String, dynamic>);
+      }
+    });
+  }
+
+  void _loadInitialData() async {
+    if (dataController?.myDocument != null && dataController!.myDocument!.exists) {
+      _updateProfileData(dataController!.myDocument!.data() as Map<String, dynamic>);
     }
   }
+
+  void _updateProfileData(Map<String, dynamic> data) {
+    setState(() {
+      firstNameController.text = data['first'] ?? '';
+      lastNameController.text = data['last'] ?? '';
+      selectedRole = data['role'] ?? 'Student';
+      image = data['image'] ?? '';
+      collegeName = data['collegeName'] ?? 'N/A';
+      joinedDate.text = _formatJoinedDate(data['joinedDate']);
+    });
+  }
+  // Helper method to format joined date
+  String _formatJoinedDate(dynamic date) {
+    if (date == null) return 'N/A';
+
+    try {
+      DateTime dateTime;
+      if (date is Timestamp) {
+        dateTime = date.toDate();
+      } else if (date is DateTime) {
+        dateTime = date;
+      } else {
+        return 'N/A';
+      }
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}'; // More detailed format
+    } catch (e) {
+      print("Error formatting date: $e");
+      return 'N/A';
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    // Get the joined date
+    String joinedDate = this.joinedDate.text;
+
     switch (selectedRole?.toLowerCase()) {
       case 'student':
-        return _buildStudentProfile();
+        return _buildStudentProfile(joinedDate);
       case 'event organizer':
-        return _buildOrganizerProfile();
+        return _buildOrganizerProfile(joinedDate);
       case 'instructor':
-        return _buildInstructorProfile();
+        return _buildInstructorProfile(joinedDate);
       default:
-        return _buildStudentProfile();
+        return _buildStudentProfile(joinedDate);
     }
   }
 
-  Widget _buildStudentProfile() {
+  Widget _buildStudentProfile(String joinedDate) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Profile', style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-        elevation: 0,
+        title: const Text(
+          'My Profile',
+          style: TextStyle(
+            fontFamily: 'gilory',
+            fontWeight: FontWeight.normal,
+            color: Colors.white,
+          ),
+        ),
         backgroundColor: AppColors.lightgreen,
-        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
@@ -86,7 +140,7 @@ class _ProfilePageState extends State<Profiles_Page> {
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
             ),
-            panelBuilder: (controller) => _buildStudentPanel(controller),
+            panelBuilder: (controller) => _buildStudentPanel(controller, joinedDate),
             onPanelSlide: (value) {
               if (value >= 0.2 && !_isOpen) {
                 setState(() => _isOpen = true);
@@ -99,13 +153,13 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
-  Widget _buildStudentPanel(ScrollController controller) {
+  Widget _buildStudentPanel(ScrollController controller, String joinedDate) {
     return SingleChildScrollView(
       controller: controller,
       child: Column(
         children: [
           _titleSection(),
-          _infoSection(),
+          _infoSection(joinedDate),
           const SizedBox(height: 24),
           _buildActivitySection(),
           const SizedBox(height: 24),
@@ -144,13 +198,21 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
-  Widget _buildOrganizerProfile() {
+  Widget _buildOrganizerProfile(String joinedDate) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: const Text(
+          'My Profile',
+          style: TextStyle(
+            fontFamily: 'gilory',
+            fontWeight: FontWeight.normal,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: AppColors.lightgreen,
         elevation: 0,
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black),
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
@@ -173,14 +235,14 @@ class _ProfilePageState extends State<Profiles_Page> {
           SlidingUpPanel(
             controller: _panelController,
             minHeight: MediaQuery.of(context).size.height * 0.5,
-            panelBuilder: (controller) => _buildOrganizerPanel(controller),
+            panelBuilder: (controller) => _buildOrganizerPanel(controller, joinedDate),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildOrganizerPanel(ScrollController controller) {
+  Widget _buildOrganizerPanel(ScrollController controller, String joinedDate) {
     return SingleChildScrollView(
       controller: controller,
       child: Column(
@@ -204,13 +266,21 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
-  Widget _buildInstructorProfile() {
+  Widget _buildInstructorProfile(String joinedDate) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: const Text(
+          'My Profile',
+          style: TextStyle(
+            fontFamily: 'gilory',
+            fontWeight: FontWeight.normal,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: AppColors.lightgreen,
         elevation: 0,
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black),
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
@@ -235,7 +305,7 @@ class _ProfilePageState extends State<Profiles_Page> {
               children: [
                 SizedBox(height: 250),
                 _titleSection(),
-                _infoSection(),
+                _infoSection(joinedDate),
                 const SizedBox(height: 24),
                 _buildActivitySection(),
                 const SizedBox(height: 24),
@@ -274,20 +344,20 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
-  Widget _infoSection() {
+  Widget _infoSection(String joinedDate) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           if (selectedRole == 'Event Organizer') ...[
-            _infoCell('Events', '24'),
+            _infoCell('Events', 'N/A'),
           ],
           if (selectedRole == 'Instructor') ...[
-            _infoCell('Courses', '8'),
+            _infoCell('Courses', 'N/A'),
           ],
-          _infoCell('College', 'IT'),
-          _infoCell('Joined', '2023'),
+          _infoCell('College', collegeName.isNotEmpty ? collegeName : 'N/A'),
+          _infoCell('Joined', joinedDate.isNotEmpty ? joinedDate : 'N/A'),
         ],
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import '../Util/app_color.dart';
 
+
 Widget myText({text, style, textAlign}) {
   return Text(
     text,

@@ -140,6 +140,21 @@ class DataController extends GetxController {
     }
     throw const FormatException("Invalid date format");
   }
+  // Add this to data_controller.dart
+  String formatJoinedDate(dynamic date) {
+    if (date == null) return '2023';
+
+    DateTime dateTime;
+    if (date is Timestamp) {
+      dateTime = date.toDate();
+    } else if (date is DateTime) {
+      dateTime = date;
+    } else {
+      return '2023';
+    }
+
+    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+  }
 
   void filterEventsByDate(DateTime selectedDate) {
     isEventsLoading.value = true; // Set loading state to true
