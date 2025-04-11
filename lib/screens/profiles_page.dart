@@ -65,7 +65,7 @@ class _ProfilePageState extends State<Profiles_Page> {
       joinedDate.text = _formatJoinedDate(data['joinedDate']);
     });
   }
-  // Helper method to format joined date
+
   String _formatJoinedDate(dynamic date) {
     if (date == null) return 'N/A';
 
@@ -78,32 +78,18 @@ class _ProfilePageState extends State<Profiles_Page> {
       } else {
         return 'N/A';
       }
-      return '${dateTime.day}/${dateTime.month}/${dateTime.year}'; // More detailed format
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
     } catch (e) {
       print("Error formatting date: $e");
       return 'N/A';
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    // Get the joined date
     String joinedDate = this.joinedDate.text;
 
-    switch (selectedRole?.toLowerCase()) {
-      case 'student':
-        return _buildStudentProfile(joinedDate);
-      case 'event organizer':
-        return _buildOrganizerProfile(joinedDate);
-      case 'instructor':
-        return _buildInstructorProfile(joinedDate);
-      default:
-        return _buildStudentProfile(joinedDate);
-    }
-  }
-
-  Widget _buildStudentProfile(String joinedDate) {
+    // Use the same layout for all roles
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -117,170 +103,7 @@ class _ProfilePageState extends State<Profiles_Page> {
         backgroundColor: AppColors.lightgreen,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      body: Stack(
-        children: [
-          Container(
-            height: MediaQuery.of(context).size.height * 0.6,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: image.isNotEmpty
-                    ? NetworkImage(image) as ImageProvider
-                    : const AssetImage('lib/assets/profilePic.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          SlidingUpPanel(
-            controller: _panelController,
-            minHeight: MediaQuery.of(context).size.height * 0.4,
-            maxHeight: MediaQuery.of(context).size.height * 0.85,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
-            ),
-            panelBuilder: (controller) => _buildStudentPanel(controller, joinedDate),
-            onPanelSlide: (value) {
-              if (value >= 0.2 && !_isOpen) {
-                setState(() => _isOpen = true);
-              }
-            },
-            onPanelClosed: () => setState(() => _isOpen = false),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStudentPanel(ScrollController controller, String joinedDate) {
-    return SingleChildScrollView(
-      controller: controller,
-      child: Column(
-        children: [
-          _titleSection(),
-          _infoSection(joinedDate),
-          const SizedBox(height: 24),
-          _buildActivitySection(),
-          const SizedBox(height: 24),
-          _buildSectionTitle('Upcoming Events'),
-          _buildEventList(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActivitySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Recent Activity'),
-        const SizedBox(height: 8),
-        ...recentActivities.map((activity) => _buildActivityItem(activity)),
-      ],
-    );
-  }
-
-  Widget _buildActivityItem(Activity activity) {
-    return ListTile(
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(activity.icon, color: Colors.blue),
-      ),
-      title: Text(activity.title),
-      subtitle: Text(activity.time),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-    );
-  }
-
-  Widget _buildOrganizerProfile(String joinedDate) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'My Profile',
-          style: TextStyle(
-            fontFamily: 'gilory',
-            fontWeight: FontWeight.normal,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: AppColors.lightgreen,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      body: Stack(
-        children: [
-          Container(
-            height: MediaQuery.of(context).size.height * 0.35,
-            color: Colors.blue.shade800,
-            child: Center(
-              child: CircleAvatar(
-                radius: 80,
-                backgroundColor: Colors.white,
-                backgroundImage: image.isNotEmpty
-                    ? NetworkImage(image) as ImageProvider
-                    : null,
-                child: image.isEmpty
-                    ? const Icon(Icons.person, size: 60, color: Colors.blue)
-                    : null,
-              ),
-            ),
-          ),
-          SlidingUpPanel(
-            controller: _panelController,
-            minHeight: MediaQuery.of(context).size.height * 0.5,
-            panelBuilder: (controller) => _buildOrganizerPanel(controller, joinedDate),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOrganizerPanel(ScrollController controller, String joinedDate) {
-    return SingleChildScrollView(
-      controller: controller,
-      child: Column(
-        children: [
-          _titleSection(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _statItem('24', 'Events'),
-              _statItem('1.2K', 'Participants'),
-              _statItem('4.8', 'Rating'),
-            ],
-          ),
-          const SizedBox(height: 24),
-          _buildActivitySection(),
-          const SizedBox(height: 24),
-          _buildSectionTitle('Upcoming Events'),
-          _buildEventList(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInstructorProfile(String joinedDate) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'My Profile',
-          style: TextStyle(
-            fontFamily: 'gilory',
-            fontWeight: FontWeight.normal,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: AppColors.lightgreen,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
@@ -295,7 +118,13 @@ class _ProfilePageState extends State<Profiles_Page> {
                     ? NetworkImage(image) as ImageProvider
                     : null,
                 child: image.isEmpty
-                    ? const Icon(Icons.school, size: 60, color: Colors.blue)
+                    ? Icon(
+                    selectedRole == 'Instructor'
+                        ? Icons.school
+                        : Icons.person,
+                    size: 60,
+                    color: Colors.blue
+                )
                     : null,
               ),
             ),
@@ -303,14 +132,19 @@ class _ProfilePageState extends State<Profiles_Page> {
           SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(height: 250),
+                const SizedBox(height: 250),
                 _titleSection(),
                 _infoSection(joinedDate),
                 const SizedBox(height: 24),
                 _buildActivitySection(),
                 const SizedBox(height: 24),
-                _buildSectionTitle('Office Hours'),
-                _buildSchedule(),
+                if (selectedRole == 'Instructor') ...[
+                  _buildSectionTitle('Office Hours'),
+                  _buildSchedule(),
+                ] else ...[
+                  _buildSectionTitle('Upcoming Events'),
+                  _buildEventList(),
+                ],
               ],
             ),
           ),
@@ -347,17 +181,69 @@ class _ProfilePageState extends State<Profiles_Page> {
   Widget _infoSection(String joinedDate) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Use different layouts based on screen width
+          if (constraints.maxWidth > 600) {
+            // Wide screen - use regular row layout
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: _buildInfoCells(joinedDate),
+            );
+          } else {
+            // Narrow screen - use wrapped layout
+            return Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              spacing: 16,
+              runSpacing: 16,
+              children: _buildInfoCells(joinedDate),
+            );
+          }
+        },
+      ),
+    );
+  }
+  List<Widget> _buildInfoCells(String joinedDate) {
+    return [
+      if (selectedRole == 'Event Organizer')
+        _buildAdaptiveInfoCell('Events', 'N/A'),
+      if (selectedRole == 'Instructor')
+        _buildAdaptiveInfoCell('Courses', 'N/A'),
+      if (selectedRole == 'Student')
+        _buildAdaptiveInfoCell('Year', 'N/A'),
+      _buildAdaptiveInfoCell('College', collegeName.isNotEmpty ? collegeName : 'N/A'),
+      _buildAdaptiveInfoCell('Joined', joinedDate.isNotEmpty ? joinedDate : 'N/A'),
+    ];
+  }
+
+  Widget _buildAdaptiveInfoCell(String title, String value) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: 150, // Set a maximum width for each cell
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          if (selectedRole == 'Event Organizer') ...[
-            _infoCell('Events', 'N/A'),
-          ],
-          if (selectedRole == 'Instructor') ...[
-            _infoCell('Courses', 'N/A'),
-          ],
-          _infoCell('College', collegeName.isNotEmpty ? collegeName : 'N/A'),
-          _infoCell('Joined', joinedDate.isNotEmpty ? joinedDate : 'N/A'),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
     );
@@ -384,24 +270,31 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
-  Widget _statItem(String value, String title) {
+  Widget _buildActivitySection() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-          ),
-        ),
+        _buildSectionTitle('Recent Activity'),
+        const SizedBox(height: 8),
+        ...recentActivities.map((activity) => _buildActivityItem(activity)),
       ],
+    );
+  }
+
+  Widget _buildActivityItem(Activity activity) {
+    return ListTile(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(activity.icon, color: Colors.blue),
+      ),
+      title: Text(activity.title),
+      subtitle: Text(activity.time),
+      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
     );
   }
 

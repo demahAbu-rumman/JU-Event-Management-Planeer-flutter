@@ -11,8 +11,6 @@ import 'package:ju_event_managment_planner/screens/notification_service.dart';
 import 'package:ju_event_managment_planner/screens/verify_email_page.dart';
 import 'package:path/path.dart' as Path;
 
-
-
 class AuthController extends GetxController {
   FirebaseAuth auth = FirebaseAuth.instance;
   var isLoading = false.obs;
@@ -25,12 +23,61 @@ class AuthController extends GetxController {
     return _userData;
   }
 
+  // Check if user has submitted feedback
+  Future<bool> hasSubmittedFeedback() async {
+    try {
+      String uid = auth.currentUser!.uid;
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+      return userDoc.exists && userDoc.get('hasSubmittedFeedback') == true;
+    } catch (e) {
+      print("Error checking feedback status: $e");
+      return false;
+    }
+  }
+
+  // Submit feedback and mark user as having submitted
+  Future<void> submitFeedback(String feedback, int rating) async {
+    try {
+      final user = auth.currentUser;
+      if (user != null) {
+        // Add to feedback collection
+        await FirebaseFirestore.instance.collection('feedback').add({
+          'userId': user.uid,
+          'feedback': feedback,
+          'rating': rating,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+
+        // Mark user as having submitted feedback
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({
+          'hasSubmittedFeedback': true,
+        }, SetOptions(merge: true));
+
+        Get.snackbar(
+          'Thank you!',
+          'Your feedback has been submitted',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to submit feedback',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
   // Method to save user data
-  // In auth_controller.dart, modify the saveUserData method
   Future<void> saveUserData(String name, String mobile, String role,
       String organizationName, String imageUrl, String collegeName) async {
     String uid = auth.currentUser!.uid;
-    DateTime joinedDate = DateTime.now(); // Get current date/time
 
     await FirebaseFirestore.instance.collection('users').doc(uid).set({
       'name': name,
@@ -39,10 +86,10 @@ class AuthController extends GetxController {
       'organizationName': organizationName,
       'imageUrl': imageUrl,
       'collegeName': collegeName,
-      'joinedDate': FieldValue.serverTimestamp(), // Use server timestamp for accuracy
-      // Also include the first and last names separately for easy access
+      'joinedDate': FieldValue.serverTimestamp(),
       'first': name.split(' ').first,
       'last': name.split(' ').length > 1 ? name.split(' ').last : '',
+      'hasSubmittedFeedback': false, // Initialize feedback flag
     }, SetOptions(merge: true));
 
     // Also store locally
@@ -53,9 +100,10 @@ class AuthController extends GetxController {
       'organizationName': organizationName,
       'imageUrl': imageUrl,
       'collegeName': collegeName,
-      'joinedDate': joinedDate,
+      'joinedDate': DateTime.now(),
     };
   }
+
   // Login method
   void login({String? email, String? password}) {
     isLoading(true);
@@ -63,9 +111,7 @@ class AuthController extends GetxController {
     auth
         .signInWithEmailAndPassword(email: email!, password: password!)
         .then((value) async {
-      // Fetch user data after successful login
       await fetchUserData();
-
       isLoading(false);
       storeToken();
       Get.to(() => const HomePage());
@@ -79,13 +125,12 @@ class AuthController extends GetxController {
   static storeToken() async {
     try {
       String? token = await FirebaseMessaging.instance.getToken();
-      print(token);
       FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .set({'fcmToken': token!}, SetOptions(merge: true));
     } catch (e) {
-      print("error is $e");
+      print("Error storing token: $e");
     }
   }
 
@@ -99,35 +144,28 @@ class AuthController extends GetxController {
         password: password!,
       );
 
-      // Save user role to Firestore
       String uid = userCredential.user!.uid;
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
         'email': email,
         'role': role,
+        'hasSubmittedFeedback': false, // Initialize feedback flag
       });
 
-      // Fetch user data after successful signup
       await fetchUserData();
-
       isLoading(false);
 
-      // Redirect user to the verify page unless the email is already in use
       if (userCredential.user != null) {
         Get.to(() => const VerifyEmailPage());
       }
 
     } on FirebaseAuthException catch (e) {
       isLoading(false);
-
       if (e.code == 'email-already-in-use') {
-        // Trigger a local notification for the error
         LocalNotificationService.sendNotification(
           title: 'Signup Failed',
           token: 'The email address is already in use by another account.',
         );
       }
-
-      // Show error message in Snackbar
       Get.snackbar('Error', e.message ?? 'Something went wrong');
     }
   }
@@ -145,54 +183,40 @@ class AuthController extends GetxController {
   // Google Sign-In method
   signInWithGoogle() async {
     isLoading(true);
-    // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? googleAuth =
+      await googleUser?.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
 
-    // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
-
-    // Create a new credential
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-
-    // Once signed in, return the UserCredential
-    FirebaseAuth.instance.signInWithCredential(credential).then((value) {
+      await FirebaseAuth.instance.signInWithCredential(credential);
       isLoading(false);
-
-      ///Successfully logged in
-      // Get.to(() => BottomBarView());
-    }).catchError((e) {
-      /// Error in getting Login
+    } catch (e) {
       isLoading(false);
-      print("Error is $e");
-    });
+      print("Error in Google Sign-In: $e");
+    }
   }
 
   var isProfileInformationLoading = false.obs;
 
   // Upload image to Firebase Storage
   Future<String> uploadImageToFirebaseStorage(File image) async {
-    String imageUrl = '';
-    String fileName = Path.basename(image.path);
-
-    var reference =
-        FirebaseStorage.instance.ref().child('profileImages/$fileName');
-    UploadTask uploadTask = reference.putFile(image);
-    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
-    await taskSnapshot.ref.getDownloadURL().then((value) {
-      imageUrl = value;
-    }).catchError((e) {
-      print("Error happened $e");
-    });
-
-    return imageUrl;
+    try {
+      String fileName = Path.basename(image.path);
+      var reference = FirebaseStorage.instance.ref().child('profileImages/$fileName');
+      UploadTask uploadTask = reference.putFile(image);
+      TaskSnapshot taskSnapshot = await uploadTask;
+      return await taskSnapshot.ref.getDownloadURL();
+    } catch (e) {
+      print("Error uploading image: $e");
+      rethrow;
+    }
   }
 
   // Upload profile data to Firestore
-  // Update the uploadProfileData method to include joinedDate
   uploadProfileData(
       String imageUrl,
       String firstName,
@@ -203,32 +227,23 @@ class AuthController extends GetxController {
       String gender,
       String collegeName,
       ) async {
-    String uid = FirebaseAuth.instance.currentUser!.uid;
+    String uid = auth.currentUser!.uid;
     final docRef = FirebaseFirestore.instance.collection('users').doc(uid);
 
     try {
-      // Upload profile info with merge to preserve existing fields like joinedDate
-      // In uploadProfileData method, update to use consistent field names
       await docRef.set({
         'image': imageUrl,
         'first': firstName,
         'last': lastName,
         'name': '$firstName $lastName',
-        'mobile': mobileNumber,  // Changed from 'phone' to 'mobile'
+        'mobile': mobileNumber,
         'gender': gender,
         'role': role,
         'organizationName': organizationName,
         'collegeName': collegeName,
         'joinedDate': FieldValue.serverTimestamp(),
+        'hasSubmittedFeedback': false, // Ensure feedback flag is initialized
       }, SetOptions(merge: true));
-
-      // Ensure joinedDate exists (add only if missing)
-      final doc = await docRef.get();
-      if (!doc.data()!.containsKey('joinedDate')) {
-        await docRef.set({
-          'joinedDate': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
-      }
 
       isProfileInformationLoading(false);
       Get.offAll(() => HomePage());
@@ -239,13 +254,12 @@ class AuthController extends GetxController {
     }
   }
 
-
   // Fetch user data from Firestore
   Future<void> fetchUserData() async {
     try {
       String uid = auth.currentUser!.uid;
       DocumentSnapshot userSnapshot =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
       if (userSnapshot.exists) {
         _userData = userSnapshot.data() as Map<String, dynamic>;

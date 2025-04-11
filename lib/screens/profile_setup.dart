@@ -331,16 +331,92 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Widget _buildCollegeField() {
+    // List of schools from your screenshots
+    final List<String> schools = [
+      // HUMANITIES SCHOOLS
+      'School of Arts',
+      'School of Business',
+      'School of Shari\'a',
+      'School of Educational Sciences',
+      'School of Law',
+      'School of Sport Science',
+      'School of Arts and Design',
+      'Prince Al Hussein Bin Abdullah II School of Political Science and International Studies',
+      'School of Foreign Languages',
+      'School of Archaeology and Tourism',
+
+      // SCIENTIFIC SCHOOLS
+      'School of Science',
+      'School of Agriculture',
+      'School of Engineering',
+      'King Abdullah II School of Information Technology',
+
+      // HEALTH SCHOOLS
+      'School of Medicine',
+      'School of Nursing',
+      'School of Pharmacy',
+      'School of Dentistry',
+      'School of Rehabilitation Sciences',
+      'Public Health Institute',
+
+      // DEANSHIPS
+      'Deanship of Scientific Research',
+      'Deanship of Student Affairs',
+
+      // GRADUATE STUDIES
+      'School of Graduate Studies',
+    ];
+
     return Column(
       children: [
         const SizedBox(height: 16),
-        _buildCustomTextField(
-          controller: _collegeNameController,
-          label: 'Name of Your College',
-          icon: Icons.school_outlined,
-          validator: (input) => _showCollegeField && (input?.isEmpty ?? true)
-              ? 'College Name is required.'
-              : null,
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: DropdownButtonFormField<String>(
+            value: _collegeNameController.text.isNotEmpty ? _collegeNameController.text : null,
+            hint: const Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: Text('Select your school', style: TextStyle(color: Colors.blueGrey)),
+            ),
+            icon: const Icon(Icons.arrow_drop_down, color: Colors.blueGrey),
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.school_outlined, color: Colors.blueGrey),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _collegeNameController.text = value ?? '';
+              });
+            },
+            items: schools.map((school) {
+              return DropdownMenuItem(
+                value: school,
+                child: Text(
+                  school,
+                  style: const TextStyle(color: Colors.blueGrey),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            }).toList(),
+            validator: (value) => _showCollegeField && (value == null || value.isEmpty)
+                ? 'School selection is required.'
+                : null,
+            dropdownColor: Colors.white,
+            style: const TextStyle(fontSize: 16, color: Colors.black),
+            isExpanded: true,
+          ),
         ),
       ],
     );

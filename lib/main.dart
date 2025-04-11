@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
+import 'package:ju_event_managment_planner/controller/auth_controller.dart';
+import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:ju_event_managment_planner/screens/notification_service.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:get/get.dart';
@@ -24,6 +26,10 @@ Future<void> main() async {
 
   LocalNotificationService.initialize();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  Get.put(DataController());
+  Get.put(AuthController());
+
   runApp(const MyApp());
 }
 

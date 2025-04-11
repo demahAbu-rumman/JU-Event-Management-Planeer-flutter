@@ -3,7 +3,6 @@ import 'package:ju_event_managment_planner/screens/EventDetailsView.dart';
 import 'package:ju_event_managment_planner/screens/MessagesPage.dart';
 import 'package:ju_event_managment_planner/screens/drawer.dart';
 import 'package:ju_event_managment_planner/screens/profiles_page.dart';
-
 import 'package:ju_event_managment_planner/util/app_color.dart';
 import 'package:ju_event_managment_planner/screens/add_event.dart';
 import 'package:ju_event_managment_planner/screens/calender.dart';
@@ -21,22 +20,38 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedFilterIndex = 0;
+  String? _userRole;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final DataController dataController = Get.find<DataController>();
-      dataController.filterEventsBy('Today'); // Default to Today's events
+      dataController.filterEventsBy('Today');
+      _loadUserRole();
     });
   }
+
+  Future<void> _loadUserRole() async {
+    final dataController = Get.find<DataController>();
+    if (dataController.myDocument != null && dataController.myDocument!.exists) {
+      setState(() {
+        _userRole = dataController.myDocument!.get('role');
+      });
+    }
+  }
+
+  bool _shouldShowCreateEvent() {
+    final dataController = Get.find<DataController>();
+    final role = dataController.myDocument?.get('role') ?? 'Student';
+    return role != 'Student';
+  }
+
   @override
   Widget build(BuildContext context) {
     final DataController dataController = Get.put(DataController());
     final DateTime now = DateTime.now();
     final String formattedDate = DateFormat('dd-MM-yyyy').format(now);
-
-    // Call the filter method whenever the selected tab changes
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -163,72 +178,120 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: AppColors.white,
-          selectedItemColor: AppColors.darkGreen,
-          unselectedItemColor: AppColors.grey,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
-          type: BottomNavigationBarType.fixed, // Add this to show all items
-          onTap: (index) {
-            if (index == 1) {
-              Navigator.push(
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: AppColors.white,
+        selectedItemColor: AppColors.darkGreen,
+        unselectedItemColor: AppColors.grey,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        currentIndex: 0,
+        onTap: (index) {
+          if (_userRole == 'Student') {
+            // Student navigation items: [Home, Calendar, Messages, Profile]
+            switch (index) {
+              case 0: // Home - do nothing
+                break;
+              case 1: // Calendar
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CalendarPage()),
+                );
+                break;
+              case 2: // Messages
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MessagesPage()),
+                );
+                break;
+              case 3: // Profile
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Profiles_Page()),
+                );
+                break;
+            }
+          } else {
+            // Admin/Staff navigation items: [Home, Events, Calendar, Messages, Profile]
+            switch (index) {
+              case 0: // Home - do nothing
+                break;
+              case 1: // Events
+                Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const CreateEventView(
                       event: null,
                       isEditing: false,
                     ),
-                  ));
+                  ),
+                );
+                break;
+              case 2: // Calendar
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CalendarPage()),
+                );
+                break;
+              case 3: // Messages
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MessagesPage()),
+                );
+                break;
+              case 4: // Profile
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Profiles_Page()),
+                );
+                break;
             }
-            if (index == 2) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CalendarPage(),
-                ),
-              );
-            }
-            if (index == 3) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MessagesPage(), // New messages page
-                ),
-              );
-            }
-            if (index == 4) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const Profiles_Page(),
-                ),
-              );
-            }
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add),
-              label: 'Events',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today),
-              label: 'Calendar',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.message), // Message icon
-              label: 'Messages',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
-        ));}
+          }
+        },
+        items: _userRole == 'Student'
+            ? [
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Calendar',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            label: 'Messages',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ]
+            : [
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: 'Events',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Calendar',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            label: 'Messages',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget buildFilterTab(int index, String text, DataController dataController) {
     bool isSelected = index == _selectedFilterIndex;
@@ -236,15 +299,14 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         setState(() {
           _selectedFilterIndex = index;
-          // Call the filter method here to update the filtered events
           dataController.filterEventsBy(
             index == 0
                 ? 'Today'
                 : index == 1
-                    ? 'Week'
-                    : index == 2
-                        ? 'Month'
-                        : 'Year',
+                ? 'Week'
+                : index == 2
+                ? 'Month'
+                : 'Year',
           );
         });
       },
