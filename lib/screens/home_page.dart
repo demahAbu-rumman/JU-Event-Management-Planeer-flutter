@@ -178,118 +178,142 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: AppColors.white,
-        selectedItemColor: AppColors.darkGreen,
-        unselectedItemColor: AppColors.grey,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        currentIndex: 0,
-        onTap: (index) {
-          if (_userRole == 'Student') {
-            // Student navigation items: [Home, Calendar, Messages, Profile]
-            switch (index) {
-              case 0: // Home - do nothing
-                break;
-              case 1: // Calendar
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CalendarPage()),
-                );
-                break;
-              case 2: // Messages
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MessagesPage()),
-                );
-                break;
-              case 3: // Profile
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Profiles_Page()),
-                );
-                break;
-            }
-          } else {
-            // Admin/Staff navigation items: [Home, Events, Calendar, Messages, Profile]
-            switch (index) {
-              case 0: // Home - do nothing
-                break;
-              case 1: // Events
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const CreateEventView(
-                      event: null,
-                      isEditing: false,
-                    ),
-                  ),
-                );
-                break;
-              case 2: // Calendar
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CalendarPage()),
-                );
-                break;
-              case 3: // Messages
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MessagesPage()),
-                );
-                break;
-              case 4: // Profile
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Profiles_Page()),
-                );
-                break;
-            }
-          }
-        },
-        items: _userRole == 'Student'
-            ? [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.shade300,
+                offset: const Offset(-5, -5),
+                blurRadius: 10,
+              ),
+              BoxShadow(
+                color: Colors.grey.shade600,
+                offset: const Offset(5, 5),
+                blurRadius: 10,
+              ),
+            ],
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendar',
+
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(30),
+            child: BottomNavigationBar(
+              backgroundColor: AppColors.white,
+              selectedItemColor: AppColors.darkGreen,
+              unselectedItemColor: AppColors.grey,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              type: BottomNavigationBarType.fixed,
+              currentIndex: 0,
+              onTap: (index) {
+                if (_userRole == 'Student') {
+                  switch (index) {
+                    case 0: // Home
+                      break;
+                    case 1: // Calendar
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CalendarPage()),
+                      );
+                      break;
+                    case 2: // Messages
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MessagesPage()),
+                      );
+                      break;
+                    case 3: // Profile
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Profiles_Page()),
+                      );
+                      break;
+                  }
+                } else {
+                  switch (index) {
+                    case 0: // Home
+                      break;
+                    case 1: // Calendar
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CalendarPage()),
+                      );
+                      break;
+                    case 2: // Messages
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MessagesPage()),
+                      );
+                      break;
+                    case 3: // Profile
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const Profiles_Page()),
+                      );
+                      break;
+                    case 4: // Create Event
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateEventView(
+                            event: null,
+                            isEditing: false,
+                          ),
+                        ),
+                      );
+                      break;
+                  }
+                }
+              },
+              items: _userRole == 'Student'
+                  ? const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_rounded),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.calendar_month_rounded),
+                  label: 'Calendar',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.mark_chat_unread_rounded),
+                  label: 'Messages',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.account_circle_rounded),
+                  label: 'Profile',
+                ),
+              ]
+                  : const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_rounded),
+                  label: 'Home',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.calendar_month_rounded),
+                  label: 'Calendar',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.mark_chat_unread_rounded),
+                  label: 'Messages',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.account_circle_rounded),
+                  label: 'Profile',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.add_circle_outline_rounded),
+                  label: 'Create',
+                ),
+              ],
+            ),
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            label: 'Messages',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ]
-            : [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Events',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendar',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.message),
-            label: 'Messages',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+        ),
       ),
+
     );
   }
 
