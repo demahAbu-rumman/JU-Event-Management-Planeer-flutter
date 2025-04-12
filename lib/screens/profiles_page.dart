@@ -22,38 +22,56 @@ class _ProfilePageState extends State<Profiles_Page> {
   late PanelController _panelController;
   String image = '';
   String collegeName = '';
-
   String? selectedRole;
+
   final List<Activity> recentActivities = [
     Activity('Joined Tech Conference', '2 days ago', Icons.people),
-    Activity('Submitted Event attendance ', '1 week ago', Icons.event_available),
+    Activity('Submitted Event attendance', '1 week ago', Icons.event_available),
   ];
 
   AuthController authController = Get.put(AuthController());
-  DataController? dataController;
+  late DataController dataController;
 
-  @override
   void initState() {
     super.initState();
     _panelController = PanelController();
-    dataController = Get.find<DataController>();
-
-    // Initialize with current data first
     _loadInitialData();
-
-    // Then listen for changes
-    dataController?.myDocument?.reference.snapshots().listen((doc) {
-      if (doc.exists) {
-        _updateProfileData(doc.data() as Map<String, dynamic>);
-      }
-    });
   }
 
   void _loadInitialData() async {
-    if (dataController?.myDocument != null && dataController!.myDocument!.exists) {
-      _updateProfileData(dataController!.myDocument!.data() as Map<String, dynamic>);
+    try {
+      final uid = authController.currentUser?.uid;
+
+      if (uid == null) {
+        print("User is not logged in.");
+        return;
+      }
+
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+      if (doc.exists) {
+        final data = doc.data()!;
+        setState(() {
+          firstNameController.text = data['first'] ?? '';
+          lastNameController.text = data['last'] ?? '';
+          selectedRole = data['role'] ?? 'Student';
+          image = data['image'] ?? '';
+          collegeName = data['collegeName'] ?? 'N/A';
+
+          final joinedTimestamp = data['joinedDate'];
+          if (joinedTimestamp != null && joinedTimestamp is Timestamp) {
+            final joined = joinedTimestamp.toDate();
+            joinedDate.text = '${joined.day}/${joined.month}/${joined.year}';
+          } else {
+            joinedDate.text = 'N/A';
+          }
+        });
+      }
+    } catch (e) {
+      print("Failed to load user data: $e");
     }
   }
+
 
   void _updateProfileData(Map<String, dynamic> data) {
     setState(() {
@@ -68,7 +86,6 @@ class _ProfilePageState extends State<Profiles_Page> {
 
   String _formatJoinedDate(dynamic date) {
     if (date == null) return 'N/A';
-
     try {
       DateTime dateTime;
       if (date is Timestamp) {
@@ -87,9 +104,8 @@ class _ProfilePageState extends State<Profiles_Page> {
 
   @override
   Widget build(BuildContext context) {
-    String joinedDate = this.joinedDate.text;
+    String joined = joinedDate.text;
 
-    // Use the same layout for all roles
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -119,11 +135,11 @@ class _ProfilePageState extends State<Profiles_Page> {
                     : null,
                 child: image.isEmpty
                     ? Icon(
-                    selectedRole == 'Instructor'
-                        ? Icons.school
-                        : Icons.person,
-                    size: 60,
-                    color: Colors.blue
+                  selectedRole == 'Instructor'
+                      ? Icons.school
+                      : Icons.person,
+                  size: 60,
+                  color: Colors.blue,
                 )
                     : null,
               ),
@@ -134,7 +150,7 @@ class _ProfilePageState extends State<Profiles_Page> {
               children: [
                 const SizedBox(height: 250),
                 _titleSection(),
-                _infoSection(joinedDate),
+                _infoSection(joined),
                 const SizedBox(height: 24),
                 _buildActivitySection(),
                 const SizedBox(height: 24),
@@ -183,15 +199,12 @@ class _ProfilePageState extends State<Profiles_Page> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Use different layouts based on screen width
           if (constraints.maxWidth > 600) {
-            // Wide screen - use regular row layout
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: _buildInfoCells(joinedDate),
             );
           } else {
-            // Narrow screen - use wrapped layout
             return Wrap(
               alignment: WrapAlignment.spaceEvenly,
               spacing: 16,
@@ -203,14 +216,11 @@ class _ProfilePageState extends State<Profiles_Page> {
       ),
     );
   }
+
   List<Widget> _buildInfoCells(String joinedDate) {
     return [
-      if (selectedRole == 'Event Organizer')
-        _buildAdaptiveInfoCell('Events', 'N/A'),
-      if (selectedRole == 'Instructor')
-        _buildAdaptiveInfoCell('Courses', 'N/A'),
-      if (selectedRole == 'Student')
-        _buildAdaptiveInfoCell('Year', 'N/A'),
+      if (selectedRole == 'Event Organizer') _buildAdaptiveInfoCell('Events', 'N/A'),
+      if (selectedRole == 'Instructor') _buildAdaptiveInfoCell('Courses', 'N/A'),
       _buildAdaptiveInfoCell('College', collegeName.isNotEmpty ? collegeName : 'N/A'),
       _buildAdaptiveInfoCell('Joined', joinedDate.isNotEmpty ? joinedDate : 'N/A'),
     ];
@@ -218,18 +228,13 @@ class _ProfilePageState extends State<Profiles_Page> {
 
   Widget _buildAdaptiveInfoCell(String title, String value) {
     return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxWidth: 150, // Set a maximum width for each cell
-      ),
+      constraints: BoxConstraints(maxWidth: 150),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             value,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
@@ -237,36 +242,12 @@ class _ProfilePageState extends State<Profiles_Page> {
           SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
-    );
-  }
-
-  Widget _infoCell(String title, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-          ),
-        ),
-      ],
     );
   }
 
@@ -305,10 +286,7 @@ class _ProfilePageState extends State<Profiles_Page> {
         alignment: Alignment.centerLeft,
         child: Text(
           title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
     );

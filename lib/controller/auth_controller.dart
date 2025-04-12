@@ -13,6 +13,7 @@ import 'package:path/path.dart' as Path;
 
 class AuthController extends GetxController {
   FirebaseAuth auth = FirebaseAuth.instance;
+  User? get currentUser => auth.currentUser;
   var isLoading = false.obs;
 
   // Private variable to hold user data
