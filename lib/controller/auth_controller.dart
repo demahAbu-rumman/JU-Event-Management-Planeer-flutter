@@ -227,6 +227,7 @@ class AuthController extends GetxController {
       String role,
       String gender,
       String collegeName,
+
       ) async {
     String uid = auth.currentUser!.uid;
     final docRef = FirebaseFirestore.instance.collection('users').doc(uid);

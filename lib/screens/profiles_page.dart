@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ju_event_managment_planner/Util/app_color.dart';
 import 'package:ju_event_managment_planner/controller/auth_controller.dart';
 import 'package:ju_event_managment_planner/controller/data_controller.dart';
+import 'package:ju_event_managment_planner/screens/settingsprofile.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class Profiles_Page extends StatefulWidget {
@@ -19,6 +20,7 @@ class _ProfilePageState extends State<Profiles_Page> {
   TextEditingController joinedDate = TextEditingController();
 
   final Map<String, String> locationToCollegeMap = {
+    // Existing mappings
     "مدرج1 - كلية الطب": 'School of Medicine',
     "مدرج سعيد المفتي - كلية الهندسة": 'School of Engineering',
     "مدرج وصفي التل - مسرح سمير الرفاعي": 'School of Science',
@@ -39,6 +41,20 @@ class _ProfilePageState extends State<Profiles_Page> {
     "كلية الزراعة": 'School of Agriculture',
     "مرج القدس - كلية التمريض": 'School of Nursing',
     "مدرج الخياط _ كلية الشريعة": 'School of Shari\'a',
+
+    // Add alternative spellings or common variations
+    "كلية الطب": 'School of Medicine',
+    "كلية الهندسة": 'School of Engineering',
+    "المسرح الرئيسي": 'School of Science',
+    "عمادة الشؤون الطلبة": 'School of Educational Sciences',
+    "كلية التربية": 'School of Sport Science',
+    "كلية التمريض": 'School of Nursing',
+    "كلية الملك عبدالله الثاني لتكنولوجيا المعلومات": 'King Abdullah II School of Information Technology',
+    "كلية الاداب": 'School of Educational Sciences',
+    "كلية الاعمال": 'School of Business',
+    "كلية الفنون": 'School of Arts',
+    "المجمع الطبي": 'Public Health Institute',
+    "كلية الشريعة": 'School of Shari\'a',
   };
 
   bool _isOpen = false;
@@ -143,7 +159,16 @@ class _ProfilePageState extends State<Profiles_Page> {
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingProfile()));
+            },
+          ),
+        ],
       ),
+
       body: Stack(
         children: [
           Container(
@@ -322,25 +347,61 @@ class _ProfilePageState extends State<Profiles_Page> {
       if (collegeName.isEmpty || collegeName == 'N/A') return [];
 
       final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      // Fetch events from today onward
       final events = await FirebaseFirestore.instance
           .collection('events')
-          .where('date', isGreaterThanOrEqualTo: now)
+          .where('date', isGreaterThanOrEqualTo: today)
           .orderBy('date')
-          .limit(3) // Limit to 3 upcoming events
+          .limit(3)
           .get();
 
-      // Filter events based on the user's college
+      // Filter events based on college
       return events.docs.where((doc) {
         final eventData = doc.data() as Map<String, dynamic>;
-        final eventLocation = eventData['location'] as String? ?? '';
-        final eventCollege = locationToCollegeMap[eventLocation] ?? '';
-        return eventCollege == collegeName;
+        final eventLocation = (eventData['location'] as String? ?? '').trim();
+        final eventDate = eventData['date'] as Timestamp?;
+
+        if (eventDate == null) return false;
+
+        // Find matching college - more flexible matching
+        String? eventCollege;
+
+        // First try exact match
+        if (locationToCollegeMap.containsKey(eventLocation)) {
+          eventCollege = locationToCollegeMap[eventLocation];
+        }
+        // If no exact match, try partial match
+        else {
+          final matchingKey = locationToCollegeMap.keys.firstWhere(
+                (key) => key.toLowerCase().contains(eventLocation.toLowerCase()) ||
+                eventLocation.toLowerCase().contains(key.toLowerCase()),
+            orElse: () => '',
+          );
+
+          if (matchingKey.isNotEmpty) {
+            eventCollege = locationToCollegeMap[matchingKey];
+          }
+        }
+
+        // Debug prints to help identify matching issues
+        print('Event Location: $eventLocation');
+        print('Mapped College: $eventCollege');
+        print('User College: $collegeName');
+
+        // Compare colleges (case insensitive and trimmed)
+        final collegeMatch = (eventCollege ?? '').toLowerCase() == collegeName.toLowerCase();
+        final isUpcoming = !eventDate.toDate().isBefore(today);
+
+        return collegeMatch && isUpcoming;
       }).toList();
     } catch (e) {
       print("Error fetching upcoming events: $e");
       return [];
     }
   }
+
 
   Widget _buildEventList() {
     return FutureBuilder<List<DocumentSnapshot>>(
@@ -370,17 +431,32 @@ class _ProfilePageState extends State<Profiles_Page> {
             final eventData = event.data() as Map<String, dynamic>;
             final eventDate = eventData['date'] as Timestamp?;
             String formattedDate = 'Date not set';
+            String formattedTime = 'Time not set';
 
             if (eventDate != null) {
               final date = eventDate.toDate();
               formattedDate = '${date.day}/${date.month}/${date.year}';
+
+              // Add time display if available
+              final startTime = eventData['start_time'] as String?;
+              final endTime = eventData['end_time'] as String?;
+              if (startTime != null && endTime != null) {
+                formattedTime = '$startTime - $endTime';
+              }
             }
 
             return Card(
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: ListTile(
                 title: Text(eventData['event_name'] ?? 'Unnamed Event'),
-                subtitle: Text(eventData['location'] ?? 'Location not specified'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(eventData['location'] ?? 'Location not specified'),
+                    if (formattedTime.isNotEmpty)
+                      Text(formattedTime, style: TextStyle(color: Colors.grey.shade600)),
+                  ],
+                ),
                 trailing: Text(formattedDate),
               ),
             );
