@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ju_event_managment_planner/Util/app_color.dart';
 import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:ju_event_managment_planner/screens/add_event.dart';
 import 'package:ju_event_managment_planner/screens/home_page.dart';
@@ -18,7 +19,6 @@ class _EventDetailsViewState extends State<EventDetailsView> {
   final DataController dataController = Get.find();
   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
 
-  @override
   Future<void> refreshEventData() async {
     DocumentSnapshot updatedEvent = await FirebaseFirestore.instance
         .collection('events')
@@ -29,168 +29,150 @@ class _EventDetailsViewState extends State<EventDetailsView> {
     });
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.event['event_name']),
-          actions: [
-            if (widget.event['uid'] == currentUserId)
-              MaterialButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CreateEventView(
-                        event: widget.event, // البيانات القديمة
-                        isEditing: true, // تمييز أن الصفحة في وضع التعديل
-                      ),
-                    ),
-                  ).then((value) {
-                    // يتم تنفيذ هذا الكود عند العودة من CreateEventView
-                    if (value == true) {
-                      // إذا تم التحديث بنجاح، قم بتحديث الصفحة الحالية
-                      setState(() {
-                        refreshEventData();
-                      });
-                    }
-                  });
-                },
-                child: Icon(Icons.edit),
-              ),
-            if (widget.event['uid'] == currentUserId)
-              MaterialButton(
-                onPressed: () {
-                  if (widget.event != null) {
-                    print(
-                        "Deleting event with ID: ${widget.event.id}"); // استخدام widget.event.id بدلاً من widget.event['id']
-                    deleteEvent(widget.event.id);
-                    Get.snackbar('Success', 'Event deleted successfully',
-                        colorText: Colors.white, backgroundColor: Colors.green);
-
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => HomePage()));
-                  } else {
-                    print("No event to delete.");
-                  }
-                },
-                child: Icon(Icons.delete),
-              ),
-          ],
+      appBar: AppBar(
+        backgroundColor: AppColors.lightgreen,
+        centerTitle: true,
+        title: const Text(
+          'Event Detail',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
         ),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.all(16),
-          child: Card(
-            color: Color(0xFFF8F8F8), // خلفية ناعمة
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Text(
-                      widget.event['event_name'],
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          if (widget.event['uid'] == currentUserId)
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CreateEventView(
+                      event: widget.event,
+                      isEditing: true,
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on, color: Colors.grey[700]),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text('Location: ${widget.event['location']}'),
-                      ),
-                    ],
+                ).then((value) {
+                  if (value == true) {
+                    refreshEventData();
+                  }
+                });
+              },
+            ),
+          if (widget.event['uid'] == currentUserId)
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.white),
+              onPressed: () {
+                deleteEvent(widget.event.id);
+                Navigator.pushReplacement(
+                    context, MaterialPageRoute(builder: (_) => HomePage()));
+              },
+            ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Card(
+          color: const Color(0xFFFAFAFA), // Light gray background for card
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18), // Rounded corners
+          ),
+          elevation: 8, // Deep shadow for a more professional look
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Text(
+                    widget.event['event_name'],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.calendar_today, color: Colors.grey[700]),
-                      SizedBox(width: 8),
-                      Text('Date: ${widget.event['date']}'),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.access_time, color: Colors.grey[700]),
-                      SizedBox(width: 8),
-                      Text(
-                          'Time: ${widget.event['start_time']} - ${widget.event['end_time']}'),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
+                ),
+                const SizedBox(height: 20),
+                buildInfoRow(Icons.location_on, 'Location',
+                    widget.event['location']),
+                buildInfoRow(Icons.calendar_today, 'Date', widget.event['date']),
+                buildInfoRow(Icons.access_time, 'Time',
+                    '${widget.event['start_time']} - ${widget.event['end_time']}'),
+                buildInfoRow(Icons.description, 'Description',
+                    widget.event['description']),
+                buildInfoRow(
+                    Icons.attach_money, 'Price', widget.event['price']),
+                buildInfoRow(Icons.repeat, 'Frequency',
+                    widget.event['frequency_of_event']),
+                buildInfoRow(Icons.people, 'Who can invite',
+                    widget.event['who_can_invite']),
+                const SizedBox(height: 16),
+                if (widget.event['media'] != null &&
+                    widget.event['media'].isNotEmpty)
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.description, color: Colors.grey[700]),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child:
-                            Text('Description: ${widget.event['description']}'),
+                      const Text(
+                        'Media:',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.attach_money, color: Colors.grey[700]),
-                      SizedBox(width: 8),
-                      Text('Price: ${widget.event['price']}'),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.repeat, color: Colors.grey[700]),
-                      SizedBox(width: 8),
-                      Text('Frequency: ${widget.event['frequency_of_event']}'),
-                    ],
-                  ),
-                  SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.people, color: Colors.grey[700]),
-                      SizedBox(width: 8),
-                      Text('Who can invite: ${widget.event['who_can_invite']}'),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  if (widget.event['media'] != null &&
-                      widget.event['media'].isNotEmpty)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Media:',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 8),
-                        ...widget.event['media'].map<Widget>((media) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                media['isImage']
-                                    ? media['url']
-                                    : media['thumbnail'],
-                              ),
+                      const SizedBox(height: 8),
+                      ...widget.event['media'].map<Widget>((media) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              media['isImage']
+                                  ? media['url']
+                                  : media['thumbnail'],
+                              fit: BoxFit.cover,
                             ),
-                          );
-                        }).toList(),
-                      ],
-                    ),
+                          ),
+                        );
+                      }).toList(),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildInfoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Colors.grey[700], size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(color: Colors.black87, fontSize: 16),
+                children: [
+                  TextSpan(
+                      text: '$label: ',
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  TextSpan(text: value),
                 ],
               ),
             ),
           ),
-        ));
+        ],
+      ),
+    );
   }
 
   void deleteEvent(String eventId) async {
@@ -199,7 +181,6 @@ class _EventDetailsViewState extends State<EventDetailsView> {
           .collection('events')
           .doc(eventId)
           .delete();
-      print("Event deleted successfully");
       Get.snackbar('Success', 'Event deleted successfully',
           colorText: Colors.white, backgroundColor: Colors.green);
     } catch (e) {
