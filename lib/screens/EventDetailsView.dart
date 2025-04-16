@@ -18,6 +18,34 @@ class EventDetailsView extends StatefulWidget {
 class _EventDetailsViewState extends State<EventDetailsView> {
   final DataController dataController = Get.find();
   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+  String? userRole;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserRole();
+  }
+
+  // Fetch user role from Firestore
+  Future<void> fetchUserRole() async {
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUserId)
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          userRole = userDoc['role']; // Assuming 'role' field exists in the user document
+          print('User role fetched: $userRole');
+        });
+      } else {
+        print('User document does not exist!');
+      }
+    } catch (e) {
+      print('Error fetching user role: $e');
+    }
+  }
 
   Future<void> refreshEventData() async {
     DocumentSnapshot updatedEvent = await FirebaseFirestore.instance
@@ -44,45 +72,15 @@ class _EventDetailsViewState extends State<EventDetailsView> {
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          if (widget.event['uid'] == currentUserId)
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.white),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CreateEventView(
-                      event: widget.event,
-                      isEditing: true,
-                    ),
-                  ),
-                ).then((value) {
-                  if (value == true) {
-                    refreshEventData();
-                  }
-                });
-              },
-            ),
-          if (widget.event['uid'] == currentUserId)
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.white),
-              onPressed: () {
-                deleteEvent(widget.event.id);
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (_) => HomePage()));
-              },
-            ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Card(
-          color: const Color(0xFFFAFAFA), // Light gray background for card
+          color: const Color(0xFFFAFAFA),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18), // Rounded corners
+            borderRadius: BorderRadius.circular(18),
           ),
-          elevation: 8, // Deep shadow for a more professional look
+          elevation: 8,
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -139,6 +137,58 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                           ),
                         );
                       }).toList(),
+                    ],
+                  ),
+                // Show the join button only for Student and Instructor roles
+                if (userRole == 'Student' || userRole == 'Instructor')
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Join event logic here
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.lightgreen, // Match your theme
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('Join Event'),
+                    ),
+                  ),
+                // Display Edit and Delete Icons in the card
+                if (userRole != null &&
+                    (userRole == 'Instructor' || userRole == 'Event Organizer') )
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon:  Icon(Icons.edit, color: AppColors.lightgreen),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreateEventView(
+                                event: widget.event,
+                                isEditing: true,
+                              ),
+                            ),
+                          ).then((value) {
+                            if (value == true) {
+                              refreshEventData();
+                            }
+                          });
+                        },
+                      ),
+                      IconButton(
+                        icon:  Icon(Icons.delete, color: AppColors.lightgreen),
+                        onPressed: () {
+                          deleteEvent(widget.event.id);
+                          Navigator.pushReplacement(
+                              context, MaterialPageRoute(builder: (_) => HomePage()));
+                        },
+                      ),
                     ],
                   ),
               ],
