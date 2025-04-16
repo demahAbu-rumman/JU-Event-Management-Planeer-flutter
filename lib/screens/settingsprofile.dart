@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ju_event_managment_planner/controller/auth_controller.dart';
 import 'package:ju_event_managment_planner/Util/app_color.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingProfile extends StatefulWidget {
   const SettingProfile({Key? key}) : super(key: key);

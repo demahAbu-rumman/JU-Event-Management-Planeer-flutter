@@ -234,70 +234,92 @@ Widget EventItem(DocumentSnapshot event) {
   String userImage = '';
   String eventImage = '';
 
-  // Fetch user data
   try {
     DocumentSnapshot user = dataController.allUsers.firstWhere((e) => event.get('uid') == e.id);
     userImage = user.get('image') ?? '';
   } catch (e) {
-    userImage = ''; // Default image if user not found
+    userImage = '';
   }
 
-  // Fetch event image
   try {
     List media = event.get('media') as List;
     Map? mediaItem = media.firstWhere((element) => element['isImage'] == true, orElse: () => null);
     eventImage = mediaItem != null ? mediaItem['url'] : '';
   } catch (e) {
-    eventImage = ''; // Default if no media
+    eventImage = '';
   }
 
-  // Get the tags as a List<String>
-  List<String> tags = List<String>.from(event.get('tags') ?? []);
-
-  // Check if event data is valid
   return Card(
-    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    elevation: 4,
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    elevation: 5,
     child: Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /// Event Name & Notification Badge
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.event, color: Colors.blue),
+              const Icon(Icons.event, color: Colors.lightGreen),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   event.get('event_name'),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              // Display tags as a comma-separated string
-              if (tags.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.redAccent, borderRadius: BorderRadius.circular(8)),
-                  child: Text(
-                    tags.join(', '), // Join the tags into a single string
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+              ),
+
+              /// Notification Badge (Right Side)
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.lightgreen,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.notifications_none,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            event.get('location') ?? '',
-            style: TextStyle(color: AppColors.grey),
+
+          const SizedBox(height: 6),
+
+          /// Location
+          Row(
+            children: [
+              const Icon(Icons.location_on, size: 16, color: Colors.grey),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  event.get('location') ?? '',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.grey,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+
+          const SizedBox(height: 12),
+
+          /// Event Image
           if (eventImage.isNotEmpty)
-            Container(
-              height: 150,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                image: DecorationImage(image: NetworkImage(eventImage), fit: BoxFit.cover),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                eventImage,
+                height: 160,
+                width: double.infinity,
+                fit: BoxFit.cover,
               ),
             ),
         ],
@@ -305,6 +327,8 @@ Widget EventItem(DocumentSnapshot event) {
     ),
   );
 }
+
+
 
 
 
