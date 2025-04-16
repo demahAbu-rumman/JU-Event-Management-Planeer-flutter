@@ -6,10 +6,10 @@ import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:ju_event_managment_planner/screens/ChatPage.dart';
 
 class MessagesPage extends StatefulWidget {
-  const MessagesPage({super.key});
+  const MessagesPage({Key? key}) : super(key: key);
 
   @override
-  State<MessagesPage> createState() => _MessagesPageState();
+  _MessagesPageState createState() => _MessagesPageState();
 }
 
 class _MessagesPageState extends State<MessagesPage> {
@@ -21,7 +21,7 @@ class _MessagesPageState extends State<MessagesPage> {
   @override
   void initState() {
     super.initState();
-    dataController.getUsers();
+    dataController.getUsers(); // Load users initially
   }
 
   @override
@@ -32,7 +32,7 @@ class _MessagesPageState extends State<MessagesPage> {
 
   Stream<QuerySnapshot> getRecentChats() {
     final currentUserId = dataController.auth.currentUser?.uid;
-    if (currentUserId == null) return const Stream.empty();
+    if (currentUserId == null) return const Stream<QuerySnapshot>.empty();
 
     return FirebaseFirestore.instance
         .collection('chats')
@@ -49,17 +49,12 @@ class _MessagesPageState extends State<MessagesPage> {
       appBar: AppBar(
         title: const Text(
           'Messages',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: AppColors.lightgreen,
         elevation: 0,
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
@@ -69,13 +64,10 @@ class _MessagesPageState extends State<MessagesPage> {
               if (dataController.isUsersLoading.value) {
                 return const Center(child: CircularProgressIndicator());
               }
-
               return Column(
                 children: [
                   _buildRecentChatsSection(),
-                  Expanded(
-                    child: _buildMainContent(),
-                  ),
+                  Expanded(child: _buildMainContent()),
                 ],
               );
             }),
@@ -125,74 +117,11 @@ class _MessagesPageState extends State<MessagesPage> {
                   final participants = List<String>.from(chat['participants']);
                   final currentUserId = dataController.auth.currentUser?.uid;
                   final otherUserId = participants.firstWhere(
-                    (id) => id != currentUserId,
-                    orElse: () =>
-                        participants.isNotEmpty ? participants[0] : '',
+                        (id) => id != currentUserId,
+                    orElse: () => '',
                   );
 
-                  return FutureBuilder<DocumentSnapshot>(
-                    future: FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(otherUserId)
-                        .get(),
-                    builder: (context, userSnapshot) {
-                      if (!userSnapshot.hasData) {
-                        return const SizedBox(width: 60);
-                      }
-
-                      final user = userSnapshot.data!;
-                      final userData =
-                          user.data() as Map<String, dynamic>? ?? {};
-                      final firstName = userData['first'] ?? '';
-                      final lastName = userData['last'] ?? '';
-                      final name = '$firstName $lastName'.trim();
-                      final imageUrl = userData['image'] ?? '';
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: InkWell(
-                          onTap: () {
-                            Get.to(() => ChatPage(
-                                  chatId: chat.id,
-                                  receiverName: name.isNotEmpty ? name : 'User',
-                                  receiverId: otherUserId,
-                                ));
-                          },
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundColor: AppColors.circle,
-                                backgroundImage: imageUrl.isNotEmpty
-                                    ? NetworkImage(imageUrl)
-                                    : null,
-                                child: imageUrl.isEmpty
-                                    ? Text(
-                                        name.isNotEmpty
-                                            ? name.substring(0, 1).toUpperCase()
-                                            : 'U',
-                                        style: TextStyle(
-                                            color: AppColors.darkGreen),
-                                      )
-                                    : null,
-                              ),
-                              const SizedBox(height: 4),
-                              SizedBox(
-                                width: 60,
-                                child: Text(
-                                  name.isNotEmpty ? name : 'User',
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
+                  return _buildChatAvatar(chat, otherUserId);
                 },
               ),
             ),
@@ -203,31 +132,70 @@ class _MessagesPageState extends State<MessagesPage> {
     );
   }
 
-  Widget _buildMainContent() {
-    if (!_hasSearched || _searchQuery.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search,
-              size: 64,
-              color: AppColors.grey.withOpacity(0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Search for users to message',
-              style: TextStyle(
-                color: AppColors.textColor,
-                fontSize: 18,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+  Widget _buildChatAvatar(DocumentSnapshot chat, String otherUserId) {
+    if (otherUserId.isEmpty) return const SizedBox(width: 60);
 
-    final filteredUsers = dataController.filteredUsers.where((user) {
+    return FutureBuilder<DocumentSnapshot>(
+      future:
+      FirebaseFirestore.instance.collection('users').doc(otherUserId).get(),
+      builder: (context, userSnapshot) {
+        if (!userSnapshot.hasData) return const SizedBox(width: 60);
+
+        final user = userSnapshot.data!;
+        final userData = user.data() as Map<String, dynamic>? ?? {};
+        final firstName = userData['first'] ?? '';
+        final lastName = userData['last'] ?? '';
+        final name = '$firstName $lastName'.trim();
+        final imageUrl = userData['image'] ?? '';
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: InkWell(
+            onTap: () {
+              Get.to(() => ChatPage(
+                chatId: chat.id,
+                receiverName: name.isNotEmpty ? name : 'User',
+                receiverId: otherUserId,
+              ));
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: AppColors.circle,
+                  backgroundImage:
+                  imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+                  child: imageUrl.isEmpty
+                      ? Text(
+                    name.isNotEmpty ? name[0].toUpperCase() : 'U',
+                    style: TextStyle(color: AppColors.darkGreen),
+                  )
+                      : null,
+                ),
+                const SizedBox(height: 4),
+                SizedBox(
+                  width: 60,
+                  child: Text(
+                    name.isNotEmpty ? name : 'User',
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMainContent() {
+    final currentUserId = dataController.auth.currentUser?.uid;
+
+    // Use allUsers instead of filteredUsers
+    final filteredUsers = dataController.allUsers.where((user) {
       final data = user.data() as Map<String, dynamic>? ?? {};
       final first = (data['first'] ?? '').toString().toLowerCase();
       final last = (data['last'] ?? '').toString().toLowerCase();
@@ -235,16 +203,30 @@ class _MessagesPageState extends State<MessagesPage> {
       return first.contains(_searchQuery.toLowerCase()) ||
           last.contains(_searchQuery.toLowerCase()) ||
           email.contains(_searchQuery.toLowerCase());
-    }).toList();
+    }).where((user) => user.id != currentUserId).toList();
+
+    // Rest of the method remains the same
+    if (!_hasSearched || _searchQuery.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search, size: 64, color: AppColors.grey.withOpacity(0.5)),
+            const SizedBox(height: 16),
+            Text(
+              'Search for users to message',
+              style: TextStyle(color: AppColors.textColor, fontSize: 18),
+            ),
+          ],
+        ),
+      );
+    }
 
     if (filteredUsers.isEmpty) {
       return Center(
         child: Text(
           'No user found matching "$_searchQuery"',
-          style: TextStyle(
-            color: AppColors.textColor,
-            fontSize: 16,
-          ),
+          style: TextStyle(color: AppColors.textColor, fontSize: 16),
         ),
       );
     }
@@ -252,15 +234,7 @@ class _MessagesPageState extends State<MessagesPage> {
     return ListView.builder(
       padding: const EdgeInsets.only(top: 8),
       itemCount: filteredUsers.length,
-      itemBuilder: (context, index) {
-        final user = filteredUsers[index];
-        final userId = user.id;
-        final currentUserId = dataController.auth.currentUser?.uid;
-
-        if (userId == currentUserId) return const SizedBox();
-
-        return _buildUserTile(user);
-      },
+      itemBuilder: (context, index) => _buildUserTile(filteredUsers[index]),
     );
   }
 
@@ -292,11 +266,11 @@ class _MessagesPageState extends State<MessagesPage> {
 
   Widget _buildUserTile(DocumentSnapshot user) {
     final userData = user.data() as Map<String, dynamic>? ?? {};
-    final imageUrl = userData['image'] as String? ?? '';
-    final firstName = userData['first'] as String? ?? '';
-    final lastName = userData['last'] as String? ?? '';
-    final email = userData['email'] as String? ?? '';
-    final role = userData['role'] as String? ?? '';
+    final imageUrl = userData['image'] ?? '';
+    final firstName = userData['first'] ?? '';
+    final lastName = userData['last'] ?? '';
+    final email = userData['email'] ?? '';
+    final role = userData['role'] ?? '';
 
     return ListTile(
       leading: CircleAvatar(
@@ -305,40 +279,25 @@ class _MessagesPageState extends State<MessagesPage> {
         backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
         child: imageUrl.isEmpty
             ? Text(
-                '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
-                style: TextStyle(color: AppColors.darkGreen),
-              )
+          '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
+          style: TextStyle(color: AppColors.darkGreen),
+        )
             : null,
       ),
       title: Text(
-        [firstName, lastName]
-                .where((s) => s.isNotEmpty)
-                .join(' ')
-                .trim()
-                .isNotEmpty
+        [firstName, lastName].where((s) => s.isNotEmpty).join(' ').trim().isNotEmpty
             ? [firstName, lastName].where((s) => s.isNotEmpty).join(' ').trim()
             : 'Unnamed User',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: AppColors.black,
-        ),
+        style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.black),
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (email.isNotEmpty)
-            Text(
-              email,
-              style: TextStyle(color: AppColors.grey),
-            ),
+            Text(email, style: TextStyle(color: AppColors.grey)),
           if (role.isNotEmpty)
-            Text(
-              role,
-              style: TextStyle(
-                color: AppColors.lightgreen,
-                fontSize: 12,
-              ),
-            ),
+            Text(role,
+                style: TextStyle(color: AppColors.lightgreen, fontSize: 12)),
         ],
       ),
       trailing: IconButton(
@@ -349,36 +308,53 @@ class _MessagesPageState extends State<MessagesPage> {
   }
 
   void _openChat(DocumentSnapshot user) async {
-    final currentUser = dataController.auth.currentUser;
-    if (currentUser == null) return;
+    try {
+      final currentUser = dataController.auth.currentUser;
+      if (currentUser == null) {
+        print('No current user');
+        return;
+      }
 
-    final userId = user.id;
-    final currentUserId = currentUser.uid;
+      final userId = user.id;
+      final currentUserId = currentUser.uid;
 
-    // Create sorted chat ID
-    final groupId = [userId, currentUserId]..sort();
-    final chatId = groupId.join('-');
+      if (userId.isEmpty || currentUserId.isEmpty) {
+        print('Invalid user IDs');
+        return;
+      }
 
-    // Create chat document if it doesn't exist
-    final chatDoc = FirebaseFirestore.instance.collection('chats').doc(chatId);
-    final chatSnapshot = await chatDoc.get();
+      print('Opening chat between $currentUserId and $userId');
 
-    if (!chatSnapshot.exists) {
-      await chatDoc.set({
-        'participants': [userId, currentUserId],
-        'createdAt': Timestamp.now(),
-        'lastMessage': '',
-        'lastMessageTime': Timestamp.now(),
-        'lastMessageSender': currentUserId,
-      });
+      final groupId = [userId, currentUserId]..sort();
+      final chatId = groupId.join('-');
+
+      print('Chat ID: $chatId');
+
+      final chatDoc = FirebaseFirestore.instance.collection('chats').doc(chatId);
+      final chatSnapshot = await chatDoc.get();
+
+      if (!chatSnapshot.exists) {
+        print('Creating new chat document');
+        await chatDoc.set({
+          'participants': [userId, currentUserId],
+          'createdAt': Timestamp.now(),
+          'lastMessage': '',
+          'lastMessageTime': Timestamp.now(),
+          'lastMessageSender': currentUserId,
+        });
+      }
+
+      final receiverName = '${user.get('first') ?? 'User'} ${user.get('last') ?? ''}'.trim();
+      print('Navigating to chat with $receiverName');
+
+      Get.to(() => ChatPage(
+        chatId: chatId,
+        receiverName: receiverName,
+        receiverId: userId,
+      ));
+    } catch (e) {
+      print('Error opening chat: $e');
+      Get.snackbar('Error', 'Could not open chat: ${e.toString()}');
     }
-
-    // Navigate to chat page
-    Get.to(() => ChatPage(
-          chatId: chatId,
-          receiverName:
-              '${user.get('first') ?? 'User'} ${user.get('last') ?? ''}'.trim(),
-          receiverId: userId,
-        ));
   }
 }

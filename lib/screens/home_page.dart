@@ -34,17 +34,20 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadUserRole() async {
     final dataController = Get.find<DataController>();
+    await dataController.fetchMyDocumentOnce(); //
     if (dataController.myDocument != null && dataController.myDocument!.exists) {
+      final role = dataController.myDocument!.get('role');
       setState(() {
-        _userRole = dataController.myDocument!.get('role');
+        _userRole = role;
       });
     }
   }
 
+
   bool _shouldShowCreateEvent() {
     final dataController = Get.find<DataController>();
     final role = dataController.myDocument?.get('role') ?? 'Student';
-    return role != 'Student';
+    return role != 'Student'; // Show for all non-student roles
   }
 
   @override
@@ -178,7 +181,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      bottomNavigationBar: Padding(
+      bottomNavigationBar: _userRole == null
+          ? const SizedBox() // or a loader while waiting for role
+          : Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         child: Container(
           decoration: BoxDecoration(
@@ -197,7 +202,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-
           child: ClipRRect(
             borderRadius: BorderRadius.circular(30),
             child: BottomNavigationBar(
@@ -211,108 +215,57 @@ class _HomePageState extends State<HomePage> {
               onTap: (index) {
                 if (_userRole == 'Student') {
                   switch (index) {
-                    case 0: // Home
+                    case 0: break;
+                    case 1:
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarPage()));
                       break;
-                    case 1: // Calendar
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const CalendarPage()),
-                      );
+                    case 2:
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const MessagesPage()));
                       break;
-                    case 2: // Messages
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MessagesPage()),
-                      );
-                      break;
-                    case 3: // Profile
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const Profiles_Page()),
-                      );
+                    case 3:
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const Profiles_Page()));
                       break;
                   }
                 } else {
                   switch (index) {
-                    case 0: // Home
+                    case 0:
+                      break; // Already on home page
+                    case 1:
+                      Get.to(() => const CalendarPage());
                       break;
-                    case 1: // Calendar
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const CalendarPage()),
-                      );
+                    case 2:
+                      Get.to(() => const MessagesPage());
                       break;
-                    case 2: // Messages
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MessagesPage()),
-                      );
+                    case 3:
+                      Get.to(() => const Profiles_Page());
                       break;
-                    case 3: // Profile
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const Profiles_Page()),
-                      );
-                      break;
-                    case 4: // Create Event
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CreateEventView(
-                            event: null,
-                            isEditing: false,
-                          ),
-                        ),
-                      );
+                    case 4:
+                      if (_shouldShowCreateEvent()) {
+                        Get.to(() => const CreateEventView(event: null, isEditing: false));
+                      }
                       break;
                   }
                 }
               },
               items: _userRole == 'Student'
                   ? const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home_rounded),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.calendar_month_rounded),
-                  label: 'Calendar',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.mark_chat_unread_rounded),
-                  label: 'Messages',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.account_circle_rounded),
-                  label: 'Profile',
-                ),
+                BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
+                BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Calendar'),
+                BottomNavigationBarItem(icon: Icon(Icons.mark_chat_unread_rounded), label: 'Messages'),
+                BottomNavigationBarItem(icon: Icon(Icons.account_circle_rounded), label: 'Profile'),
               ]
                   : const [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home_rounded),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.calendar_month_rounded),
-                  label: 'Calendar',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.mark_chat_unread_rounded),
-                  label: 'Messages',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.account_circle_rounded),
-                  label: 'Profile',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.add_circle_outline_rounded),
-                  label: 'Create',
-                ),
+                BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
+                BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Calendar'),
+                BottomNavigationBarItem(icon: Icon(Icons.mark_chat_unread_rounded), label: 'Messages'),
+                BottomNavigationBarItem(icon: Icon(Icons.account_circle_rounded), label: 'Profile'),
+                BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline_rounded), label: 'Create'),
               ],
             ),
           ),
         ),
       ),
+
 
     );
   }

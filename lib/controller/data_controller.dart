@@ -189,16 +189,26 @@ class DataController extends GetxController {
     });
   }
 
+  Future<void> fetchMyDocumentOnce() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(auth.currentUser?.uid)
+        .get();
+    myDocument = doc;
+    update(); // optional
+  }
+
   /// Fetch all users
   void getUsers() {
     isUsersLoading(true);
     FirebaseFirestore.instance.collection('users').snapshots().listen((event) {
       allUsers.assignAll(event.docs);
-      filteredUsers.assignAll(allUsers);
+      isUsersLoading(false);
+    }, onError: (error) {
+      print('Error fetching users: $error');
       isUsersLoading(false);
     });
   }
-
   /// Fetch all events
   void getEvents() {
     isEventsLoading(true);
@@ -215,6 +225,22 @@ class DataController extends GetxController {
 
       isEventsLoading(false);
     });
+  }
+  void filterEventsBySearch(String query) {
+    if (query.isEmpty) {
+      // If the search query is empty, show all events
+      filteredEvents.assignAll(allEvents);
+    } else {
+      // Filter events based on the search query
+      List<DocumentSnapshot> filteredList = allEvents.where((event) {
+        String eventName = event.get('name') as String;
+        String eventLocation = event.get('location') as String;
+
+        return eventName.toLowerCase().contains(query.toLowerCase()) ||
+            eventLocation.toLowerCase().contains(query.toLowerCase());
+      }).toList();
+      filteredEvents.assignAll(filteredList);
+    }
   }
 
   /// Upload image to Firebase Storage

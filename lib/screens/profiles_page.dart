@@ -18,6 +18,29 @@ class _ProfilePageState extends State<Profiles_Page> {
   TextEditingController lastNameController = TextEditingController();
   TextEditingController joinedDate = TextEditingController();
 
+  final Map<String, String> locationToCollegeMap = {
+    "مدرج1 - كلية الطب": 'School of Medicine',
+    "مدرج سعيد المفتي - كلية الهندسة": 'School of Engineering',
+    "مدرج وصفي التل - مسرح سمير الرفاعي": 'School of Science',
+    "كلية العلوم": 'School of Science',
+    "مدرج الحسن - عمادة الشؤوون الطلبة": 'School of Educational Sciences',
+    "مدرج الايمن - كلية التربية": 'School of Sport Science',
+    "مدرج ابن سبنا - كلية التمريض": 'School of Nursing',
+    "كلية الصيدلة": 'School of Pharmacy',
+    "كلية الحقوق": 'School of Law',
+    "مدرج اللوزي _ كلية الملك عبدلله الثاني لتكنولوجيا المعلومات": 'King Abdullah II School of Information Technology',
+    "مدرج الكندي - كلية الاداب": 'School of Educational Sciences',
+    "مدرج ابن خلدون - كلية الاداب": 'School of Educational Sciences',
+    "مدرج الفراهيدي - كلية الاداب": 'School of Educational Sciences',
+    "مدرج1 - كلية الاعمال": 'School of Business',
+    "مدرج الموسيقى - كلية الفنون": 'School of Arts',
+    "مدرج الاعمال الكبير - كلية الاعمال": 'School of Business',
+    "مدرج بهجت التهلوني - مجمع القاعات الطبية": 'Public Health Institute',
+    "كلية الزراعة": 'School of Agriculture',
+    "مرج القدس - كلية التمريض": 'School of Nursing',
+    "مدرج الخياط _ كلية الشريعة": 'School of Shari\'a',
+  };
+
   bool _isOpen = false;
   late PanelController _panelController;
   String image = '';
@@ -292,19 +315,78 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
+// Add this to the _ProfilePageState class
+
+  Future<List<DocumentSnapshot>> _fetchUpcomingEvents() async {
+    try {
+      if (collegeName.isEmpty || collegeName == 'N/A') return [];
+
+      final now = DateTime.now();
+      final events = await FirebaseFirestore.instance
+          .collection('events')
+          .where('date', isGreaterThanOrEqualTo: now)
+          .orderBy('date')
+          .limit(3) // Limit to 3 upcoming events
+          .get();
+
+      // Filter events based on the user's college
+      return events.docs.where((doc) {
+        final eventData = doc.data() as Map<String, dynamic>;
+        final eventLocation = eventData['location'] as String? ?? '';
+        final eventCollege = locationToCollegeMap[eventLocation] ?? '';
+        return eventCollege == collegeName;
+      }).toList();
+    } catch (e) {
+      print("Error fetching upcoming events: $e");
+      return [];
+    }
+  }
+
   Widget _buildEventList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: 3,
-      itemBuilder: (context, index) => Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: ListTile(
-          title: Text('Event ${index + 1}'),
-          subtitle: const Text('Computer Science Department'),
-          trailing: const Text('Nov 15'),
-        ),
-      ),
+    return FutureBuilder<List<DocumentSnapshot>>(
+      future: _fetchUpcomingEvents(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'No upcoming events in your college',
+              style: TextStyle(color: Colors.grey),
+            ),
+          );
+        }
+
+        final events = snapshot.data!;
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: events.length,
+          itemBuilder: (context, index) {
+            final event = events[index];
+            final eventData = event.data() as Map<String, dynamic>;
+            final eventDate = eventData['date'] as Timestamp?;
+            String formattedDate = 'Date not set';
+
+            if (eventDate != null) {
+              final date = eventDate.toDate();
+              formattedDate = '${date.day}/${date.month}/${date.year}';
+            }
+
+            return Card(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ListTile(
+                title: Text(eventData['event_name'] ?? 'Unnamed Event'),
+                subtitle: Text(eventData['location'] ?? 'Location not specified'),
+                trailing: Text(formattedDate),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
