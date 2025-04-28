@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const GetMaterialApp(
+    return GetMaterialApp(
       home: MyHomePage(),
       debugShowCheckedModeBanner: false,
     );
@@ -59,7 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightGreen[100], // Set scaffold background to match gradient
+      backgroundColor:
+          Colors.lightGreen[100], // Set scaffold background to match gradient
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -80,7 +81,8 @@ class _MyHomePageState extends State<MyHomePage> {
               Colors.white,
               Colors.lightGreen[50]!,
               Colors.lightGreen[100]!,
-              Colors.lightGreen[200]!, // Added one more color for smoother transition
+              Colors.lightGreen[
+                  200]!, // Added one more color for smoother transition
             ],
             stops: const [0.0, 0.4, 0.7, 0.9, 1.0], // Adjusted stops
           ),
@@ -115,7 +117,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       const Text(
                         textAlign: TextAlign.center,
                         "Plan University event \n easily and professionally",
-                        style: TextStyle(color: Colors.black, fontSize: 14, fontFamily: "gilory req"),
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                            fontFamily: "gilory req"),
                       ),
                       const SizedBox(height: 35),
                       InkWell(
@@ -137,7 +142,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: const Center(
                             child: Text(
                               "Next",
-                              style: TextStyle(color: Colors.white, fontSize: 17, fontFamily: "gilory"),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 17,
+                                  fontFamily: "gilory"),
                             ),
                           ),
                         ),
@@ -179,7 +187,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       const Text(
                         textAlign: TextAlign.center,
                         "Organize your time \n and ensure you don't miss any events",
-                        style: TextStyle(color: Colors.black, fontSize: 14, fontFamily: "gilory req"),
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                            fontFamily: "gilory req"),
                       ),
                       const SizedBox(height: 50),
                       InkWell(
@@ -201,7 +212,10 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: const Center(
                             child: Text(
                               "Next",
-                              style: TextStyle(color: Colors.white, fontSize: 17, fontFamily: "gilory"),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 17,
+                                  fontFamily: "gilory"),
                             ),
                           ),
                         ),
@@ -243,7 +257,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       const Text(
                         textAlign: TextAlign.center,
                         "Share the event schedule \n with your colleagues and students",
-                        style: TextStyle(color: Colors.black, fontSize: 14, fontFamily: "gilory req"),
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                            fontFamily: "gilory req"),
                       ),
                       const SizedBox(height: 50),
                       InkWell(
@@ -268,7 +285,10 @@ class _MyHomePageState extends State<MyHomePage> {
                             },
                             child: const Text(
                               "Get Started",
-                              style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: "gilory"),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontFamily: "gilory"),
                             ),
                           ),
                         ),

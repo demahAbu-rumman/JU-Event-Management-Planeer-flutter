@@ -3,7 +3,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import '../Util/app_color.dart';
 
-
 Widget myText({text, style, textAlign}) {
   return Text(
     text,
@@ -45,7 +44,8 @@ Widget myTextField({
   return SizedBox(
     height: 45,
     child: TextFormField(
-      validator: (input) => validator!(input),
+      validator: validator != null ? (input) => validator!(input) : null,
+
       obscureText: bool,
       controller: controller,
       onChanged: onChanged, // Add this line
@@ -64,7 +64,6 @@ Widget myTextField({
     ),
   );
 }
-
 
 Widget socialAppsIcons({text, Function? onPressed}) {
   return InkWell(

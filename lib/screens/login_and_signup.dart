@@ -40,7 +40,6 @@ class _LoginViewState extends State<LoginView> {
   void initState() {
     super.initState();
     authController = Get.put(AuthController());
-
   }
 
   @override
@@ -198,7 +197,8 @@ class _LoginViewState extends State<LoginView> {
                       }
 
                       if (input.length < 6) {
-                        Get.snackbar('Warning', 'Password should be 6+ characters.',
+                        Get.snackbar(
+                            'Warning', 'Password should be 6+ characters.',
                             colorText: AppColors.white,
                             backgroundColor: AppColors.darkGreen);
                         return '';
@@ -216,7 +216,9 @@ class _LoginViewState extends State<LoginView> {
                         });
                       },
                       child: Icon(
-                        _obscureLoginPassword ? Icons.visibility : Icons.visibility_off,
+                        _obscureLoginPassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         color: AppColors.lightGreen,
                       ),
                     ),
@@ -269,22 +271,22 @@ class _LoginViewState extends State<LoginView> {
           Obx(() => authController.isLoading.value
               ? const Center(child: CircularProgressIndicator())
               : Container(
-            height: 50,
-            margin: EdgeInsets.symmetric(vertical: Get.height * 0.04),
-            width: Get.width,
-            child: elevatedButton(
-              text: 'Login',
-              onpress: () {
-                if (!formKey.currentState!.validate()) {
-                  return;
-                }
-                authController.login(
-                  email: emailController.text.trim(),
-                  password: passwordController.text.trim(),
-                );
-              },
-            ),
-          )),
+                  height: 50,
+                  margin: EdgeInsets.symmetric(vertical: Get.height * 0.04),
+                  width: Get.width,
+                  child: elevatedButton(
+                    text: 'Login',
+                    onpress: () {
+                      if (!formKey.currentState!.validate()) {
+                        return;
+                      }
+                      authController.login(
+                        email: emailController.text.trim(),
+                        password: passwordController.text.trim(),
+                      );
+                    },
+                  ),
+                )),
           SizedBox(height: Get.height * 0.02),
           myText(
             text: 'Or Connect With',
@@ -335,7 +337,8 @@ class _LoginViewState extends State<LoginView> {
       bool hasUppercase = password.contains(RegExp(r'[A-Z]'));
       bool hasDigits = password.contains(RegExp(r'[0-9]'));
       bool hasLowercase = password.contains(RegExp(r'[a-z]'));
-      bool hasSpecialChars = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+      bool hasSpecialChars =
+          password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
       bool hasMinLength = password.length >= 8;
 
       setState(() {
@@ -344,8 +347,12 @@ class _LoginViewState extends State<LoginView> {
         if (!hasMinLength) {
           passwordStrength = 'Password must be at least 8 characters';
           strengthColor = Colors.red;
-        } else if (!(hasUppercase && hasDigits && hasLowercase && hasSpecialChars)) {
-          passwordStrength = 'Include uppercase, lowercase, numbers & special chars';
+        } else if (!(hasUppercase &&
+            hasDigits &&
+            hasLowercase &&
+            hasSpecialChars)) {
+          passwordStrength =
+              'Include uppercase, lowercase, numbers & special chars';
           strengthColor = Colors.orange;
         } else {
           passwordStrength = 'Strong password!';
@@ -414,7 +421,9 @@ class _LoginViewState extends State<LoginView> {
                     });
                   },
                   child: Icon(
-                    _obscureSignupPassword ? Icons.visibility : Icons.visibility_off,
+                    _obscureSignupPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                     color: AppColors.lightGreen,
                   ),
                 ),
@@ -453,11 +462,21 @@ class _LoginViewState extends State<LoginView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('• 8+ characters', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                        Text('• Uppercase letter (A-Z)', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                        Text('• Lowercase letter (a-z)', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                        Text('• Number (0-9)', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-                        Text('• Special character (!@#\$%^&*)', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                        Text('• 8+ characters',
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[600])),
+                        Text('• Uppercase letter (A-Z)',
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[600])),
+                        Text('• Lowercase letter (a-z)',
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[600])),
+                        Text('• Number (0-9)',
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[600])),
+                        Text('• Special character (!@#\$%^&*)',
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[600])),
                       ],
                     ),
                   ),
@@ -499,7 +518,9 @@ class _LoginViewState extends State<LoginView> {
                     });
                   },
                   child: Icon(
-                    _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                    _obscureConfirmPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                     color: AppColors.lightGreen,
                   ),
                 ),
@@ -512,22 +533,22 @@ class _LoginViewState extends State<LoginView> {
           Obx(() => authController.isLoading.value
               ? const Center(child: CircularProgressIndicator())
               : Container(
-            height: 50,
-            margin: EdgeInsets.symmetric(vertical: Get.height * 0.04),
-            width: Get.width,
-            child: elevatedButton(
-              text: 'Sign Up',
-              onpress: () {
-                if (!formKey.currentState!.validate()) {
-                  return;
-                }
-                authController.signUp(
-                  email: emailController.text.trim(),
-                  password: passwordController.text.trim(),
-                );
-              },
-            ),
-          )),
+                  height: 50,
+                  margin: EdgeInsets.symmetric(vertical: Get.height * 0.04),
+                  width: Get.width,
+                  child: elevatedButton(
+                    text: 'Sign Up',
+                    onpress: () {
+                      if (!formKey.currentState!.validate()) {
+                        return;
+                      }
+                      authController.signUp(
+                        email: emailController.text.trim(),
+                        password: passwordController.text.trim(),
+                      );
+                    },
+                  ),
+                )),
           SizedBox(height: Get.height * 0.02),
           myText(
             text: 'Or Connect With',
@@ -558,4 +579,5 @@ class _LoginViewState extends State<LoginView> {
         ],
       ),
     );
-  }}
+  }
+}

@@ -33,13 +33,20 @@ class _CreateEventViewState extends State<CreateEventView> {
   TextEditingController timeController = TextEditingController();
   TextEditingController titleController = TextEditingController();
   TextEditingController locationController = TextEditingController();
-  TextEditingController priceController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
-  TextEditingController tagsController = TextEditingController();
-  TextEditingController maxEntries = TextEditingController();
+  TextEditingController TargetController = TextEditingController();
+  TextEditingController ServicesController = TextEditingController();
+  TextEditingController studentController = TextEditingController();
+  TextEditingController collageController = TextEditingController();
+  TextEditingController studentidController = TextEditingController();
   TextEditingController endTimeController = TextEditingController();
   TextEditingController startTimeController = TextEditingController();
-  TextEditingController frequencyEventController = TextEditingController();
+  TextEditingController SupervisorTController = TextEditingController();
+  TextEditingController SupervisorController = TextEditingController();
+  TextEditingController comController = TextEditingController();
+  TextEditingController com1Controller = TextEditingController();
+  TextEditingController DeanController = TextEditingController();
+  TextEditingController unionController = TextEditingController();
   TimeOfDay startTime = const TimeOfDay(hour: 0, minute: 0);
   TimeOfDay endTime = const TimeOfDay(hour: 0, minute: 0);
   TextEditingController collegeController = TextEditingController();
@@ -51,13 +58,21 @@ class _CreateEventViewState extends State<CreateEventView> {
     timeController.clear();
     titleController.clear();
     locationController.clear();
-    priceController.clear();
+
     descriptionController.clear();
-    tagsController.clear();
-    maxEntries.clear();
+    TargetController.clear();
+    studentController.clear();
+    studentidController.clear();
+    collageController.clear();
+    com1Controller.clear();
+    comController.clear();
+    ServicesController.clear();
     endTimeController.clear();
     startTimeController.clear();
-    frequencyEventController.clear();
+    SupervisorController.clear();
+    SupervisorTController.clear();
+    DeanController.clear();
+    unionController.clear();
     startTime = const TimeOfDay(hour: 0, minute: 0);
     endTime = const TimeOfDay(hour: 0, minute: 0);
     setState(() {});
@@ -127,8 +142,15 @@ class _CreateEventViewState extends State<CreateEventView> {
     setState(() {});
   }
 
-  String event_type = 'Public';
-  List<String> list_item = ['Public', 'Private'];
+  String event_type = 'Initiative';
+  List<String> list_item = [
+    'Initiative',
+    'Training Course',
+    'Lecture',
+    'Workshop',
+    'Exhibition',
+    'Competition'
+  ];
 
   String accessModifier = 'Closed';
   List<String> close_list = [
@@ -153,18 +175,33 @@ class _CreateEventViewState extends State<CreateEventView> {
       // تعبئة الحقول بقيم الحدث المحدد
       final eventData = widget.event!.data()
           as Map<String, dynamic>; // تحويل البيانات إلى Map
-      titleController.text = eventData['event_name'];
-      locationController.text = eventData['location'];
-      dateController.text = eventData['date'];
-      startTimeController.text = eventData['start_time'];
-      endTimeController.text = eventData['end_time'];
-      maxEntries.text = eventData['max_entries'].toString();
-      frequencyEventController.text = eventData['frequency_of_event'];
-      descriptionController.text = eventData['description'];
-      priceController.text = eventData['price'];
-      tagsController.text = eventData['tags'].join(',');
-      accessModifier = eventData['who_can_invite'];
-      event_type = eventData['event'];
+      titleController.text = eventData['event_name'] ?? '';
+      locationController.text = eventData['location'] ?? '';
+      dateController.text = eventData['date'] ?? '';
+      startTimeController.text = eventData['start_time'] ?? '';
+      endTimeController.text = eventData['end_time'] ?? '';
+      ServicesController.text = eventData['Services'] ?? '';
+      unionController.text = eventData['Name of the Student Union President'];
+      descriptionController.text = eventData['description'] ?? '';
+      comController.text = eventData['comment'] ?? '';
+      com1Controller.text = eventData['comment1'] ?? '';
+      studentController.text = eventData['name std'] ?? '';
+      studentidController.text = eventData['id'] ?? '';
+      collageController.text = eventData['collage'] ?? '';
+      var targetData = eventData['target'];
+
+      if (targetData is List) {
+        TargetController.text = targetData.join(', ');
+      } else if (targetData is String) {
+        TargetController.text = targetData;
+      } else {
+        TargetController.text = '';
+      }
+
+      SupervisorTController.text = eventData['telesup'] ?? '';
+      SupervisorController.text = eventData['name sup'] ?? '';
+      DeanController.text = eventData['name Dean'] ?? '';
+      event_type = eventData['event'] ?? 'Initiative'; // قيمة افتراضية
     }
   }
 
@@ -411,13 +448,14 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Basic Information',
+                        Text(
+                            'Name of the Organization Responsible for the Activity',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 16),
                         myTextField(
                             bool: false,
                             icon: 'lib/assets/4DotIcon.png',
-                            text: 'Event Name',
+                            text: 'Name of the Organization',
                             controller: titleController,
                             validator: (String input) {
                               if (input.isEmpty) {
@@ -571,7 +609,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Event Tags',
+                          'Activity Participants and Target Audience',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -580,10 +618,9 @@ class _CreateEventViewState extends State<CreateEventView> {
                         SizedBox(height: 12), // مسافة بين العنوان والحقل
                         iconTitleContainer(
                           path: 'lib/assets/#.png',
-                          text:
-                              'Enter tags separated by commas (e.g. music,art,food)',
+                          text: 'hint (student it,student Bussines)',
                           width: double.infinity,
-                          controller: tagsController,
+                          controller: TargetController,
                           type: TextInputType.text,
                           onPress:
                               () {}, // يمكنك إضافة وظيفة عند الضغط إذا لزم الأمر
@@ -591,7 +628,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                             if (input.isEmpty) {
                               Get.snackbar(
                                 'Opps',
-                                "Tags are required.",
+                                "Participants and Target Audience are required.",
                                 colorText: Colors.white,
                                 backgroundColor: Colors.blue,
                               );
@@ -616,22 +653,23 @@ class _CreateEventViewState extends State<CreateEventView> {
                     // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  margin: EdgeInsets.only(bottom: 16),
+                  margin:
+                      EdgeInsets.only(bottom: 16), // التباعد الخارجي من الأسفل
                   child: Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16), // التباعد الداخلي
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Event Frequency',
+                          'Support Services Required for Conducting the Activity',
                           style: TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        SizedBox(height: 12),
+                        SizedBox(height: 12), // مسافة بين العنوان وحقل الوصف
                         Container(
-                          height: 42,
+                          height: 149,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
@@ -640,277 +678,13 @@ class _CreateEventViewState extends State<CreateEventView> {
                             ),
                           ),
                           child: TextFormField(
-                            readOnly: true,
-                            onTap: () {
-                              Get.bottomSheet(
-                                StatefulBuilder(builder: (ctx, state) {
-                                  return Container(
-                                    width: double.infinity,
-                                    height: Get.width * 0.6,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.only(
-                                        topRight: Radius.circular(10),
-                                        topLeft: Radius.circular(10),
-                                      ),
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            selectedFrequency == 10
-                                                ? Container()
-                                                : SizedBox(width: 5),
-                                            Expanded(
-                                              child: InkWell(
-                                                onTap: () {
-                                                  selectedFrequency = -1;
-                                                  state(() {});
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: 5,
-                                                    vertical: 10,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: selectedFrequency ==
-                                                            -1
-                                                        ? Colors.blue
-                                                        : Colors.black
-                                                            .withOpacity(0.1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                  ),
-                                                  child: Center(
-                                                    child: Text(
-                                                      "Once",
-                                                      style: TextStyle(
-                                                        color:
-                                                            selectedFrequency !=
-                                                                    -1
-                                                                ? Colors.black
-                                                                : Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            selectedFrequency == 10
-                                                ? Container()
-                                                : SizedBox(width: 5),
-                                            Expanded(
-                                              child: InkWell(
-                                                onTap: () {
-                                                  selectedFrequency = 0;
-                                                  state(() {});
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: 5,
-                                                    vertical: 10,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: selectedFrequency ==
-                                                            0
-                                                        ? Colors.blue
-                                                        : Colors.black
-                                                            .withOpacity(0.1),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                  ),
-                                                  child: Center(
-                                                    child: Text(
-                                                      "Daily",
-                                                      style: TextStyle(
-                                                        color:
-                                                            selectedFrequency !=
-                                                                    0
-                                                                ? Colors.black
-                                                                : Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            selectedFrequency == 10
-                                                ? Container()
-                                                : SizedBox(width: 10),
-                                            Expanded(
-                                              child: InkWell(
-                                                onTap: () {
-                                                  state(() {
-                                                    selectedFrequency = 1;
-                                                  });
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: 5,
-                                                    vertical: 10,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                    color: selectedFrequency ==
-                                                            1
-                                                        ? Colors.blue
-                                                        : Colors.black
-                                                            .withOpacity(0.1),
-                                                  ),
-                                                  child: Center(
-                                                    child: Text(
-                                                      "Weekly",
-                                                      style: TextStyle(
-                                                        color:
-                                                            selectedFrequency !=
-                                                                    1
-                                                                ? Colors.black
-                                                                : Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            selectedFrequency == 10
-                                                ? Container()
-                                                : SizedBox(width: 10),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            selectedFrequency == 10
-                                                ? Container()
-                                                : SizedBox(width: 10),
-                                            Expanded(
-                                              child: InkWell(
-                                                onTap: () {
-                                                  state(() {
-                                                    selectedFrequency = 2;
-                                                  });
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: 5,
-                                                    vertical: 10,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                    color: selectedFrequency ==
-                                                            2
-                                                        ? Colors.blue
-                                                        : Colors.black
-                                                            .withOpacity(0.1),
-                                                  ),
-                                                  child: Center(
-                                                    child: Text(
-                                                      "Monthly",
-                                                      style: TextStyle(
-                                                        color:
-                                                            selectedFrequency !=
-                                                                    2
-                                                                ? Colors.black
-                                                                : Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            selectedFrequency == 10
-                                                ? Container()
-                                                : SizedBox(width: 10),
-                                            Expanded(
-                                              child: InkWell(
-                                                onTap: () {
-                                                  state(() {
-                                                    selectedFrequency = 3;
-                                                  });
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: 5,
-                                                    vertical: 10,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                    color: selectedFrequency ==
-                                                            3
-                                                        ? Colors.blue
-                                                        : Colors.black
-                                                            .withOpacity(0.1),
-                                                  ),
-                                                  child: Center(
-                                                    child: Text(
-                                                      "Yearly",
-                                                      style: TextStyle(
-                                                        color:
-                                                            selectedFrequency !=
-                                                                    3
-                                                                ? Colors.black
-                                                                : Colors.white,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            selectedFrequency == 10
-                                                ? Container()
-                                                : SizedBox(width: 5),
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          children: [
-                                            MaterialButton(
-                                              minWidth: Get.width * 0.8,
-                                              onPressed: () {
-                                                frequencyEventController
-                                                    .text = selectedFrequency ==
-                                                        -1
-                                                    ? 'Once'
-                                                    : selectedFrequency == 0
-                                                        ? 'Daily'
-                                                        : selectedFrequency == 1
-                                                            ? 'Weekly'
-                                                            : selectedFrequency ==
-                                                                    2
-                                                                ? 'Monthly'
-                                                                : 'Yearly';
-                                                Get.back();
-                                              },
-                                              color: Colors.blue,
-                                              child: Text(
-                                                "Select",
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }),
-                              );
-                            },
-                            validator: (String? input) {
+                            maxLines: 5,
+                            controller: ServicesController,
+                            validator: (input) {
                               if (input!.isEmpty) {
                                 Get.snackbar(
                                   'Opps',
-                                  "Frequency is required.",
+                                  "Support Services Required for Conducting the Activity is required.",
                                   colorText: Colors.white,
                                   backgroundColor: Colors.blue,
                                 );
@@ -918,19 +692,15 @@ class _CreateEventViewState extends State<CreateEventView> {
                               }
                               return null;
                             },
-                            controller: frequencyEventController,
                             decoration: InputDecoration(
-                              contentPadding: EdgeInsets.only(top: 3),
-                              errorStyle: TextStyle(fontSize: 0),
+                              border: InputBorder.none,
+                              contentPadding:
+                                  EdgeInsets.only(top: 25, left: 15, right: 15),
                               hintStyle: TextStyle(
                                 color: AppColors.genderTextColor,
                               ),
-                              border: InputBorder.none,
-                              hintText: 'Frequency of event',
-                              prefixIcon: Image.asset(
-                                'lib/assets/repeat.png',
-                                cacheHeight: 20,
-                              ),
+                              hintText:
+                                  ' ex:Audio-Visual Equipment,Venue Setup,Internet Access',
                             ),
                           ),
                         ),
@@ -938,7 +708,6 @@ class _CreateEventViewState extends State<CreateEventView> {
                     ),
                   ),
                 ),
-
                 // myTextField(
                 //     bool: false,
                 //     icon: 'assets/repeat.png',
@@ -1027,7 +796,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Description/Instruction',
+                          'Activity Description and Objectives',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -1077,106 +846,181 @@ class _CreateEventViewState extends State<CreateEventView> {
                 SizedBox(
                   height: Get.height * 0.02,
                 ),
+                Divider(
+                  color: AppColors.lightGreen, // تغيير اللون إلى أخضر
+                  thickness: 2, // سمك الخط
+                  indent: 20, // المسافة من اليسار
+                  endIndent: 20, // المسافة من اليمين
+                  height: 20,
+                ),
                 Card(
-                  elevation: 6, // درجة ظل الكارد
+                  elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
                     // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  margin: EdgeInsets.only(bottom: 16),
                   child: Padding(
                     padding: EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Invitation & Pricing',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        Text('Activity Supervisor Information',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        SizedBox(height: 16),
+                        myTextField(
+                            bool: false,
+                            icon: 'lib/assets/4DotIcon.png',
+                            text: 'Supervisor Name',
+                            controller: SupervisorController,
+                            validator: (String input) {
+                              if (input.isEmpty) {
+                                Get.snackbar(
+                                    'Opps', "Supervisor Name is required.",
+                                    colorText: Colors.white,
+                                    backgroundColor: Colors.blue);
+                                return '';
+                              }
+                              return null;
+                            }),
+                        myTextField(
+                            bool: false,
+                            icon: 'lib/assets/4DotIcon.png',
+                            text: 'Phone Number',
+                            controller: SupervisorTController,
+                            validator: (String input) {
+                              if (input.isEmpty) {
+                                Get.snackbar(
+                                    'Opps', "Phone Number super is required.",
+                                    colorText: Colors.white,
+                                    backgroundColor: Colors.blue);
+                                return '';
+                              }
+                              return null;
+                            }),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: Get.height * 0.03,
+                ),
+                Divider(
+                  color: AppColors.lightGreen, // تغيير اللون إلى أخضر
+                  thickness: 2, // سمك الخط
+                  indent: 20, // المسافة من اليسار
+                  endIndent: 20, // المسافة من اليمين
+                  height: 20,
+                ),
+                Card(
+                  elevation: 6,
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Student Information ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        SizedBox(height: 16),
+                        myTextField(
+                          bool: false,
+                          icon: 'lib/assets/4DotIcon.png',
+                          text: 'Name of the Student Submitting the Activity',
+                          controller: studentController,
+                          validator: (String input) {
+                            if (input.isEmpty) {
+                              Get.snackbar('Opps',
+                                  "Name of the Student Submitting the Activity is required.",
+                                  colorText: Colors.white,
+                                  backgroundColor: Colors.blue);
+                              return '';
+                            }
+
+                            return null;
+                          },
                         ),
-                        SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Dropdown for "Who can invite?"
-                            Expanded(
-                              child: Container(
-                                height: 40,
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    width: 1,
-                                    color: AppColors.genderTextColor,
-                                  ),
-                                ),
-                                child: DropdownButton<String>(
-                                  isExpanded: true,
-                                  underline: SizedBox(),
-                                  icon: Image.asset('lib/assets/arrowDown.png'),
-                                  elevation: 16,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: AppColors.black,
-                                  ),
-                                  value: accessModifier,
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      accessModifier = newValue!;
-                                    });
-                                  },
-                                  items: close_list.map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(
-                                        value,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w400,
-                                          color: Color(0xffA6A6A6),
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            ),
+                        SizedBox(height: 10),
+                        myTextField(
+                          bool: false,
+                          icon: 'lib/assets/4DotIcon.png',
+                          text: 'University ID Number',
+                          controller: studentidController,
+                          validator: (String input) {
+                            if (input.isEmpty) {
+                              Get.snackbar(
+                                  'Opps', "University ID Number is required.",
+                                  colorText: Colors.white,
+                                  backgroundColor: Colors.blue);
+                              return '';
+                            }
 
-                            SizedBox(width: 16),
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 10),
+                        myTextField(
+                          bool: false,
+                          icon: 'lib/assets/4DotIcon.png',
+                          text: 'collage',
+                          controller: collageController,
+                          validator: (String input) {
+                            if (input.isEmpty) {
+                              Get.snackbar('Opps', " collage is required.",
+                                  colorText: Colors.white,
+                                  backgroundColor: Colors.blue);
+                              return '';
+                            }
 
-                            // Price Field
-                            Expanded(
-                              child: Container(
-                                height: 40,
-                                child: TextFormField(
-                                  controller: priceController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    hintText: 'Price',
-                                    prefixIcon: Image.asset(
-                                        'lib/assets/dollarLogo.png'),
-                                    border: OutlineInputBorder(),
-                                    contentPadding: EdgeInsets.only(bottom: 10),
-                                  ),
-                                  validator: (String? value) {
-                                    if (value == null || value.isEmpty) {
-                                      Get.snackbar(
-                                        'Opps',
-                                        "Price is required.",
-                                        colorText: Colors.white,
-                                        backgroundColor: Colors.blue,
-                                      );
-                                      return '';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: Get.height * 0.03,
+                ),
+                Divider(
+                  color: AppColors.lightGreen, // تغيير اللون إلى أخضر
+                  thickness: 2, // سمك الخط
+                  indent: 20, // المسافة من اليسار
+                  endIndent: 20, // المسافة من اليمين
+                  height: 20,
+                ),
+                Card(
+                  elevation: 6,
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Comments ',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        SizedBox(height: 16),
+                        myTextField(
+                          bool: false,
+                          icon: 'lib/assets/4DotIcon.png',
+                          text: 'Comments of the Relevant Division Head',
+                          controller: comController,
+                        ),
+                        SizedBox(height: 10),
+                        myTextField(
+                          bool: false,
+                          icon: 'lib/assets/4DotIcon.png',
+                          text: 'Comments of the Relevant Department Director',
+                          controller: com1Controller,
                         ),
                       ],
                     ),
@@ -1185,6 +1029,95 @@ class _CreateEventViewState extends State<CreateEventView> {
                 SizedBox(
                   height: Get.height * 0.03,
                 ),
+                Divider(
+                  color: AppColors.lightGreen, // تغيير اللون إلى أخضر
+                  thickness: 2, // سمك الخط
+                  indent: 20, // المسافة من اليسار
+                  endIndent: 20, // المسافة من اليمين
+                  height: 20,
+                ),
+                Card(
+                  elevation: 6,
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('For events through the colleges',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        SizedBox(height: 16),
+                        myTextField(
+                            bool: false,
+                            icon: 'lib/assets/4DotIcon.png',
+                            text: 'Name of the College Dean',
+                            controller: DeanController,
+                            validator: (String input) {
+                              if (input.isEmpty) {
+                                Get.snackbar('Opps',
+                                    "Name of the College Dean is required.",
+                                    colorText: Colors.white,
+                                    backgroundColor: Colors.blue);
+                                return '';
+                              }
+                              return null;
+                            }),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: Get.height * 0.03,
+                ),
+                Divider(
+                  color: AppColors.lightGreen, // تغيير اللون إلى أخضر
+                  thickness: 2, // سمك الخط
+                  indent: 20, // المسافة من اليسار
+                  endIndent: 20, // المسافة من اليمين
+                  height: 20,
+                ),
+                Card(
+                  elevation: 6,
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('For events through the Student Union',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        SizedBox(height: 16),
+                        myTextField(
+                            bool: false,
+                            icon: 'lib/assets/4DotIcon.png',
+                            text: 'Name of the Student Union President',
+                            controller: unionController,
+                            validator: (String input) {
+                              if (input.isEmpty) {
+                                Get.snackbar('Opps',
+                                    "Name of the Student Union President is required.",
+                                    colorText: Colors.white,
+                                    backgroundColor: Colors.blue);
+                                return '';
+                              }
+                              return null;
+                            }),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: Get.height * 0.03,
+                ),
+
                 Obx(() => isCreatingEvent.value
                     ? const Center(
                         child: CircularProgressIndicator(),
@@ -1198,8 +1131,8 @@ class _CreateEventViewState extends State<CreateEventView> {
                                 return;
                               }
 
-                              if (tagsController.text.isEmpty) {
-                                Get.snackbar('Opps', "Tags is required.",
+                              if (TargetController.text.isEmpty) {
+                                Get.snackbar('Opps', "Target is required.",
                                     colorText: Colors.white,
                                     backgroundColor: Colors.blue);
                                 return;
@@ -1234,11 +1167,11 @@ class _CreateEventViewState extends State<CreateEventView> {
                               }
 
                               List<String> tags =
-                                  tagsController.text.split(',');
+                                  TargetController.text.split(',');
 
                               Map<String, dynamic> eventData = {
                                 'event': event_type ??
-                                    'Public', // استخدام قيمة افتراضية إذا كانت null
+                                    'Initiative', // استخدام قيمة افتراضية إذا كانت null
                                 'event_name': titleController.text ??
                                     '', // استخدام قيمة افتراضية إذا كانت null
                                 'location': locationController.text ?? '',
@@ -1247,20 +1180,28 @@ class _CreateEventViewState extends State<CreateEventView> {
                                     : '',
                                 'start_time': startTimeController.text ?? '',
                                 'end_time': endTimeController.text ?? '',
-                                'max_entries': int.tryParse(maxEntries.text) ??
-                                    0, // استخدام قيمة افتراضية إذا كانت null
-                                'frequency_of_event':
-                                    frequencyEventController.text ?? '',
+                                'Services': ServicesController.text ?? '',
+                                'Name of the Student Union President':
+                                    unionController.text ?? '',
                                 'description': descriptionController.text ?? '',
-                                'who_can_invite': accessModifier ?? 'Closed',
+                                'comment': comController.text ?? '',
+                                'comment1': com1Controller.text ?? '',
+                                'name std': studentController.text ?? '',
+                                'id': studentidController.text ?? '',
+                                'collage': collageController.text ?? '',
+                                'target':
+                                    TargetController.text?.split(',') ?? [],
+
+                                'telesup': SupervisorTController.text ?? '',
+                                'name sup': SupervisorController.text ?? '',
+
                                 'joined': [
                                   FirebaseAuth.instance.currentUser!.uid
                                 ],
-                                'price': priceController.text ?? '',
+                                'name Dean': DeanController.text ?? '',
                                 'media': mediaUrls,
                                 'uid': FirebaseAuth.instance.currentUser!.uid,
-                                'tags': tagsController.text?.split(',') ??
-                                    [], // استخدام قيمة افتراضية إذا كانت null
+
                                 'inviter': [
                                   FirebaseAuth.instance.currentUser!.uid
                                 ]

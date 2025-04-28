@@ -36,7 +36,7 @@ class _EventDetailsViewState extends State<EventDetailsView> {
 
       if (userDoc.exists) {
         setState(() {
-          userRole = userDoc['role']; // Assuming 'role' field exists in the user document
+          userRole = userDoc['role'];
           print('User role fetched: $userRole');
         });
       } else {
@@ -59,6 +59,15 @@ class _EventDetailsViewState extends State<EventDetailsView> {
 
   @override
   Widget build(BuildContext context) {
+    // Show loading spinner while user role is being fetched
+    if (userRole == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.lightgreen,
@@ -98,19 +107,15 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                buildInfoRow(Icons.location_on, 'Location',
-                    widget.event['location']),
-                buildInfoRow(Icons.calendar_today, 'Date', widget.event['date']),
+                buildInfoRow(
+                    Icons.location_on, 'Location', widget.event['location']),
+                buildInfoRow(
+                    Icons.calendar_today, 'Date', widget.event['date']),
                 buildInfoRow(Icons.access_time, 'Time',
                     '${widget.event['start_time']} - ${widget.event['end_time']}'),
                 buildInfoRow(Icons.description, 'Description',
                     widget.event['description']),
-                buildInfoRow(
-                    Icons.attach_money, 'Price', widget.event['price']),
-                buildInfoRow(Icons.repeat, 'Frequency',
-                    widget.event['frequency_of_event']),
-                buildInfoRow(Icons.people, 'Who can invite',
-                    widget.event['who_can_invite']),
+
                 const SizedBox(height: 16),
                 if (widget.event['media'] != null &&
                     widget.event['media'].isNotEmpty)
@@ -139,7 +144,8 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                       }).toList(),
                     ],
                   ),
-                // Show the join button only for Student and Instructor roles
+
+                // Show Join Button for Students or Instructors
                 if (userRole == 'Student' || userRole == 'Instructor')
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20),
@@ -148,7 +154,7 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                         // Join event logic here
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.lightgreen, // Match your theme
+                        backgroundColor: AppColors.lightgreen,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -157,14 +163,14 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                       child: const Text('Join Event'),
                     ),
                   ),
-                // Display Edit and Delete Icons in the card
-                if (userRole != null &&
-                    (userRole == 'Instructor' || userRole == 'Event Organizer') )
+
+                // Show Edit/Delete buttons only if current user is event owner
+                if (widget.event['uid'] == currentUserId)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       IconButton(
-                        icon:  Icon(Icons.edit, color: AppColors.lightgreen),
+                        icon: Icon(Icons.edit, color: AppColors.lightgreen),
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -182,11 +188,11 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                         },
                       ),
                       IconButton(
-                        icon:  Icon(Icons.delete, color: AppColors.lightgreen),
+                        icon: Icon(Icons.delete, color: AppColors.lightgreen),
                         onPressed: () {
                           deleteEvent(widget.event.id);
-                          Navigator.pushReplacement(
-                              context, MaterialPageRoute(builder: (_) => HomePage()));
+                          Navigator.pushReplacement(context,
+                              MaterialPageRoute(builder: (_) => HomePage()));
                         },
                       ),
                     ],
