@@ -137,6 +137,14 @@ class AuthController extends GetxController {
 
   // SignUp method with role parameter
   void signUp({String? email, String? password, String? role}) async {
+
+    final validRoles = ['Student', 'Instructor', 'Event Organizer', 'Vice Dean', 'Activities Director'];
+    if (role != null && !validRoles.contains(role)) {
+      isLoading(false);
+      Get.snackbar('Error', 'Invalid role selected');
+      return;
+    }
+
     isLoading(true);
 
     try {

@@ -287,7 +287,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           setState(() {
             _selectedRole = value;
             _isEventOrganizer = value == "Event Organizer";
-            _showCollegeField = value == "Student" || value == "Instructor";
+            _showCollegeField = value == "Student" ||
+                value == "Instructor" ||
+                value == "Vice Dean" ||
+                value == "Activities Director";
 
             if (!_isEventOrganizer) _organizationNameController.clear();
             if (!_showCollegeField) _collegeNameController.clear();
@@ -306,6 +309,14 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             value: "Event Organizer",
             child: Text("Event Organizer", style: TextStyle(color: Colors.blueGrey)),
           ),
+          DropdownMenuItem(
+            value: "Vice Dean",
+            child: Text("Vice Dean", style: TextStyle(color: Colors.blueGrey)),
+          ),
+          DropdownMenuItem(
+            value: "Activities Director",
+            child: Text("Activities Director", style: TextStyle(color: Colors.blueGrey)),
+          ),
         ],
         validator: (value) => value == null ? 'Please select your role' : null,
         dropdownColor: Colors.white,
@@ -313,6 +324,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       ),
     );
   }
+
 
   Widget _buildOrganizationField() {
     return Column(

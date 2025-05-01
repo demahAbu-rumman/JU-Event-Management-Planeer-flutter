@@ -5,6 +5,7 @@ import 'package:ju_event_managment_planner/Util/app_color.dart';
 import 'package:ju_event_managment_planner/controller/auth_controller.dart';
 import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:ju_event_managment_planner/screens/settingsprofile.dart';
+import 'package:ju_event_managment_planner/widgets/event_fetch.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class Profiles_Page extends StatefulWidget {
@@ -200,15 +201,26 @@ class _ProfilePageState extends State<Profiles_Page> {
                 _titleSection(),
                 _infoSection(joined),
                 const SizedBox(height: 24),
-                _buildActivitySection(),
+
+                if (selectedRole != 'Vice Dean' && selectedRole != 'Activities Director')
+                  _buildActivitySection(),
+
                 const SizedBox(height: 24),
                 if (selectedRole == 'Instructor') ...[
                   _buildSectionTitle('Office Hours'),
                   _buildSchedule(),
+                ] else if (selectedRole == 'Vice Dean') ...[
+                  _buildSectionTitle('Upcoming Events'),
+                  _buildRequestedEvents(),
+                  _buildEventList(),
+                ] else if (selectedRole == 'Activities Director') ...[
+                  _buildApprovedActivities(),
+                  _buildRequestedEvents(),
                 ] else ...[
                   _buildSectionTitle('Upcoming Events'),
                   _buildEventList(),
                 ],
+
               ],
             ),
           ),
@@ -310,6 +322,7 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
+
   Widget _buildActivityItem(Activity activity) {
     return ListTile(
       leading: Container(
@@ -344,58 +357,65 @@ class _ProfilePageState extends State<Profiles_Page> {
 
   Future<List<DocumentSnapshot>> _fetchUpcomingEvents() async {
     try {
-      if (collegeName.isEmpty || collegeName == 'N/A') return [];
+      if (collegeName.isEmpty || collegeName == 'N/A') {
+        print("College name not set properly");
+        return [];
+      }
 
+      // Get current date (without time component)
       final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
+      final todayStart = DateTime(now.year, now.month, now.day);
+      final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
-      // Fetch events from today onward
-      final events = await FirebaseFirestore.instance
+      // Fetch events from today onward (including all of today)
+      final querySnapshot = await FirebaseFirestore.instance
           .collection('events')
-          .where('date', isGreaterThanOrEqualTo: today)
+          .where('date', isGreaterThanOrEqualTo: todayStart)
+          .where('date', isLessThanOrEqualTo: todayEnd)
           .orderBy('date')
-          .limit(3)
+          .limit(20) // Increased limit to ensure we capture today's events
           .get();
 
+      // Debug: Print all fetched events
+      print('Fetched ${querySnapshot.docs.length} events from Firestore');
+      querySnapshot.docs.forEach((doc) {
+        final eventDate = (doc.data()['date'] as Timestamp).toDate();
+        print('Event: ${doc.data()['event_name']} on ${eventDate.toString()}');
+      });
+
       // Filter events based on college
-      return events.docs.where((doc) {
+      final filteredEvents = querySnapshot.docs.where((doc) {
         final eventData = doc.data() as Map<String, dynamic>;
         final eventLocation = (eventData['location'] as String? ?? '').trim();
-        final eventDate = eventData['date'] as Timestamp?;
 
-        if (eventDate == null) return false;
-
-        // Find matching college - more flexible matching
-        String? eventCollege;
-
-        // First try exact match
-        if (locationToCollegeMap.containsKey(eventLocation)) {
-          eventCollege = locationToCollegeMap[eventLocation];
-        }
-        // If no exact match, try partial match
-        else {
-          final matchingKey = locationToCollegeMap.keys.firstWhere(
-                (key) => key.toLowerCase().contains(eventLocation.toLowerCase()) ||
-                eventLocation.toLowerCase().contains(key.toLowerCase()),
-            orElse: () => '',
-          );
-
-          if (matchingKey.isNotEmpty) {
-            eventCollege = locationToCollegeMap[matchingKey];
-          }
+        // First try direct college field if it exists
+        if (eventData.containsKey('college')) {
+          final match = (eventData['college'] as String? ?? '').toLowerCase() ==
+              collegeName.toLowerCase();
+          if (match) return true;
         }
 
-        // Debug prints to help identify matching issues
-        print('Event Location: $eventLocation');
-        print('Mapped College: $eventCollege');
-        print('User College: $collegeName');
+        // Then try location mapping
+        final eventCollege = locationToCollegeMap.entries.firstWhere(
+              (entry) => eventLocation.toLowerCase().contains(entry.key.toLowerCase()),
+          orElse: () => MapEntry('', ''),
+        ).value;
 
-        // Compare colleges (case insensitive and trimmed)
-        final collegeMatch = (eventCollege ?? '').toLowerCase() == collegeName.toLowerCase();
-        final isUpcoming = !eventDate.toDate().isBefore(today);
+        final collegeMatch = eventCollege.toLowerCase() == collegeName.toLowerCase();
 
-        return collegeMatch && isUpcoming;
+        // Debug: Print matching info
+        if (collegeMatch) {
+          print('Matched event: ${eventData['event_name']}');
+          print('Location: $eventLocation');
+          print('Mapped college: $eventCollege');
+          print('User college: $collegeName');
+        }
+
+        return collegeMatch;
       }).toList();
+
+      print('Found ${filteredEvents.length} matching events for college $collegeName');
+      return filteredEvents;
     } catch (e) {
       print("Error fetching upcoming events: $e");
       return [];
@@ -411,7 +431,7 @@ class _ProfilePageState extends State<Profiles_Page> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
@@ -422,49 +442,55 @@ class _ProfilePageState extends State<Profiles_Page> {
         }
 
         final events = snapshot.data!;
-        return ListView.builder(
+        final Map<String, List<DocumentSnapshot>> groupedEvents = {};
+
+        for (var doc in events) {
+          final data = doc.data() as Map<String, dynamic>;
+          final timestamp = data['date'] as Timestamp?;
+          if (timestamp == null) continue;
+
+          final date = timestamp.toDate();
+          final now = DateTime.now();
+          String label;
+
+          if (_isSameDay(date, now)) {
+            label = 'Today';
+          } else if (_isSameDay(date, now.add(Duration(days: 1)))) {
+            label = 'Tomorrow';
+          } else {
+            label = '${date.day}/${date.month}/${date.year}';
+          }
+
+          groupedEvents.putIfAbsent(label, () => []).add(doc);
+        }
+
+        return ListView(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: events.length,
-          itemBuilder: (context, index) {
-            final event = events[index];
-            final eventData = event.data() as Map<String, dynamic>;
-            final eventDate = eventData['date'] as Timestamp?;
-            String formattedDate = 'Date not set';
-            String formattedTime = 'Time not set';
-
-            if (eventDate != null) {
-              final date = eventDate.toDate();
-              formattedDate = '${date.day}/${date.month}/${date.year}';
-
-              // Add time display if available
-              final startTime = eventData['start_time'] as String?;
-              final endTime = eventData['end_time'] as String?;
-              if (startTime != null && endTime != null) {
-                formattedTime = '$startTime - $endTime';
-              }
-            }
-
-            return Card(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: ListTile(
-                title: Text(eventData['event_name'] ?? 'Unnamed Event'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(eventData['location'] ?? 'Location not specified'),
-                    if (formattedTime.isNotEmpty)
-                      Text(formattedTime, style: TextStyle(color: Colors.grey.shade600)),
-                  ],
+          children: groupedEvents.entries.map((entry) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Text(
+                    entry.key,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                 ),
-                trailing: Text(formattedDate),
-              ),
+                ...entry.value.map((doc) => EventItem(doc)).toList(),
+              ],
             );
-          },
+          }).toList(),
         );
       },
     );
   }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
 
   Widget _buildSchedule() {
     return Card(
@@ -487,6 +513,16 @@ class _ProfilePageState extends State<Profiles_Page> {
         ],
       ),
     );
+  }
+
+  Widget _buildRequestedEvents() {
+    return _buildSectionTitle('Requested Events'); // Placeholder
+    // You can replace with actual Firestore call to fetch where status == 'requested'
+  }
+
+  Widget _buildApprovedActivities() {
+    return _buildSectionTitle('Approved Activities'); // Placeholder
+    // You can replace with actual Firestore call to fetch where status == 'approved'
   }
 }
 
