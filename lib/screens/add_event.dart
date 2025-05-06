@@ -1118,133 +1118,121 @@ class _CreateEventViewState extends State<CreateEventView> {
                   height: Get.height * 0.03,
                 ),
 
-                Obx(() => isCreatingEvent.value
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : SizedBox(
-                        height: 42,
-                        width: double.infinity,
-                        child: elevatedButton(
-                            onpress: () async {
-                              if (!formKey.currentState!.validate()) {
-                                return;
-                              }
+            Obx(() => isCreatingEvent.value
+                ? const Center(
+              child: CircularProgressIndicator(),
+            )
+                : SizedBox(
+              height: 42,
+              width: double.infinity,
+              child: elevatedButton(
+                onpress: () async {
+                  if (!formKey.currentState!.validate()) return;
 
-                              if (TargetController.text.isEmpty) {
-                                Get.snackbar('Opps', "Target is required.",
-                                    colorText: Colors.white,
-                                    backgroundColor: Colors.blue);
-                                return;
-                              }
+                  if (TargetController.text.isEmpty) {
+                    Get.snackbar('Warning', "Please enter the target audience.",
+                        colorText: Colors.white, backgroundColor: Colors.blue);
+                    return;
+                  }
 
-                              isCreatingEvent(true);
+                  isCreatingEvent(true);
 
-                              DataController dataController = Get.find();
+                  try {
+                    DataController dataController = Get.find();
+                    List<Map<String, dynamic>> mediaUrls = [];
 
-                              if (media.isNotEmpty) {
-                                for (int i = 0; i < media.length; i++) {
-                                  if (media[i].isVideo!) {
-                                    String thumbnailUrl = await dataController
-                                        .uploadThumbnailToFirebase(
-                                            media[i].thumbnail!);
+                    // Upload media (images/videos)
+                    if (media.isNotEmpty) {
+                      for (int i = 0; i < media.length; i++) {
+                        if (media[i].isVideo!) {
+                          String thumbnailUrl = await dataController
+                              .uploadThumbnailToFirebase(media[i].thumbnail!);
+                          String videoUrl = await dataController
+                              .uploadImageToFirebase(media[i].video!);
+                          mediaUrls.add({
+                            'url': videoUrl,
+                            'thumbnail': thumbnailUrl,
+                            'isImage': false
+                          });
+                        } else {
+                          String imageUrl = await dataController
+                              .uploadImageToFirebase(media[i].image!);
+                          mediaUrls.add({'url': imageUrl, 'isImage': true});
+                        }
+                      }
+                    }
 
-                                    String videoUrl = await dataController
-                                        .uploadImageToFirebase(media[i].video!);
+                    // Prepare event data
+                    Map<String, dynamic> eventData = {
+                      'event': event_type ?? 'Initiative',
+                      'event_name': titleController.text,
+                      'location': locationController.text,
+                      'date': date != null
+                          ? '${date!.day}-${date!.month}-${date!.year}'
+                          : '',
+                      'start_time': startTimeController.text,
+                      'end_time': endTimeController.text,
+                      'Services': ServicesController.text,
+                      'Name of the Student Union President': unionController.text,
+                      'description': descriptionController.text,
+                      'comment': comController.text,
+                      'comment1': com1Controller.text,
+                      'name std': studentController.text,
+                      'id': studentidController.text,
+                      'collage': collageController.text,
+                      'target': TargetController.text.split(','),
+                      'telesup': SupervisorTController.text,
+                      'name sup': SupervisorController.text,
+                      'joined': [FirebaseAuth.instance.currentUser!.uid],
+                      'name Dean': DeanController.text,
+                      'media': mediaUrls,
+                      'uid': FirebaseAuth.instance.currentUser!.uid,
+                      'inviter': [FirebaseAuth.instance.currentUser!.uid],
+                      'instructorApproval': null,
+                      'requestDate': Timestamp.now(),
+                    };
 
-                                    mediaUrls.add({
-                                      'url': videoUrl,
-                                      'thumbnail': thumbnailUrl,
-                                      'isImage': false
-                                    });
-                                  } else {
-                                    String imageUrl = await dataController
-                                        .uploadImageToFirebase(media[i].image!);
-                                    mediaUrls.add(
-                                        {'url': imageUrl, 'isImage': true});
-                                  }
-                                }
-                              }
+                    // Update or create
+                    if (widget.isEditing && widget.event != null) {
+                      await dataController.updateEvent(widget.event!.id, eventData);
+                      print("Event updated");
+                      resetControllers();
+                      Get.back(result: true);
+                      Get.snackbar('Success', 'Event updated successfully',
+                          colorText: Colors.white, backgroundColor: Colors.green);
+                    } else {
+                      await FirebaseFirestore.instance
+                          .collection('eventRequests')
+                          .add(eventData);
+                      print('Request submitted successfully');
+                      resetControllers();
+                      Get.defaultDialog(
+                        title: "Request Sent",
+                        middleText:
+                        "Your event request has been submitted for approval.",
+                        textConfirm: "Close",
+                        confirmTextColor: Colors.white,
+                        onConfirm: () {
+                          Get.back(); // Close dialog
+                          isCreatingEvent(false);
+                          Get.back(); // Go back to previous screen
+                        },
+                        barrierDismissible: false,
+                      );
+                    }
+                  } catch (e, stack) {
+                    print('Error creating event: $e');
+                    print(stack);
+                    Get.snackbar('Error', 'Failed to create the event',
+                        colorText: Colors.white, backgroundColor: Colors.red);
+                  }
+                },
+                text: widget.isEditing ? 'Update Event' : 'Create Event',
+              ),
+            )),
 
-                              List<String> tags =
-                                  TargetController.text.split(',');
 
-                              Map<String, dynamic> eventData = {
-                                'event': event_type ??
-                                    'Initiative', // استخدام قيمة افتراضية إذا كانت null
-                                'event_name': titleController.text ??
-                                    '', // استخدام قيمة افتراضية إذا كانت null
-                                'location': locationController.text ?? '',
-                                'date': date != null
-                                    ? '${date!.day}-${date!.month}-${date!.year}'
-                                    : '',
-                                'start_time': startTimeController.text ?? '',
-                                'end_time': endTimeController.text ?? '',
-                                'Services': ServicesController.text ?? '',
-                                'Name of the Student Union President':
-                                    unionController.text ?? '',
-                                'description': descriptionController.text ?? '',
-                                'comment': comController.text ?? '',
-                                'comment1': com1Controller.text ?? '',
-                                'name std': studentController.text ?? '',
-                                'id': studentidController.text ?? '',
-                                'collage': collageController.text ?? '',
-                                'target':
-                                    TargetController.text?.split(',') ?? [],
-
-                                'telesup': SupervisorTController.text ?? '',
-                                'name sup': SupervisorController.text ?? '',
-
-                                'joined': [
-                                  FirebaseAuth.instance.currentUser!.uid
-                                ],
-                                'name Dean': DeanController.text ?? '',
-                                'media': mediaUrls,
-                                'uid': FirebaseAuth.instance.currentUser!.uid,
-
-                                'inviter': [
-                                  FirebaseAuth.instance.currentUser!.uid
-                                ]
-                              };
-
-                              if (widget.isEditing && widget.event != null) {
-                                // إذا كان في وضع التعديل، قومي بتحديث الحدث
-                                await dataController
-                                    .updateEvent(widget.event!.id, eventData)
-                                    .then((value) {
-                                  print("Event updated");
-                                  isCreatingEvent(false);
-                                  resetControllers();
-
-                                  Get.back(result: true);
-                                  Get.snackbar(
-                                      'Success', 'Event update successfully',
-                                      colorText: Colors.white,
-                                      backgroundColor: Colors.green);
-                                  setState(() {});
-                                  // العودة إلى الشاشة السابقة بعد التحديث
-                                });
-                              } else {
-                                // إذا كان في وضع الإنشاء، قومي بإنشاء حدث جديد
-                                await dataController
-                                    .createEvent(eventData)
-                                    .then((value) {
-                                  print("Event is done");
-                                  Get.snackbar(
-                                      'Success', 'Event created successfully',
-                                      colorText: Colors.white,
-                                      backgroundColor: Colors.green);
-                                  isCreatingEvent(false);
-                                  resetControllers();
-                                  Get.back(); // العودة إلى الشاشة السابقة بعد الإنشاء
-                                });
-                              }
-                            },
-                            text: widget.isEditing
-                                ? 'Update Event'
-                                : 'Create Event'), // تغيير نص الزر
-                      )),
-                SizedBox(
+            SizedBox(
                   height: Get.height * 0.03,
                 ),
               ],

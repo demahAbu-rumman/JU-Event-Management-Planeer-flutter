@@ -1,0 +1,2 @@
+C:/Users/demah/StudioProjects/JU-Event-Management-Planeer-flutter/android/app/.cxx/Debug/4a1g6g4a/x86/CMakeFiles/edit_cache.dir
+C:/Users/demah/StudioProjects/JU-Event-Management-Planeer-flutter/android/app/.cxx/Debug/4a1g6g4a/x86/CMakeFiles/rebuild_cache.dir
