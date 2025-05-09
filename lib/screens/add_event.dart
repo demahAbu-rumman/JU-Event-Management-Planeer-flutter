@@ -180,8 +180,8 @@ class _CreateEventViewState extends State<CreateEventView> {
       dateController.text = eventData['date'] ?? '';
       startTimeController.text = eventData['start_time'] ?? '';
       endTimeController.text = eventData['end_time'] ?? '';
-      ServicesController.text = eventData['Services'] ?? '';
-      unionController.text = eventData['Name of the Student Union President'];
+      ServicesController.text = eventData['services'] ?? '';
+      unionController.text = eventData['nameof_theStudentUnionPresident'] ?? '';
       descriptionController.text = eventData['description'] ?? '';
       comController.text = eventData['comment'] ?? '';
       com1Controller.text = eventData['comment1'] ?? '';
@@ -199,8 +199,8 @@ class _CreateEventViewState extends State<CreateEventView> {
       }
 
       SupervisorTController.text = eventData['telesup'] ?? '';
-      SupervisorController.text = eventData['name sup'] ?? '';
-      DeanController.text = eventData['name Dean'] ?? '';
+      SupervisorController.text = eventData['name_sup'] ?? '';
+      DeanController.text = eventData['name_Dean'] ?? '';
       event_type = eventData['event'] ?? 'Initiative'; // قيمة افتراضية
     }
   }
@@ -448,9 +448,14 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                            'Name of the Organization Responsible for the Activity',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text('Name of the Organization Responsible ',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ]),
                         SizedBox(height: 16),
                         myTextField(
                             bool: false,
@@ -495,11 +500,17 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Location',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text(
+                            'Location',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ]),
                         SizedBox(height: 10), // مسافة بين العنوان والحقل
                         GestureDetector(
                           onTap: () async {
@@ -559,11 +570,17 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Event Date',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text(
+                            'Event Date',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ]),
                         SizedBox(height: 10),
                         InkWell(
                           onTap: () => _selectDate(context),
@@ -608,13 +625,19 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Activity Participants and Target Audience',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text(
+                            'Activity Participants and Target Audience',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
+                        ]),
                         SizedBox(height: 12), // مسافة بين العنوان والحقل
                         iconTitleContainer(
                           path: 'lib/assets/#.png',
@@ -660,13 +683,19 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Support Services Required for Conducting the Activity',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text(
+                            'Support ServicesRequiredfor Conducting theActivity',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
+                        ]),
                         SizedBox(height: 12), // مسافة بين العنوان وحقل الوصف
                         Container(
                           height: 149,
@@ -736,13 +765,19 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Event Time',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text(
+                            'Event Time',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
+                        ]),
                         SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -795,13 +830,19 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Activity Description and Objectives',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text(
+                            'Activity Description and Objectives',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
+                        ]),
                         SizedBox(height: 12), // مسافة بين العنوان وحقل الوصف
                         Container(
                           height: 149,
@@ -865,8 +906,14 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Activity Supervisor Information',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text('Activity Supervisor Information',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ]),
                         SizedBox(height: 16),
                         myTextField(
                             bool: false,
@@ -924,8 +971,14 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Student Information ',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text('Student Information ',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ]),
                         SizedBox(height: 16),
                         myTextField(
                           bool: false,
@@ -1048,8 +1101,14 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('For events through the colleges',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text('For events through the colleges',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ]),
                         SizedBox(height: 16),
                         myTextField(
                             bool: false,
@@ -1092,8 +1151,14 @@ class _CreateEventViewState extends State<CreateEventView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('For events through the Student Union',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text('For events through the Student Union',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ]),
                         SizedBox(height: 16),
                         myTextField(
                             bool: false,
@@ -1118,121 +1183,136 @@ class _CreateEventViewState extends State<CreateEventView> {
                   height: Get.height * 0.03,
                 ),
 
-            Obx(() => isCreatingEvent.value
-                ? const Center(
-              child: CircularProgressIndicator(),
-            )
-                : SizedBox(
-              height: 42,
-              width: double.infinity,
-              child: elevatedButton(
-                onpress: () async {
-                  if (!formKey.currentState!.validate()) return;
+                Obx(() => isCreatingEvent.value
+                    ? const Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : SizedBox(
+                        height: 42,
+                        width: double.infinity,
+                        child: elevatedButton(
+                          onpress: () async {
+                            if (!formKey.currentState!.validate()) return;
 
-                  if (TargetController.text.isEmpty) {
-                    Get.snackbar('Warning', "Please enter the target audience.",
-                        colorText: Colors.white, backgroundColor: Colors.blue);
-                    return;
-                  }
+                            if (TargetController.text.isEmpty) {
+                              Get.snackbar('Warning',
+                                  "Please enter the target audience.",
+                                  colorText: Colors.white,
+                                  backgroundColor: Colors.blue);
+                              return;
+                            }
 
-                  isCreatingEvent(true);
+                            isCreatingEvent(true);
 
-                  try {
-                    DataController dataController = Get.find();
-                    List<Map<String, dynamic>> mediaUrls = [];
+                            try {
+                              DataController dataController = Get.find();
+                              List<Map<String, dynamic>> mediaUrls = [];
 
-                    // Upload media (images/videos)
-                    if (media.isNotEmpty) {
-                      for (int i = 0; i < media.length; i++) {
-                        if (media[i].isVideo!) {
-                          String thumbnailUrl = await dataController
-                              .uploadThumbnailToFirebase(media[i].thumbnail!);
-                          String videoUrl = await dataController
-                              .uploadImageToFirebase(media[i].video!);
-                          mediaUrls.add({
-                            'url': videoUrl,
-                            'thumbnail': thumbnailUrl,
-                            'isImage': false
-                          });
-                        } else {
-                          String imageUrl = await dataController
-                              .uploadImageToFirebase(media[i].image!);
-                          mediaUrls.add({'url': imageUrl, 'isImage': true});
-                        }
-                      }
-                    }
+                              // Upload media (images/videos)
+                              if (media.isNotEmpty) {
+                                for (int i = 0; i < media.length; i++) {
+                                  if (media[i].isVideo!) {
+                                    String thumbnailUrl = await dataController
+                                        .uploadThumbnailToFirebase(
+                                            media[i].thumbnail!);
+                                    String videoUrl = await dataController
+                                        .uploadImageToFirebase(media[i].video!);
+                                    mediaUrls.add({
+                                      'url': videoUrl,
+                                      'thumbnail': thumbnailUrl,
+                                      'isImage': false
+                                    });
+                                  } else {
+                                    String imageUrl = await dataController
+                                        .uploadImageToFirebase(media[i].image!);
+                                    mediaUrls.add(
+                                        {'url': imageUrl, 'isImage': true});
+                                  }
+                                }
+                              }
 
-                    // Prepare event data
-                    Map<String, dynamic> eventData = {
-                      'event': event_type ?? 'Initiative',
-                      'event_name': titleController.text,
-                      'location': locationController.text,
-                      'date': date != null
-                          ? '${date!.day}-${date!.month}-${date!.year}'
-                          : '',
-                      'start_time': startTimeController.text,
-                      'end_time': endTimeController.text,
-                      'Services': ServicesController.text,
-                      'Name of the Student Union President': unionController.text,
-                      'description': descriptionController.text,
-                      'comment': comController.text,
-                      'comment1': com1Controller.text,
-                      'name std': studentController.text,
-                      'id': studentidController.text,
-                      'collage': collageController.text,
-                      'target': TargetController.text.split(','),
-                      'telesup': SupervisorTController.text,
-                      'name sup': SupervisorController.text,
-                      'joined': [FirebaseAuth.instance.currentUser!.uid],
-                      'name Dean': DeanController.text,
-                      'media': mediaUrls,
-                      'uid': FirebaseAuth.instance.currentUser!.uid,
-                      'inviter': [FirebaseAuth.instance.currentUser!.uid],
-                      'instructorApproval': null,
-                      'requestDate': Timestamp.now(),
-                    };
+                              // Prepare event data
+                              Map<String, dynamic> eventData = {
+                                'event': event_type ?? 'Initiative',
+                                'event_name': titleController.text,
+                                'location': locationController.text,
+                                'date': date != null
+                                    ? '${date!.day}-${date!.month}-${date!.year}'
+                                    : '',
+                                'start_time': startTimeController.text,
+                                'end_time': endTimeController.text,
+                                'services': ServicesController.text,
+                                'nameof_theStudentUnionPresident':
+                                    unionController.text,
+                                'description': descriptionController.text,
+                                'comment': comController.text,
+                                'comment1': com1Controller.text,
+                                'name std': studentController.text,
+                                'id': studentidController.text,
+                                'collage': collageController.text,
+                                'target': TargetController.text.split(','),
+                                'telesup': SupervisorTController.text,
+                                'name_sup': SupervisorController.text,
+                                'joined': [
+                                  FirebaseAuth.instance.currentUser!.uid
+                                ],
+                                'name_Dean': DeanController.text,
+                                'media': mediaUrls,
+                                'uid': FirebaseAuth.instance.currentUser!.uid,
+                                'inviter': [
+                                  FirebaseAuth.instance.currentUser!.uid
+                                ],
+                                'instructorApproval': null,
+                                'requestDate': Timestamp.now(),
+                              };
 
-                    // Update or create
-                    if (widget.isEditing && widget.event != null) {
-                      await dataController.updateEvent(widget.event!.id, eventData);
-                      print("Event updated");
-                      resetControllers();
-                      Get.back(result: true);
-                      Get.snackbar('Success', 'Event updated successfully',
-                          colorText: Colors.white, backgroundColor: Colors.green);
-                    } else {
-                      await FirebaseFirestore.instance
-                          .collection('eventRequests')
-                          .add(eventData);
-                      print('Request submitted successfully');
-                      resetControllers();
-                      Get.defaultDialog(
-                        title: "Request Sent",
-                        middleText:
-                        "Your event request has been submitted for approval.",
-                        textConfirm: "Close",
-                        confirmTextColor: Colors.white,
-                        onConfirm: () {
-                          Get.back(); // Close dialog
-                          isCreatingEvent(false);
-                          Get.back(); // Go back to previous screen
-                        },
-                        barrierDismissible: false,
-                      );
-                    }
-                  } catch (e, stack) {
-                    print('Error creating event: $e');
-                    print(stack);
-                    Get.snackbar('Error', 'Failed to create the event',
-                        colorText: Colors.white, backgroundColor: Colors.red);
-                  }
-                },
-                text: widget.isEditing ? 'Update Event' : 'Create Event',
-              ),
-            )),
+                              // Update or create
+                              if (widget.isEditing && widget.event != null) {
+                                await dataController.updateEvent(
+                                    widget.event!.id, eventData);
+                                print("Event updated");
+                                resetControllers();
+                                Get.back(result: true);
+                                Get.snackbar(
+                                    'Success', 'Event updated successfully',
+                                    colorText: Colors.white,
+                                    backgroundColor: Colors.green);
+                              } else {
+                                await FirebaseFirestore.instance
+                                    .collection('eventRequests')
+                                    .add(eventData);
+                                print('Request submitted successfully');
+                                resetControllers();
+                                Get.defaultDialog(
+                                  title: "Request Sent",
+                                  middleText:
+                                      "Your event request has been submitted for approval.",
+                                  textConfirm: "Close",
+                                  confirmTextColor: Colors.white,
+                                  onConfirm: () {
+                                    Get.back(); // Close dialog
+                                    isCreatingEvent(false);
+                                    Get.back(); // Go back to previous screen
+                                  },
+                                  barrierDismissible: false,
+                                );
+                              }
+                            } catch (e, stack) {
+                              print('Error creating event: $e');
+                              print(stack);
+                              Get.snackbar(
+                                  'Error', 'Failed to create the event',
+                                  colorText: Colors.white,
+                                  backgroundColor: Colors.red);
+                            }
+                          },
+                          text: widget.isEditing
+                              ? 'Update Event'
+                              : 'Create Event',
+                        ),
+                      )),
 
-
-            SizedBox(
+                SizedBox(
                   height: Get.height * 0.03,
                 ),
               ],

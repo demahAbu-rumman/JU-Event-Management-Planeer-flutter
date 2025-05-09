@@ -48,7 +48,8 @@ Widget myTextField({
 
       obscureText: bool,
       controller: controller,
-      onChanged: onChanged, // Add this line
+      onChanged: onChanged,
+      // Add this line
       decoration: InputDecoration(
           contentPadding: const EdgeInsets.only(top: 5),
           errorStyle: const TextStyle(fontSize: 0),
