@@ -4,8 +4,10 @@ import 'package:get/get.dart';
 import 'package:ju_event_managment_planner/Util/app_color.dart';
 import 'package:ju_event_managment_planner/controller/auth_controller.dart';
 import 'package:ju_event_managment_planner/controller/data_controller.dart';
+import 'package:ju_event_managment_planner/screens/ApprovedeventsSection.dart';
+import 'package:ju_event_managment_planner/screens/RequestedEventsSection.dart';
+import 'package:ju_event_managment_planner/screens/UpcomingEventsPage.dart';
 import 'package:ju_event_managment_planner/screens/settingsprofile.dart';
-import 'package:ju_event_managment_planner/widgets/event_fetch.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class Profiles_Page extends StatefulWidget {
@@ -20,6 +22,8 @@ class _ProfilePageState extends State<Profiles_Page> {
   TextEditingController lastNameController = TextEditingController();
   TextEditingController joinedDate = TextEditingController();
 
+
+
   final Map<String, String> locationToCollegeMap = {
     // Existing mappings
     "مدرج1 - كلية الطب": 'School of Medicine',
@@ -31,7 +35,8 @@ class _ProfilePageState extends State<Profiles_Page> {
     "مدرج ابن سبنا - كلية التمريض": 'School of Nursing',
     "كلية الصيدلة": 'School of Pharmacy',
     "كلية الحقوق": 'School of Law',
-    "مدرج اللوزي _ كلية الملك عبدلله الثاني لتكنولوجيا المعلومات": 'King Abdullah II School of Information Technology',
+    "مدرج اللوزي _ كلية الملك عبدلله الثاني لتكنولوجيا المعلومات":
+        'King Abdullah II School of Information Technology',
     "مدرج الكندي - كلية الاداب": 'School of Educational Sciences',
     "مدرج ابن خلدون - كلية الاداب": 'School of Educational Sciences',
     "مدرج الفراهيدي - كلية الاداب": 'School of Educational Sciences',
@@ -50,7 +55,8 @@ class _ProfilePageState extends State<Profiles_Page> {
     "عمادة الشؤون الطلبة": 'School of Educational Sciences',
     "كلية التربية": 'School of Sport Science',
     "كلية التمريض": 'School of Nursing',
-    "كلية الملك عبدالله الثاني لتكنولوجيا المعلومات": 'King Abdullah II School of Information Technology',
+    "كلية الملك عبدالله الثاني لتكنولوجيا المعلومات":
+        'King Abdullah II School of Information Technology',
     "كلية الاداب": 'School of Educational Sciences',
     "كلية الاعمال": 'School of Business',
     "كلية الفنون": 'School of Arts',
@@ -59,6 +65,7 @@ class _ProfilePageState extends State<Profiles_Page> {
   };
 
   bool _isOpen = false;
+  bool _isExpanded = false;
   late PanelController _panelController;
   String image = '';
   String collegeName = '';
@@ -72,12 +79,14 @@ class _ProfilePageState extends State<Profiles_Page> {
   AuthController authController = Get.put(AuthController());
   late DataController dataController;
 
+  @override
   void initState() {
     super.initState();
     _panelController = PanelController();
     _loadInitialData();
   }
 
+  // Update the _loadInitialData method to ensure it only gets college from user data
   void _loadInitialData() async {
     try {
       final uid = authController.currentUser?.uid;
@@ -96,7 +105,10 @@ class _ProfilePageState extends State<Profiles_Page> {
           lastNameController.text = data['last'] ?? '';
           selectedRole = data['role'] ?? 'Student';
           image = data['image'] ?? '';
+
+          // Ensure collegeName only comes from user document
           collegeName = data['collegeName'] ?? 'N/A';
+          // Don't derive college from location mapping
 
           final joinedTimestamp = data['joinedDate'];
           if (joinedTimestamp != null && joinedTimestamp is Timestamp) {
@@ -111,7 +123,6 @@ class _ProfilePageState extends State<Profiles_Page> {
       print("Failed to load user data: $e");
     }
   }
-
 
   void _updateProfileData(Map<String, dynamic> data) {
     setState(() {
@@ -164,12 +175,12 @@ class _ProfilePageState extends State<Profiles_Page> {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingProfile()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const SettingProfile()));
             },
           ),
         ],
       ),
-
       body: Stack(
         children: [
           Container(
@@ -184,12 +195,12 @@ class _ProfilePageState extends State<Profiles_Page> {
                     : null,
                 child: image.isEmpty
                     ? Icon(
-                  selectedRole == 'Instructor'
-                      ? Icons.school
-                      : Icons.person,
-                  size: 60,
-                  color: Colors.blue,
-                )
+                        selectedRole == 'Instructor'
+                            ? Icons.school
+                            : Icons.person,
+                        size: 60,
+                        color: Colors.blue,
+                      )
                     : null,
               ),
             ),
@@ -201,26 +212,25 @@ class _ProfilePageState extends State<Profiles_Page> {
                 _titleSection(),
                 _infoSection(joined),
                 const SizedBox(height: 24),
-
-                if (selectedRole != 'Vice Dean' && selectedRole != 'Activities Director')
+                if (selectedRole != 'Vice Dean' &&
+                    selectedRole != 'Activities Director')
                   _buildActivitySection(),
-
                 const SizedBox(height: 24),
                 if (selectedRole == 'Instructor') ...[
-                  _buildSectionTitle('Office Hours'),
+                  _buildUpcomingEvents(),
                   _buildSchedule(),
                 ] else if (selectedRole == 'Vice Dean') ...[
-                  _buildSectionTitle('Upcoming Events'),
+                  _buildUpcomingEvents(),
+                  const SizedBox(height: 24),
                   _buildRequestedEvents(),
-                  _buildEventList(),
                 ] else if (selectedRole == 'Activities Director') ...[
                   _buildApprovedActivities(),
+                  const SizedBox(height: 24),
                   _buildRequestedEvents(),
                 ] else ...[
-                  _buildSectionTitle('Upcoming Events'),
-                  _buildEventList(),
-                ],
+                  _buildUpcomingEvents(),
 
+                ],
               ],
             ),
           ),
@@ -279,10 +289,15 @@ class _ProfilePageState extends State<Profiles_Page> {
 
   List<Widget> _buildInfoCells(String joinedDate) {
     return [
-      if (selectedRole == 'Event Organizer') _buildAdaptiveInfoCell('Events', 'N/A'),
-      if (selectedRole == 'Instructor') _buildAdaptiveInfoCell('Courses', 'N/A'),
-      _buildAdaptiveInfoCell('College', collegeName.isNotEmpty ? collegeName : 'N/A'),
-      _buildAdaptiveInfoCell('Joined', joinedDate.isNotEmpty ? joinedDate : 'N/A'),
+      if (selectedRole == 'Event Organizer')
+        _buildAdaptiveInfoCell('Events', 'N/A'),
+      if (selectedRole == 'Instructor')
+        _buildAdaptiveInfoCell('Courses', 'N/A'),
+      if (selectedRole != 'Activities Director')
+        _buildAdaptiveInfoCell(
+            'College', collegeName.isNotEmpty ? collegeName : 'N/A'),
+      _buildAdaptiveInfoCell(
+          'Joined', joinedDate.isNotEmpty ? joinedDate : 'N/A'),
     ];
   }
 
@@ -322,7 +337,6 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
-
   Widget _buildActivityItem(Activity activity) {
     return ListTile(
       leading: Container(
@@ -342,153 +356,48 @@ class _ProfilePageState extends State<Profiles_Page> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Row(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const Spacer(),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            child: Text(
+              _isExpanded ? 'Collapse' : 'View All',
+              style: TextStyle(color: AppColors.lightgreen),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-// Add this to the _ProfilePageState class
-
-  Future<List<DocumentSnapshot>> _fetchUpcomingEvents() async {
-    try {
-      if (collegeName.isEmpty || collegeName == 'N/A') {
-        print("College name not set properly");
-        return [];
-      }
-
-      // Get current date (without time component)
-      final now = DateTime.now();
-      final todayStart = DateTime(now.year, now.month, now.day);
-      final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
-
-      // Fetch events from today onward (including all of today)
-      final querySnapshot = await FirebaseFirestore.instance
-          .collection('events')
-          .where('date', isGreaterThanOrEqualTo: todayStart)
-          .where('date', isLessThanOrEqualTo: todayEnd)
-          .orderBy('date')
-          .limit(20) // Increased limit to ensure we capture today's events
-          .get();
-
-      // Debug: Print all fetched events
-      print('Fetched ${querySnapshot.docs.length} events from Firestore');
-      querySnapshot.docs.forEach((doc) {
-        final eventDate = (doc.data()['date'] as Timestamp).toDate();
-        print('Event: ${doc.data()['event_name']} on ${eventDate.toString()}');
-      });
-
-      // Filter events based on college
-      final filteredEvents = querySnapshot.docs.where((doc) {
-        final eventData = doc.data() as Map<String, dynamic>;
-        final eventLocation = (eventData['location'] as String? ?? '').trim();
-
-        // First try direct college field if it exists
-        if (eventData.containsKey('college')) {
-          final match = (eventData['college'] as String? ?? '').toLowerCase() ==
-              collegeName.toLowerCase();
-          if (match) return true;
-        }
-
-        // Then try location mapping
-        final eventCollege = locationToCollegeMap.entries.firstWhere(
-              (entry) => eventLocation.toLowerCase().contains(entry.key.toLowerCase()),
-          orElse: () => MapEntry('', ''),
-        ).value;
-
-        final collegeMatch = eventCollege.toLowerCase() == collegeName.toLowerCase();
-
-        // Debug: Print matching info
-        if (collegeMatch) {
-          print('Matched event: ${eventData['event_name']}');
-          print('Location: $eventLocation');
-          print('Mapped college: $eventCollege');
-          print('User college: $collegeName');
-        }
-
-        return collegeMatch;
-      }).toList();
-
-      print('Found ${filteredEvents.length} matching events for college $collegeName');
-      return filteredEvents;
-    } catch (e) {
-      print("Error fetching upcoming events: $e");
-      return [];
-    }
-  }
 
 
-  Widget _buildEventList() {
-    return FutureBuilder<List<DocumentSnapshot>>(
-      future: _fetchUpcomingEvents(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'No upcoming events in your college',
-              style: TextStyle(color: Colors.grey),
-            ),
-          );
-        }
-
-        final events = snapshot.data!;
-        final Map<String, List<DocumentSnapshot>> groupedEvents = {};
-
-        for (var doc in events) {
-          final data = doc.data() as Map<String, dynamic>;
-          final timestamp = data['date'] as Timestamp?;
-          if (timestamp == null) continue;
-
-          final date = timestamp.toDate();
-          final now = DateTime.now();
-          String label;
-
-          if (_isSameDay(date, now)) {
-            label = 'Today';
-          } else if (_isSameDay(date, now.add(Duration(days: 1)))) {
-            label = 'Tomorrow';
-          } else {
-            label = '${date.day}/${date.month}/${date.year}';
-          }
-
-          groupedEvents.putIfAbsent(label, () => []).add(doc);
-        }
-
-        return ListView(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          children: groupedEvents.entries.map((entry) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  child: Text(
-                    entry.key,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                ...entry.value.map((doc) => EventItem(doc)).toList(),
-              ],
-            );
-          }).toList(),
-        );
-      },
+  Widget _buildUpcomingEvents() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle("Upcoming Events"),
+        UpcomingEventsSection(
+          collegeName: collegeName,
+          locationToCollegeMap: locationToCollegeMap,
+          filterByCollege: true, // or false if you want all events
+        ),
+      ],
     );
-  }
-
-  bool _isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
 
@@ -516,13 +425,38 @@ class _ProfilePageState extends State<Profiles_Page> {
   }
 
   Widget _buildRequestedEvents() {
-    return _buildSectionTitle('Requested Events'); // Placeholder
-    // You can replace with actual Firestore call to fetch where status == 'requested'
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Requested Events'),
+        if (selectedRole == 'Activities Director')
+          RequestedEventsSection(
+            collegeName: null, // Pass null for Activities Director
+            locationToCollegeMap: locationToCollegeMap,
+            filterByCollege: false, // Disable college filtering
+          )
+        else
+          RequestedEventsSection(
+            collegeName: collegeName,
+            locationToCollegeMap: locationToCollegeMap,
+            filterByCollege: true, // Enable college filtering for others
+          ),
+      ],
+    );
   }
 
   Widget _buildApprovedActivities() {
-    return _buildSectionTitle('Approved Activities'); // Placeholder
-    // You can replace with actual Firestore call to fetch where status == 'approved'
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle('Approved Activities'),
+        ApprovedActivitiesSection(
+          collegeName: collegeName,
+          locationToCollegeMap: locationToCollegeMap,
+          filterByCollege: false, // Or true if you want to filter by college
+        ),
+      ],
+    );
   }
 }
 

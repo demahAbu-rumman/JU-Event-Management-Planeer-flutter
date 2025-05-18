@@ -81,6 +81,7 @@ class AuthController extends GetxController {
     String uid = auth.currentUser!.uid;
 
     await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'uid': uid,
       'name': name,
       'mobile': mobile,
       'role': role,
@@ -155,6 +156,7 @@ class AuthController extends GetxController {
 
       String uid = userCredential.user!.uid;
       await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'uid': uid,
         'email': email,
         'role': role,
         'hasSubmittedFeedback': false, // Initialize feedback flag
@@ -242,6 +244,7 @@ class AuthController extends GetxController {
 
     try {
       await docRef.set({
+        'uid': uid,
         'image': imageUrl,
         'first': firstName,
         'last': lastName,

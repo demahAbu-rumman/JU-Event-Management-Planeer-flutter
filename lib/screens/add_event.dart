@@ -29,6 +29,7 @@ class CreateEventView extends StatefulWidget {
 class _CreateEventViewState extends State<CreateEventView> {
   DateTime? date = DateTime.now();
 
+  final TextEditingController actualEventNameController = TextEditingController();
   TextEditingController dateController = TextEditingController();
   TextEditingController timeController = TextEditingController();
   TextEditingController titleController = TextEditingController();
@@ -54,6 +55,8 @@ class _CreateEventViewState extends State<CreateEventView> {
   var selectedFrequency = -2;
 
   void resetControllers() {
+
+    actualEventNameController.clear();
     dateController.clear();
     timeController.clear();
     titleController.clear();
@@ -175,7 +178,8 @@ class _CreateEventViewState extends State<CreateEventView> {
       // تعبئة الحقول بقيم الحدث المحدد
       final eventData = widget.event!.data()
           as Map<String, dynamic>; // تحويل البيانات إلى Map
-      titleController.text = eventData['event_name'] ?? '';
+      actualEventNameController.text=eventData['eventName']?? '' ;
+      titleController.text = eventData['Organization_name'] ?? '';
       locationController.text = eventData['location'] ?? '';
       dateController.text = eventData['date'] ?? '';
       startTimeController.text = eventData['start_time'] ?? '';
@@ -432,6 +436,55 @@ class _CreateEventViewState extends State<CreateEventView> {
                           scrollDirection: Axis.horizontal,
                         ),
                       ),
+
+                Card(
+                  elevation: 6, // درجة ظل الكارد
+                  shadowColor: AppColors.lightgreen,
+                  shape: RoundedRectangleBorder(
+                    // زوايا مدورة
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          Text("*",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red)),
+                          Text('Event Name',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                        ]),
+                        SizedBox(height: 16),
+                        myTextField(
+                            bool: false,
+                            icon: 'lib/assets/4DotIcon.png',
+                            text: 'Name of the Event',
+                            controller: actualEventNameController,
+                            validator: (String input) {
+                              if (input.isEmpty) {
+                                Get.snackbar('Opps', "Event name is required.",
+                                    colorText: Colors.white,
+                                    backgroundColor: Colors.blue);
+                                return '';
+                              }
+
+                              if (input.length < 3) {
+                                Get.snackbar('Opps',
+                                    "Event name is should be 3+ characters.",
+                                    colorText: Colors.white,
+                                    backgroundColor: Colors.blue);
+                                return '';
+                              }
+                              return null;
+                            }),
+                      ],
+                    ),
+                  ),
+                ),
+
 
                 const SizedBox(
                   height: 20,
@@ -1233,8 +1286,9 @@ class _CreateEventViewState extends State<CreateEventView> {
 
                               // Prepare event data
                               Map<String, dynamic> eventData = {
+                                'eventName': actualEventNameController.text,
                                 'event': event_type ?? 'Initiative',
-                                'event_name': titleController.text,
+                                'Organization_name': titleController.text,
                                 'location': locationController.text,
                                 'date': date != null
                                     ? '${date!.day}-${date!.month}-${date!.year}'
@@ -1268,35 +1322,54 @@ class _CreateEventViewState extends State<CreateEventView> {
 
                               // Update or create
                               if (widget.isEditing && widget.event != null) {
-                                await dataController.updateEvent(
-                                    widget.event!.id, eventData);
+                                await dataController.updateEvent(widget.event!.id, eventData);
                                 print("Event updated");
                                 resetControllers();
                                 Get.back(result: true);
                                 Get.snackbar(
-                                    'Success', 'Event updated successfully',
-                                    colorText: Colors.white,
-                                    backgroundColor: Colors.green);
+                                  'Success',
+                                  'Event updated successfully',
+                                  colorText: Colors.white,
+                                  backgroundColor: Colors.green,
+                                );
                               } else {
+                                eventData['status'] = 'Pending';
                                 await FirebaseFirestore.instance
                                     .collection('eventRequests')
                                     .add(eventData);
-                                print('Request submitted successfully');
                                 resetControllers();
-                                Get.defaultDialog(
-                                  title: "Request Sent",
-                                  middleText:
+                                Get.dialog(
+                                  AlertDialog(
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                    title: Row(
+                                      children: const [
+                                        Icon(Icons.check_circle, color: Colors.green),
+                                        SizedBox(width: 8),
+                                        Text("Request Sent"),
+                                      ],
+                                    ),
+                                    content: const Text(
                                       "Your event request has been submitted for approval.",
-                                  textConfirm: "Close",
-                                  confirmTextColor: Colors.white,
-                                  onConfirm: () {
-                                    Get.back(); // Close dialog
-                                    isCreatingEvent(false);
-                                    Get.back(); // Go back to previous screen
-                                  },
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Get.back(); // Close dialog
+                                          isCreatingEvent(false);
+                                          Get.back(); // Go back to previous screen
+                                        },
+                                        child: const Text(
+                                          "Close",
+                                          style: TextStyle(color: Colors.green),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                   barrierDismissible: false,
                                 );
                               }
+
                             } catch (e, stack) {
                               print('Error creating event: $e');
                               print(stack);

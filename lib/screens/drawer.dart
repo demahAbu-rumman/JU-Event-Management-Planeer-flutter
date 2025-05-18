@@ -11,7 +11,7 @@ import 'package:ju_event_managment_planner/screens/profiles_page.dart';
 import '../Util/app_color.dart';
 import 'add_event.dart';
 import 'calender.dart';
-import 'instructor_requests_page.dart';
+import 'requests_page.dart';
 import 'login_and_signup.dart';
 import '../controller/data_controller.dart';
 
@@ -176,7 +176,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
               );
             },
           ),
-          if (_userRole == 'Instructor' || _userRole == 'Vice Dean' || _userRole == 'Activities Director')
+          if (_userRole == 'Vice Dean' || _userRole == 'Activities Director')
             ListTile(
               leading: const Icon(Icons.list_alt),
               title: const Text('Event Requests'),
@@ -185,7 +185,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const InstructorRequestsPage(),
+                    builder: (context) => const RequestsPage(),
                   ),
                 );
               },

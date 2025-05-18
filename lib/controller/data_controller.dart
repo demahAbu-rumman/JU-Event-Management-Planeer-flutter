@@ -14,6 +14,9 @@ import '../screens/notification_service.dart';
 class DataController extends GetxController {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  RxList<Map<String, dynamic>> messages = <Map<String, dynamic>>[].obs;
+  String get uid => FirebaseAuth.instance.currentUser?.uid ?? '';
 
   DocumentSnapshot? myDocument;
   var allUsers = <DocumentSnapshot>[].obs;
@@ -26,27 +29,22 @@ class DataController extends GetxController {
   var isMessageSending = false.obs;
   var isUsersLoading = false.obs;
 
-  // Controller for the selected role
   var selectedRole = ''.obs;
-  Future<void> updateEvent(
-      String eventId, Map<String, dynamic> eventData) async {
+
+  Future<void> updateEvent(String eventId, Map<String, dynamic> eventData) async {
     try {
-      // تأكد من أن eventData لا يحتوي على قيم null
       eventData.forEach((key, value) {
         if (value == null) {
           print("Warning: Field '$key' is null. Setting default value.");
-          eventData[key] = ''; // أو أي قيمة افتراضية أخرى
+          eventData[key] = '';
         }
       });
 
-      await FirebaseFirestore.instance
-          .collection('events')
-          .doc(eventId)
-          .update(eventData);
+      await FirebaseFirestore.instance.collection('events').doc(eventId).update(eventData);
       print("Event updated successfully");
     } catch (e) {
       print("Error updating event: $e");
-      throw e; // إعادة رمي الخطأ للتعامل معه في الواجهة
+      throw e;
     }
   }
 
@@ -64,13 +62,10 @@ class DataController extends GetxController {
     getMyDocument();
     getUsers();
     getEvents();
-
-    // Listening for changes in the selectedRole
     ever(selectedRole, (role) {
       if (role == 'Student') {
         hideEventCreatedSection();
       } else {
-        // Show all events when the role is not "Student"
         filteredEvents.assignAll(allEvents);
       }
     });
@@ -92,7 +87,6 @@ class DataController extends GetxController {
                 eventDate.day == now.day;
           }).toList();
           break;
-
         case 'Week':
           DateTime weekStart = now.subtract(Duration(days: now.weekday - 1));
           DateTime weekEnd = weekStart.add(const Duration(days: 6));
@@ -103,7 +97,6 @@ class DataController extends GetxController {
                 eventDate.isBefore(weekEnd.add(const Duration(days: 1)));
           }).toList();
           break;
-
         case 'Month':
           filteredList = allEvents.where((event) {
             String eventDateStr = event.get('date') as String;
@@ -111,7 +104,6 @@ class DataController extends GetxController {
             return eventDate.year == now.year && eventDate.month == now.month;
           }).toList();
           break;
-
         case 'Year':
           filteredList = allEvents.where((event) {
             String eventDateStr = event.get('date') as String;
@@ -119,7 +111,6 @@ class DataController extends GetxController {
             return eventDate.year == now.year;
           }).toList();
           break;
-
         default:
           filteredList = allEvents;
       }
@@ -129,7 +120,6 @@ class DataController extends GetxController {
     });
   }
 
-// Helper method to parse date string formatted as "DD-MM-YYYY"
   DateTime _parseDateString(String dateStr) {
     List<String> parts = dateStr.split('-');
     if (parts.length == 3) {
@@ -140,10 +130,9 @@ class DataController extends GetxController {
     }
     throw const FormatException("Invalid date format");
   }
-  // Add this to data_controller.dart
+
   String formatJoinedDate(dynamic date) {
     if (date == null) return '2023';
-
     DateTime dateTime;
     if (date is Timestamp) {
       dateTime = date.toDate();
@@ -152,32 +141,22 @@ class DataController extends GetxController {
     } else {
       return '2023';
     }
-
     return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 
   void filterEventsByDate(DateTime selectedDate) {
-    isEventsLoading.value = true; // Set loading state to true
-
-    String formattedDate =
-        "${selectedDate.day.toString().padLeft(2, '0')}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.year}";
-
-    // Filter the events that match the selected date
+    isEventsLoading.value = true;
     List<DocumentSnapshot> filteredList = allEvents.where((event) {
-      String eventDateStr = event.get('date') as String; // Get date as String
-      DateTime eventDate =
-          _parseDateString(eventDateStr); // Parse string to DateTime
+      String eventDateStr = event.get('date') as String;
+      DateTime eventDate = _parseDateString(eventDateStr);
       return eventDate.year == selectedDate.year &&
           eventDate.month == selectedDate.month &&
           eventDate.day == selectedDate.day;
     }).toList();
-
-    // Update the filteredEvents with the new filtered list
     filteredEvents.assignAll(filteredList);
-    isEventsLoading.value = false; // Set loading state to false
+    isEventsLoading.value = false;
   }
 
-  /// Fetch the current user's document
   void getMyDocument() {
     FirebaseFirestore.instance
         .collection('users')
@@ -195,10 +174,9 @@ class DataController extends GetxController {
         .doc(auth.currentUser?.uid)
         .get();
     myDocument = doc;
-    update(); // optional
+    update();
   }
 
-  /// Fetch all users
   void getUsers() {
     isUsersLoading(true);
     FirebaseFirestore.instance.collection('users').snapshots().listen((event) {
@@ -209,33 +187,27 @@ class DataController extends GetxController {
       isUsersLoading(false);
     });
   }
-  /// Fetch all events
+
   void getEvents() {
     isEventsLoading(true);
-
     FirebaseFirestore.instance.collection('events').snapshots().listen((event) {
       allEvents.assignAll(event.docs);
       filteredEvents.assignAll(event.docs);
-
-      // Populate joined events for the current user
       joinedEvents.assignAll(allEvents.where((e) {
         List joinedIds = e.get('joined') ?? [];
         return joinedIds.contains(auth.currentUser?.uid);
       }).toList());
-
       isEventsLoading(false);
     });
   }
+
   void filterEventsBySearch(String query) {
     if (query.isEmpty) {
-      // If the search query is empty, show all events
       filteredEvents.assignAll(allEvents);
     } else {
-      // Filter events based on the search query
       List<DocumentSnapshot> filteredList = allEvents.where((event) {
-        String eventName = event.get('name') as String;
+        String eventName = event.get('eventName') as String;
         String eventLocation = event.get('location') as String;
-
         return eventName.toLowerCase().contains(query.toLowerCase()) ||
             eventLocation.toLowerCase().contains(query.toLowerCase());
       }).toList();
@@ -243,7 +215,6 @@ class DataController extends GetxController {
     }
   }
 
-  /// Upload image to Firebase Storage
   Future<String> uploadImageToFirebase(File file) async {
     String fileName = Path.basename(file.path);
     var reference = FirebaseStorage.instance.ref().child('myfiles/$fileName');
@@ -252,26 +223,40 @@ class DataController extends GetxController {
     return await taskSnapshot.ref.getDownloadURL();
   }
 
-  /// Upload thumbnail to Firebase Storage
   Future<String> uploadThumbnailToFirebase(Uint8List file) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    var reference =
-        FirebaseStorage.instance.ref().child('myfiles/$fileName.jpg');
+    var reference = FirebaseStorage.instance.ref().child('myfiles/$fileName.jpg');
     UploadTask uploadTask = reference.putData(file);
     TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
     return await taskSnapshot.ref.getDownloadURL();
   }
 
-  /// Send message to Firebase
+  Stream<QuerySnapshot> getUserChatsStream() {
+    return _firestore
+        .collection('chats')
+        .where('group', arrayContains: uid)
+        .orderBy('lastMessage', descending: true)
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot> getChatMessagesStream(String groupId) {
+    return _firestore
+        .collection('chats')
+        .doc(groupId)
+        .collection('chatroom')
+        .where('message', isNotEqualTo: null)
+        .orderBy('message')
+        .orderBy('timestamp', descending: true)
+        .snapshots();
+  }
+
   Future<void> sendMessageToFirebase({
     required Map<String, dynamic> data,
     required String lastMessage,
     required String groupId,
-    required String recipientToken, // The FCM token of the recipient
+    required String recipientToken,
   }) async {
     isMessageSending(true);
-
-    // Add the message to Firestore
     await FirebaseFirestore.instance
         .collection('chats')
         .doc(groupId)
@@ -286,7 +271,6 @@ class DataController extends GetxController {
 
     isMessageSending(false);
 
-    // Send the FCM notification to the recipient
     await sendFCMNotification(
       title: 'New Message',
       body: lastMessage,
@@ -321,9 +305,7 @@ class DataController extends GetxController {
     }
   }
 
-  /// Create a notification
-  Future<void> createNotification(
-      String recipientUid, String recipientToken) async {
+  Future<void> createNotification(String recipientUid, String recipientToken) async {
     try {
       await FirebaseFirestore.instance
           .collection('notifications')
@@ -332,8 +314,7 @@ class DataController extends GetxController {
           .add({
         'message': "Sent you a message.",
         'image': myDocument?.get('image') ?? '',
-        'name':
-            "${myDocument?.get('first') ?? ''} ${myDocument?.get('last') ?? ''}",
+        'name': "${myDocument?.get('first') ?? ''} ${myDocument?.get('last') ?? ''}",
         'time': DateTime.now(),
       });
       print('Notification added successfully');
@@ -341,7 +322,6 @@ class DataController extends GetxController {
       print('Error creating notification: $e');
     }
 
-    // Send the FCM notification to the recipient
     await sendFCMNotification(
       title: 'New Message',
       body: 'You have a new message from ${myDocument?.get('first') ?? ''}',
@@ -360,17 +340,13 @@ class DataController extends GetxController {
         .where('date', isLessThan: endOfDay)
         .get();
 
-    return snapshot.docs
-        .map((doc) => doc.data() as Map<String, dynamic>)
-        .toList();
+    return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
   }
 
   Future<bool> createEvent(Map<String, dynamic> eventData) async {
     try {
-      // Create the event in Firestore
       await FirebaseFirestore.instance.collection('events').add(eventData);
 
-      // Create a notification for the user
       await LocalNotificationService.storeNotification(
         title: "New Event Created",
         body: "You have a new event scheduled for today!",
@@ -386,7 +362,6 @@ class DataController extends GetxController {
     }
   }
 
-// Example method to fetch user tokens
   Future<List<String>> fetchUserTokens() async {
     List<String> tokens = [];
     var snapshot = await FirebaseFirestore.instance.collection('users').get();
@@ -398,7 +373,6 @@ class DataController extends GetxController {
     return tokens;
   }
 
-  /// Hide the Event Created section for students
   void hideEventCreatedSection() {
     filteredEvents.assignAll(allEvents.where((event) {
       return event.get('creatorRole') != 'Student';

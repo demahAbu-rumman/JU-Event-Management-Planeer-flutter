@@ -193,20 +193,9 @@ class _MessagesPageState extends State<MessagesPage> {
 
   Widget _buildMainContent() {
     final currentUserId = dataController.auth.currentUser?.uid;
+    final query = _searchQuery.trim().toLowerCase();
 
-    // Use allUsers instead of filteredUsers
-    final filteredUsers = dataController.allUsers.where((user) {
-      final data = user.data() as Map<String, dynamic>? ?? {};
-      final first = (data['first'] ?? '').toString().toLowerCase();
-      final last = (data['last'] ?? '').toString().toLowerCase();
-      final email = (data['email'] ?? '').toString().toLowerCase();
-      return first.contains(_searchQuery.toLowerCase()) ||
-          last.contains(_searchQuery.toLowerCase()) ||
-          email.contains(_searchQuery.toLowerCase());
-    }).where((user) => user.id != currentUserId).toList();
-
-    // Rest of the method remains the same
-    if (!_hasSearched || _searchQuery.isEmpty) {
+    if (!_hasSearched || query.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -221,6 +210,16 @@ class _MessagesPageState extends State<MessagesPage> {
         ),
       );
     }
+
+    final filteredUsers = dataController.allUsers.where((user) {
+      final data = user.data() as Map<String, dynamic>? ?? {};
+      final first = (data['first'] ?? '').toString().toLowerCase();
+      final last = (data['last'] ?? '').toString().toLowerCase();
+      final email = (data['email'] ?? '').toString().toLowerCase();
+
+      return (first.contains(query) || last.contains(query) || email.contains(query)) &&
+          user.id != currentUserId;
+    }).toList();
 
     if (filteredUsers.isEmpty) {
       return Center(
@@ -257,7 +256,7 @@ class _MessagesPageState extends State<MessagesPage> {
         onChanged: (value) {
           setState(() {
             _searchQuery = value;
-            _hasSearched = value.isNotEmpty;
+            _hasSearched = value.trim().isNotEmpty;
           });
         },
       ),
@@ -285,7 +284,11 @@ class _MessagesPageState extends State<MessagesPage> {
             : null,
       ),
       title: Text(
-        [firstName, lastName].where((s) => s.isNotEmpty).join(' ').trim().isNotEmpty
+        [firstName, lastName]
+            .where((s) => s.isNotEmpty)
+            .join(' ')
+            .trim()
+            .isNotEmpty
             ? [firstName, lastName].where((s) => s.isNotEmpty).join(' ').trim()
             : 'Unnamed User',
         style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.black),
@@ -344,7 +347,8 @@ class _MessagesPageState extends State<MessagesPage> {
         });
       }
 
-      final receiverName = '${user.get('first') ?? 'User'} ${user.get('last') ?? ''}'.trim();
+      final receiverName =
+      '${user.get('first') ?? 'User'} ${user.get('last') ?? ''}'.trim();
       print('Navigating to chat with $receiverName');
 
       Get.to(() => ChatPage(

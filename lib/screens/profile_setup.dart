@@ -289,8 +289,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             _isEventOrganizer = value == "Event Organizer";
             _showCollegeField = value == "Student" ||
                 value == "Instructor" ||
-                value == "Vice Dean" ||
-                value == "Activities Director";
+                value == "Vice Dean";
 
             if (!_isEventOrganizer) _organizationNameController.clear();
             if (!_showCollegeField) _collegeNameController.clear();

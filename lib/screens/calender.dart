@@ -120,7 +120,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     final event = events[index];
                     return _buildEventCard(
                       context,
-                      name: event.get('event_name') ?? 'No Name',
+                      name: event.get('eventName') ?? 'No Name',
                       location: event.get('location') ?? 'No Location',
                       time:
                           "${event.get('start_time')} - ${event.get('end_time')}",

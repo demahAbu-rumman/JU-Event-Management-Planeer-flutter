@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ju_event_managment_planner/Util/app_color.dart';
+import '../Util/app_color.dart';
 
 class Location extends StatefulWidget {
   @override
@@ -71,10 +73,14 @@ class _LocationState extends State<Location> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green.shade700,
-        iconTheme: IconThemeData(color: Colors.white),
-        title: Text('Location', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Location',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
+        backgroundColor: AppColors.lightgreen,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
@@ -144,10 +150,10 @@ class _LocationState extends State<Location> {
             SizedBox(height: 24),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green.shade700,
+                backgroundColor: AppColors.lightgreen,
                 minimumSize: Size(double.infinity, 50),
               ),
-              onPressed: () {
+              onPressed: () async {
                 if (selectedCollege != null) {
                   Get.back(result: selectedCollege);
                 } else {
@@ -156,6 +162,24 @@ class _LocationState extends State<Location> {
                       backgroundColor: Colors.red,
                       snackPosition: SnackPosition.BOTTOM);
                 }
+
+                /* if (selectedCollege != null) {
+                  final uid = FirebaseAuth.instance.currentUser?.uid;
+                  if (uid != null) {
+                    await FirebaseFirestore.instance
+                        .collection('eventRequests')
+                        .doc(uid)
+                        .set({
+                      'collegeName': selectedCollege,
+                    }, SetOptions(merge: true)); // This creates or updates safely
+                  }
+                  Get.back(result: selectedCollege);
+                } else {
+                  Get.snackbar('خطأ', 'يرجى اختيار الكلية',
+                      colorText: Colors.white,
+                      backgroundColor: Colors.red,
+                      snackPosition: SnackPosition.BOTTOM);
+                }*/
               },
               child: Text(
                 'Confirm',

@@ -97,7 +97,7 @@ class _EventDetailsViewState extends State<EventDetailsView> {
               children: [
                 Center(
                   child: Text(
-                    widget.event['event_name'],
+                    widget.event['eventName'],
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 26,
