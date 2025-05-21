@@ -228,6 +228,7 @@ class _ChatPageState extends State<ChatPage> {
         .doc(widget.chatId)
         .collection('messages')
         .add({
+
       'text': text,
       'senderId': userId,
       'receiverId': widget.receiverId,

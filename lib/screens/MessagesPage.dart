@@ -151,14 +151,30 @@ class _MessagesPageState extends State<MessagesPage> {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: InkWell(
-            onTap: () {
-              Get.to(() => ChatPage(
-                chatId: chat.id,
-                receiverName: name.isNotEmpty ? name : 'User',
-                receiverId: otherUserId,
-              ));
-            },
-            child: Column(
+              onTap: () {
+                final receiverId = user.id;
+                final firstName = user['first'] ?? '';
+                final lastName = user['last'] ?? '';
+                final receiverName = '$firstName $lastName'.trim();
+                final currentUserId = dataController.auth.currentUser!.uid;
+                final groupId = [currentUserId, receiverId]..sort();
+                final chatId = groupId.join('_');
+
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatPage(
+                      chatId: chatId,
+                      receiverId: receiverId,
+                      receiverName: receiverName,
+                    ),
+                  ),
+                );
+              },
+
+
+              child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircleAvatar(
@@ -192,50 +208,47 @@ class _MessagesPageState extends State<MessagesPage> {
   }
 
   Widget _buildMainContent() {
-    final currentUserId = dataController.auth.currentUser?.uid;
-    final query = _searchQuery.trim().toLowerCase();
-
-    if (!_hasSearched || query.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.search, size: 64, color: AppColors.grey.withOpacity(0.5)),
-            const SizedBox(height: 16),
-            Text(
-              'Search for users to message',
-              style: TextStyle(color: AppColors.textColor, fontSize: 18),
-            ),
-          ],
-        ),
-      );
+    if (_searchQuery.isEmpty) {
+      return const Center(child: Text('Start typing to search for users'));
     }
 
-    final filteredUsers = dataController.allUsers.where((user) {
-      final data = user.data() as Map<String, dynamic>? ?? {};
-      final first = (data['first'] ?? '').toString().toLowerCase();
-      final last = (data['last'] ?? '').toString().toLowerCase();
-      final email = (data['email'] ?? '').toString().toLowerCase();
+    return FutureBuilder<QuerySnapshot>(
+      future: FirebaseFirestore.instance.collection('users').get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      return (first.contains(query) || last.contains(query) || email.contains(query)) &&
-          user.id != currentUserId;
-    }).toList();
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(child: Text('No users found'));
+        }
 
-    if (filteredUsers.isEmpty) {
-      return Center(
-        child: Text(
-          'No user found matching "$_searchQuery"',
-          style: TextStyle(color: AppColors.textColor, fontSize: 16),
-        ),
-      );
-    }
+        final query = _searchQuery.toLowerCase();
+        final matchedUsers = snapshot.data!.docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final first = (data['first'] ?? '').toString().toLowerCase();
+          final last = (data['last'] ?? '').toString().toLowerCase();
+          final fullName = '$first $last';
+          return first.contains(query) || last.contains(query) || fullName.contains(query);
+        }).toList();
 
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 8),
-      itemCount: filteredUsers.length,
-      itemBuilder: (context, index) => _buildUserTile(filteredUsers[index]),
+        if (matchedUsers.isEmpty) {
+          return const Center(child: Text('No matching users found'));
+        }
+
+        return ListView.builder(
+          itemCount: matchedUsers.length,
+          itemBuilder: (context, index) {
+            final user = matchedUsers[index];
+            return _buildUserTile(user);
+          },
+        );
+      },
     );
   }
+
+
+
 
   Widget _buildSearchBar() {
     return Padding(
@@ -339,6 +352,7 @@ class _MessagesPageState extends State<MessagesPage> {
       if (!chatSnapshot.exists) {
         print('Creating new chat document');
         await chatDoc.set({
+          'chatId': chatId,
           'participants': [userId, currentUserId],
           'createdAt': Timestamp.now(),
           'lastMessage': '',
