@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ju_event_managment_planner/screens/notification_service.dart';
 import '../Util/app_color.dart';
 
 class RequestsPage extends StatelessWidget {
@@ -172,6 +173,41 @@ class RequestCard extends StatelessWidget {
       ),
     );
   }
+  Future<void> publishEvent({required String eventTitle}) async {
+    try {
+      final allUsersSnapshot = await FirebaseFirestore.instance.collection('users').get();
+
+      for (var userDoc in allUsersSnapshot.docs) {
+        final userId = userDoc.id;
+        final fcmToken = userDoc.data()['fcmToken']; // optional
+
+        // Store the notification in Firestore
+        await FirebaseFirestore.instance
+            .collection('notifications')
+            .doc(userId)
+            .collection('userNotifications')
+            .add({
+          'title': 'New Event Published!',
+          'body': 'A new event "$eventTitle" has been published. Check it out!',
+          'timestamp': FieldValue.serverTimestamp(),
+          'isRead': false,
+        });
+
+        // Optional: Send FCM push notification
+        if (fcmToken != null && fcmToken.isNotEmpty) {
+          await LocalNotificationService.sendNotification(
+            title: 'New Event Published!',
+            message: 'Check out the latest event "$eventTitle" now!',
+            token: fcmToken,
+          );
+        }
+      }
+
+      print('Notifications sent to all users.');
+    } catch (e) {
+      print('Error notifying users: $e');
+    }
+  }
 
   Future<void> _approveRequest(String docId, Map<String, dynamic> data) async {
     try {
@@ -185,9 +221,10 @@ class RequestCard extends StatelessWidget {
       });
 
       await FirebaseFirestore.instance.collection('events').add(filteredData);
-
       Get.snackbar('Approved', 'Event has been approved and added to events.',
           backgroundColor: AppColors.lightgreen, colorText: Colors.white);
+      await publishEvent(eventTitle: data['eventName'] ?? 'A new event');
+
     } catch (e) {
       print("Error approving request: $e");
       Get.snackbar('Error', 'Failed to approve request.',

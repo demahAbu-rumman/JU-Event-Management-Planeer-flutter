@@ -81,22 +81,43 @@ class _CreateEventViewState extends State<CreateEventView> {
     setState(() {});
   }
 
-  void publishEvent() async {
-    // After publishing, notify users
-    String? userId =
-        FirebaseAuth.instance.currentUser?.uid; // Get the current user ID
+  /*Future<void> publishEvent({required String eventTitle}) async {
+    try {
+      final allUsersSnapshot = await FirebaseFirestore.instance.collection('users').get();
 
-    if (userId != null) {
-      await LocalNotificationService.storeNotification(
-        title: 'New Event Published!',
-        body: 'A new event has been published. Check it out!',
-        userId: userId, // Use the current user's ID
-      );
-    } else {
-      print('No user is currently signed in.');
+      for (var userDoc in allUsersSnapshot.docs) {
+        final userId = userDoc.id;
+        final fcmToken = userDoc.data()['fcmToken']; // optional
+
+        // Store the notification in Firestore
+        await FirebaseFirestore.instance
+            .collection('notifications')
+            .doc(userId)
+            .collection('userNotifications')
+            .add({
+          'title': 'New Event Published!',
+          'body': 'A new event "$eventTitle" has been published. Check it out!',
+          'timestamp': FieldValue.serverTimestamp(),
+          'isRead': false,
+        });
+
+        // Optional: Send FCM push notification
+        if (fcmToken != null && fcmToken.isNotEmpty) {
+          await LocalNotificationService.sendNotification(
+            title: 'New Event Published!',
+            message: 'Check out the latest event "$eventTitle" now!',
+            token: fcmToken,
+          );
+        }
+      }
+
+      print('Notifications sent to all users.');
+    } catch (e) {
+      print('Error notifying users: $e');
     }
   }
 
+*/
   var isCreatingEvent = false.obs;
 
   _selectDate(BuildContext context) async {

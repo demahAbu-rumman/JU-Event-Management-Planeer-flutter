@@ -106,6 +106,7 @@ class AuthController extends GetxController {
     };
   }
 
+
   // Login method
   void login({String? email, String? password}) {
     isLoading(true);
@@ -117,6 +118,13 @@ class AuthController extends GetxController {
       isLoading(false);
       storeToken();
       Get.to(() => const HomePage());
+
+      await LocalNotificationService.storeNotification(
+        title: 'Welcome Back !',
+        body: 'This is your first notification.',
+        userId: FirebaseAuth.instance.currentUser!.uid,
+      );
+
     }).catchError((e) {
       isLoading(false);
       Get.snackbar('Error', "$e");
@@ -281,4 +289,5 @@ class AuthController extends GetxController {
       print("Error fetching user data: $e");
     }
   }
+
 }

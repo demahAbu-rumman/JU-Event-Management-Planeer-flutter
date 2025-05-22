@@ -305,12 +305,12 @@ class DataController extends GetxController {
     }
   }
 
-  Future<void> createNotification(String recipientUid, String recipientToken) async {
+  /*Future<void> createNotification(String recipientUid, String recipientToken) async {
     try {
       await FirebaseFirestore.instance
           .collection('notifications')
           .doc(recipientUid)
-          .collection('myNotifications')
+          .collection('userNotifications')
           .add({
         'message': "Sent you a message.",
         'image': myDocument?.get('image') ?? '',
@@ -327,7 +327,7 @@ class DataController extends GetxController {
       body: 'You have a new message from ${myDocument?.get('first') ?? ''}',
       token: recipientToken,
     );
-  }
+  }*/
 
   Future<List<Map<String, dynamic>>> fetchTodaysEvents() async {
     final today = DateTime.now();

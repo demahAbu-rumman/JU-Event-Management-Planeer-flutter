@@ -65,7 +65,7 @@ class _LoginViewState extends State<LoginView> {
                         ),
                       )
                     : myText(
-                        text: 'Login',
+                        text: 'Log In',
                         style: GoogleFonts.poppins(
                           fontSize: 23,
                           fontWeight: FontWeight.w600,
@@ -80,7 +80,7 @@ class _LoginViewState extends State<LoginView> {
                         alignment: Alignment.center,
                         child: Image.asset(
                           'lib/assets/JU.png',
-                          width: Get.width * 0.4,
+                          width: Get.width * 0.2,
                           height: Get.height * 0.2,
                           fit: BoxFit.contain,
                         ),
@@ -89,7 +89,7 @@ class _LoginViewState extends State<LoginView> {
                         alignment: Alignment.center,
                         child: Image.asset(
                           'lib/assets/JU.png',
-                          width: Get.width * 0.4,
+                          width: Get.width * 0.2,
                           height: Get.height * 0.2,
                           fit: BoxFit.contain,
                         ),
@@ -111,7 +111,7 @@ class _LoginViewState extends State<LoginView> {
                     },
                     tabs: [
                       myText(
-                        text: 'Login',
+                        text: 'Log In',
                         style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w500,
@@ -228,44 +228,74 @@ class _LoginViewState extends State<LoginView> {
               InkWell(
                 onTap: () {
                   Get.defaultDialog(
-                    title: 'Forget Password?',
-                    content: SizedBox(
-                      width: Get.width,
-                      child: Column(
-                        children: [
-                          myTextField(
-                            bool: false,
-                            icon: 'lib/assets/lock.png',
-                            text: 'enter your email...',
-                            controller: forgetEmailController,
-                          ),
-                          const SizedBox(height: 10),
-                          MaterialButton(
-                            color: AppColors.lightgreen,
+                    title: 'Reset Password',
+                    titleStyle: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    radius: 12,
+                    content: Column(
+                      children: [
+                        myTextField(
+                          bool: false,
+                          icon: 'lib/assets/lock.png',
+                          text: 'Enter your email address',
+                          controller: forgetEmailController,
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.lightgreen,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
                             onPressed: () {
                               authController.forgetPassword(
-                                  forgetEmailController.text.trim());
+                                forgetEmailController.text.trim(),
+                              );
                             },
-                            minWidth: double.infinity,
-                            child: const Text("Sent"),
-                          )
-                        ],
-                      ),
+                            child: const Text(
+                              "Send Reset Link",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 },
                 child: Container(
                   margin: EdgeInsets.only(top: Get.height * 0.02),
-                  child: myText(
-                    text: 'Forgot password?',
-                    style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.lightGreen,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Forgot Password?',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.textColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4), // Space between text and line
+                      Container(
+                        width: 130, // Adjust to match text width
+                        height: 1.5,
+                        color: AppColors.textColor,
+                      ),
+                    ],
                   ),
                 ),
               ),
+
             ],
           ),
           Obx(() => authController.isLoading.value
@@ -290,10 +320,11 @@ class _LoginViewState extends State<LoginView> {
           SizedBox(height: Get.height * 0.02),
           myText(
             text: 'Or Connect With',
-            style: TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.w400,
-              color: AppColors.darkGreen,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textColor,
+              letterSpacing: 0.5,
             ),
           ),
           SizedBox(height: Get.height * 0.01),
@@ -552,10 +583,11 @@ class _LoginViewState extends State<LoginView> {
           SizedBox(height: Get.height * 0.02),
           myText(
             text: 'Or Connect With',
-            style: TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.w400,
-              color: AppColors.darkGreen,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textColor,
+              letterSpacing: 0.5,
             ),
           ),
           SizedBox(height: Get.height * 0.01),

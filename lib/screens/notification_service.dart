@@ -100,6 +100,33 @@ class LocalNotificationService {
     }
   }
 
+  // Add this method to your LocalNotificationService class in notification_service.dart
+  static Future<void> initializeNotificationStructure() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) return;
+
+      // Check if the notifications collection exists for the current user
+      final snapshot = await FirebaseFirestore.instance
+          .collection('notifications')
+          .doc(currentUser.uid)
+          .collection('userNotifications')
+          .limit(1)
+          .get();
+
+      // If no documents exist, create a welcome notification
+      if (snapshot.docs.isEmpty) {
+        await storeNotification(
+          title: 'Welcome Back!',
+          body: 'Your notification history has been reset.',
+          userId: currentUser.uid,
+        );
+      }
+    } catch (e) {
+      print("Error initializing notification structure: $e");
+    }
+  }
+
   static Future<void> storeNotification({
     required String title,
     required String body,

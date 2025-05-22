@@ -9,9 +9,15 @@ class NotificationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.lightgreen,
-        title: Text('Notifications', style: TextStyle(color: Colors.white)),
         iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: AppColors.lightgreen,
+        title: const Text(
+          'Notifications',
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
+        elevation: 0,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
