@@ -4,8 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:ju_event_managment_planner/Util/app_color.dart';
 import 'package:ju_event_managment_planner/screens/home_page.dart';
 import 'package:ju_event_managment_planner/screens/notification_service.dart';
 import 'package:ju_event_managment_planner/screens/verify_email_page.dart';
@@ -117,17 +119,35 @@ class AuthController extends GetxController {
       await fetchUserData();
       isLoading(false);
       storeToken();
-      Get.to(() => const HomePage());
 
+      // 🔔 Save a local notification (if needed)
       await LocalNotificationService.storeNotification(
         title: 'Welcome Back !',
-        body: 'This is your first notification.',
+        body: ' ',
         userId: FirebaseAuth.instance.currentUser!.uid,
+      );
+
+      // 👉 Navigate to home
+      Get.to(() => const HomePage());
+
+      Get.snackbar(
+        'Welcome Back!  🎉 ',
+        'Glad to see you again.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: AppColors.lightgreen,
+        colorText: Colors.white,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        duration: const Duration(seconds: 3),
       );
 
     }).catchError((e) {
       isLoading(false);
-      Get.snackbar('Error', "$e");
+      Get.snackbar(
+        'Login Failed',
+        e.toString(),
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
     });
   }
 

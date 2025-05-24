@@ -218,30 +218,31 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+// In ChatPage.dart, update the _sendMessage method:
   Future<void> _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty || userId == null) return;
 
-    // Add the message to the messages subcollection
-    await _firestore
-        .collection('chats')
-        .doc(widget.chatId)
-        .collection('messages')
-        .add({
+    // Get the recipient's token for notification
+    final recipientDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.receiverId)
+        .get();
+    final recipientToken = recipientDoc.get('fcmToken') ?? '';
 
-      'text': text,
-      'senderId': userId,
-      'receiverId': widget.receiverId,
-      'timestamp': Timestamp.now(),
-      'isRead': false,
-    });
-
-    // Update the chat document with last message info
-    await _firestore.collection('chats').doc(widget.chatId).update({
-      'lastMessage': text,
-      'lastMessageTime': Timestamp.now(),
-      'lastMessageSender': userId,
-    });
+    // Use DataController to send message for consistency
+    await Get.find<DataController>().sendMessageToFirebase(
+      data: {
+        'text': text,
+        'senderId': userId,
+        'receiverId': widget.receiverId,
+        'timestamp': Timestamp.now(),
+        'isRead': false,
+      },
+      lastMessage: text,
+      groupId: widget.chatId,
+      recipientToken: recipientToken,
+    );
 
     _messageController.clear();
   }

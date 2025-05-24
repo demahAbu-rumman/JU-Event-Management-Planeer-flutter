@@ -175,32 +175,31 @@ class RequestCard extends StatelessWidget {
   }
   Future<void> publishEvent({required String eventTitle}) async {
     try {
-      final allUsersSnapshot = await FirebaseFirestore.instance.collection('users').get();
+      final allUsersSnapshot =
+      await FirebaseFirestore.instance.collection('users').get();
 
       for (var userDoc in allUsersSnapshot.docs) {
         final userId = userDoc.id;
-        final fcmToken = userDoc.data()['fcmToken']; // optional
+        //  final fcmToken = userDoc.data()['fcmToken']; // optional
 
-        // Store the notification in Firestore
-        await FirebaseFirestore.instance
-            .collection('notifications')
-            .doc(userId)
-            .collection('userNotifications')
-            .add({
-          'title': 'New Event Published!',
-          'body': 'A new event "$eventTitle" has been published. Check it out!',
-          'timestamp': FieldValue.serverTimestamp(),
-          'isRead': false,
-        });
+        //  Use your LocalNotificationService to store the notification
+        await LocalNotificationService.storeNotification(
+          title: 'New Event Published!',
+          body: 'A new event "$eventTitle" has been published. Check it out!',
+          userId: userId,
+        );
 
-        // Optional: Send FCM push notification
-        if (fcmToken != null && fcmToken.isNotEmpty) {
-          await LocalNotificationService.sendNotification(
-            title: 'New Event Published!',
-            message: 'Check out the latest event "$eventTitle" now!',
-            token: fcmToken,
-          );
-        }
+        // Optional: Send push notification here if needed later
+        /*
+      final fcmToken = userDoc.data()['fcmToken'];
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        await LocalNotificationService.sendNotification(
+          title: 'New Event Published!',
+          message: 'Check out the latest event "$eventTitle" now!',
+          token: fcmToken,
+        );
+      }
+      */
       }
 
       print('Notifications sent to all users.');
@@ -208,6 +207,7 @@ class RequestCard extends StatelessWidget {
       print('Error notifying users: $e');
     }
   }
+
 
   Future<void> _approveRequest(String docId, Map<String, dynamic> data) async {
     try {
@@ -223,6 +223,7 @@ class RequestCard extends StatelessWidget {
       await FirebaseFirestore.instance.collection('events').add(filteredData);
       Get.snackbar('Approved', 'Event has been approved and added to events.',
           backgroundColor: AppColors.lightgreen, colorText: Colors.white);
+
       await publishEvent(eventTitle: data['eventName'] ?? 'A new event');
 
     } catch (e) {

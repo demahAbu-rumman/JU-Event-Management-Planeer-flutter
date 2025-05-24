@@ -31,7 +31,8 @@ class DataController extends GetxController {
 
   var selectedRole = ''.obs;
 
-  Future<void> updateEvent(String eventId, Map<String, dynamic> eventData) async {
+  Future<void> updateEvent(
+      String eventId, Map<String, dynamic> eventData) async {
     try {
       eventData.forEach((key, value) {
         if (value == null) {
@@ -40,7 +41,10 @@ class DataController extends GetxController {
         }
       });
 
-      await FirebaseFirestore.instance.collection('events').doc(eventId).update(eventData);
+      await FirebaseFirestore.instance
+          .collection('events')
+          .doc(eventId)
+          .update(eventData);
       print("Event updated successfully");
     } catch (e) {
       print("Error updating event: $e");
@@ -225,7 +229,8 @@ class DataController extends GetxController {
 
   Future<String> uploadThumbnailToFirebase(Uint8List file) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    var reference = FirebaseStorage.instance.ref().child('myfiles/$fileName.jpg');
+    var reference =
+        FirebaseStorage.instance.ref().child('myfiles/$fileName.jpg');
     UploadTask uploadTask = reference.putData(file);
     TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
     return await taskSnapshot.ref.getDownloadURL();
@@ -250,6 +255,7 @@ class DataController extends GetxController {
         .snapshots();
   }
 
+// In DataController.dart, update the sendMessageToFirebase method:
   Future<void> sendMessageToFirebase({
     required Map<String, dynamic> data,
     required String lastMessage,
@@ -257,16 +263,19 @@ class DataController extends GetxController {
     required String recipientToken,
   }) async {
     isMessageSending(true);
+
+    // Add message to the consistent path
     await FirebaseFirestore.instance
         .collection('chats')
         .doc(groupId)
-        .collection('chatroom')
+        .collection('messages')  // Changed from 'chatroom' to 'messages'
         .add(data);
 
     await FirebaseFirestore.instance.collection('chats').doc(groupId).set({
       'lastMessage': lastMessage,
       'groupId': groupId,
-      'group': groupId.split('-'),
+      'participants': groupId.split('-'),  // Changed from 'group' to 'participants'
+      'lastMessageTime': Timestamp.now(),  // Add timestamp for sorting
     }, SetOptions(merge: true));
 
     isMessageSending(false);
@@ -340,7 +349,107 @@ class DataController extends GetxController {
         .where('date', isLessThan: endOfDay)
         .get();
 
-    return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+    return snapshot.docs
+        .map((doc) => doc.data() as Map<String, dynamic>)
+        .toList();
+  }
+
+  Future<bool> hasEventConflict(Map<String, dynamic> newEventData) async {
+    try {
+      // Check required fields
+      if (!newEventData.containsKey('date') ||
+          !newEventData.containsKey('start_time') ||
+          !newEventData.containsKey('end_time') ||
+          !newEventData.containsKey('location')) {
+        print('Missing required event data');
+        return false;
+      }
+
+      // Parse date and time
+      String newDateStr = newEventData['date'];
+      DateTime newDate = _parseDateString(newDateStr);
+      //String loc=newEventData['location'];
+
+      TimeOfDay newStartTime = _parseTimeString(newEventData['start_time']);
+      TimeOfDay newEndTime = _parseTimeString(newEventData['end_time']);
+
+      DateTime newStartDateTime = DateTime(
+          newDate.year, newDate.month, newDate.day,
+          newStartTime.hour, newStartTime.minute);
+      DateTime newEndDateTime = DateTime(
+          newDate.year, newDate.month, newDate.day,
+          newEndTime.hour, newEndTime.minute);
+
+      // Check sanity
+      if (newEndDateTime.isBefore(newStartDateTime)) {
+        print("End time is before start time");
+        return true;
+      }
+
+      // Get existing events with same date AND location
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('events')
+          .where('date', isEqualTo: newDateStr)
+          .get();
+
+      for (var doc in snapshot.docs) {
+        Map<String, dynamic> existingEvent = doc.data() as Map<String, dynamic>;
+
+        // Skip if same event being updated
+        if (newEventData.containsKey('id') && doc.id == newEventData['id']) {
+          continue;
+        }
+
+        // Parse existing event time
+        TimeOfDay existingStartTime = _parseTimeString(existingEvent['start_time']);
+        TimeOfDay existingEndTime = _parseTimeString(existingEvent['end_time']);
+
+        DateTime existingStartDateTime = DateTime(
+            newDate.year, newDate.month, newDate.day,
+            existingStartTime.hour, existingStartTime.minute);
+        DateTime existingEndDateTime = DateTime(
+            newDate.year, newDate.month, newDate.day,
+            existingEndTime.hour, existingEndTime.minute);
+
+        if (newStartDateTime.isBefore(existingEndDateTime) &&
+            newEndDateTime.isAfter(existingStartDateTime))
+        {
+          print('Conflict with event: ${doc.id}');
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      print('Error in hasEventConflict: $e');
+      return false;
+    }
+  }
+
+
+
+  TimeOfDay _parseTimeString(String timeStr) {
+    try {
+      // Handle formats like "10:00 AM" or "10:00:00 AM"
+      final parts = timeStr.split(' ');
+      final timePart = parts[0];
+      final period = parts.length > 1 ? parts[1] : 'AM';
+
+      final timeComponents = timePart.split(':');
+      int hour = int.parse(timeComponents[0]);
+      int minute = int.parse(timeComponents[1]);
+
+      // Convert to 24-hour format
+      if (period.toUpperCase() == 'PM' && hour != 12) {
+        hour += 12;
+      } else if (period.toUpperCase() == 'AM' && hour == 12) {
+        hour = 0;
+      }
+
+      return TimeOfDay(hour: hour, minute: minute);
+    } catch (e) {
+      print('Error parsing time string: $timeStr');
+      return const TimeOfDay(hour: 0, minute: 0);
+    }
   }
 
   Future<bool> createEvent(Map<String, dynamic> eventData) async {

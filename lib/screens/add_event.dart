@@ -1257,6 +1257,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                   height: Get.height * 0.03,
                 ),
 
+
                 Obx(() => isCreatingEvent.value
                     ? const Center(
                         child: CircularProgressIndicator(),
@@ -1266,6 +1267,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                         width: double.infinity,
                         child: elevatedButton(
                           onpress: () async {
+
                             if (!formKey.currentState!.validate()) return;
 
                             if (TargetController.text.isEmpty) {
@@ -1341,8 +1343,32 @@ class _CreateEventViewState extends State<CreateEventView> {
                                 'requestDate': Timestamp.now(),
                               };
 
+                              bool conflict = await dataController.hasEventConflict({
+                                'date': '${date!.day}-${date!.month}-${date!.year}',
+                                'start_time': startTimeController.text,
+                                'end_time': endTimeController.text,
+                                'location': locationController.text,
+                                if (widget.isEditing && widget.event != null) 'id': widget.event!.id,
+                              });
+
+                              if (conflict) {
+                                Get.snackbar(
+                                  'Event Conflict',
+                                  'There is already an event at this location during the selected time.',
+                                  snackPosition: SnackPosition.TOP,
+                                  backgroundColor: Colors.redAccent,
+                                  colorText: Colors.white,
+
+                                );
+                                isCreatingEvent(false);
+                                return; // Stop the process only if there is a conflict
+                              }
+
+
+
                               // Update or create
                               if (widget.isEditing && widget.event != null) {
+                                isCreatingEvent(false);
                                 await dataController.updateEvent(widget.event!.id, eventData);
                                 print("Event updated");
                                 resetControllers();
