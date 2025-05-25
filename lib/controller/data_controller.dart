@@ -256,7 +256,7 @@ class DataController extends GetxController {
   }
 
 // In DataController.dart, update the sendMessageToFirebase method:
-  Future<void> sendMessageToFirebase({
+ /* Future<void> sendMessageToFirebase({
     required Map<String, dynamic> data,
     required String lastMessage,
     required String groupId,
@@ -285,7 +285,7 @@ class DataController extends GetxController {
       body: lastMessage,
       token: recipientToken,
     );
-  }
+  }*/
 
   Future<void> sendFCMNotification({
     required String title,

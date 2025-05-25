@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ju_event_managment_planner/Util/app_color.dart';
@@ -28,6 +29,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void initState() {
+    print('Widget chatId: ${widget.chatId}');
     super.initState();
     _markMessagesAsRead();
   }
@@ -70,11 +72,13 @@ class _ChatPageState extends State<ChatPage> {
           color: Colors.white, // Light white color for the arrow
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(child: _buildMessagesList()),
-          _buildMessageInput(),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(child: _buildMessagesList()),
+            _buildMessageInput(),
+          ],
+        ),
       ),
     );
   }
@@ -163,7 +167,9 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  String _formatTimestamp(Timestamp timestamp) {
+  String _formatTimestamp(dynamic timestamp) {
+    if (timestamp == null || timestamp is! Timestamp) return '';
+
     final date = timestamp.toDate();
     final now = DateTime.now();
 
@@ -175,6 +181,7 @@ class _ChatPageState extends State<ChatPage> {
       return '${date.day}/${date.month} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
     }
   }
+
 
   Widget _buildMessageInput() {
     return SafeArea(
@@ -209,8 +216,15 @@ class _ChatPageState extends State<ChatPage> {
               ),
               child: IconButton(
                 icon: const Icon(Icons.send, color: Colors.white),
-                onPressed: _sendMessage,
+                onPressed: () {
+                  final text = _messageController.text.trim();
+                  if (text.isNotEmpty) {
+                    sendMessage(widget.receiverId, text);
+                    _messageController.clear();
+                  }
+                },
               ),
+
             ),
           ],
         ),
@@ -219,33 +233,45 @@ class _ChatPageState extends State<ChatPage> {
   }
 
 // In ChatPage.dart, update the _sendMessage method:
-  Future<void> _sendMessage() async {
-    final text = _messageController.text.trim();
-    if (text.isEmpty || userId == null) return;
+  Future<void> sendMessage(String receiverId, String messageText) async {
+    if (messageText.trim().isEmpty) return;
 
-    // Get the recipient's token for notification
-    final recipientDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.receiverId)
-        .get();
-    final recipientToken = recipientDoc.get('fcmToken') ?? '';
+    String senderId = FirebaseAuth.instance.currentUser!.uid;
+    String chatId = widget.chatId; // ✅ use what the UI is already bound to
 
-    // Use DataController to send message for consistency
-    await Get.find<DataController>().sendMessageToFirebase(
-      data: {
-        'text': text,
-        'senderId': userId,
-        'receiverId': widget.receiverId,
-        'timestamp': Timestamp.now(),
-        'isRead': false,
-      },
-      lastMessage: text,
-      groupId: widget.chatId,
-      recipientToken: recipientToken,
-    );
 
-    _messageController.clear();
+    final message = {
+      'senderId': senderId,
+      'receiverId': receiverId,
+      'text': messageText, // ✅ Match what your UI expects
+      'timestamp': FieldValue.serverTimestamp(),
+      'isRead': false, // ✅ Optional but useful
+    };
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .add(message);
+
+      // ✅ Optionally update parent chat document for recent chat list
+      await FirebaseFirestore.instance.collection('chats').doc(chatId).set({
+        'lastMessage': messageText,
+        'participants': [senderId, receiverId],
+        'lastMessageTime': Timestamp.now(),
+      }, SetOptions(merge: true));
+
+    } catch (e) {
+      print('Error sending message: $e');
+    }
   }
+
+  String getChatId(String user1, String user2) {
+    final sorted = [user1, user2]..sort();
+    return '${sorted[0]}_${sorted[1]}';
+  }
+
 
   @override
   void dispose() {
