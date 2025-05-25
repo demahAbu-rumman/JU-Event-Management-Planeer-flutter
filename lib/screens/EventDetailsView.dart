@@ -19,14 +19,26 @@ class _EventDetailsViewState extends State<EventDetailsView> {
   final DataController dataController = Get.find();
   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
   String? userRole;
+  bool hasJoined = false;
 
   @override
   void initState() {
     super.initState();
     fetchUserRole();
+    checkIfJoined();
   }
 
-  // Fetch user role from Firestore
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    refreshEventData();
+  }
+
+  String formatTimestamp(Timestamp timestamp) {
+    final date = timestamp.toDate();
+    return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
+  }
+
   Future<void> fetchUserRole() async {
     try {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
@@ -52,14 +64,22 @@ class _EventDetailsViewState extends State<EventDetailsView> {
         .collection('events')
         .doc(widget.event.id)
         .get();
+
     setState(() {
       widget.event = updatedEvent;
+    });
+    checkIfJoined();
+  }
+
+  void checkIfJoined() {
+    final joinedUsers = (widget.event.data() as Map<String, dynamic>)['joinedUsers'] as List<dynamic>? ?? [];
+    setState(() {
+      hasJoined = joinedUsers.contains(currentUserId);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Show loading spinner while user role is being fetched
     if (userRole == null) {
       return const Scaffold(
         body: Center(
@@ -109,13 +129,14 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                 const SizedBox(height: 20),
                 buildInfoRow(
                     Icons.location_on, 'Location', widget.event['location']),
-                buildInfoRow(
-                    Icons.calendar_today, 'Date', widget.event['date']),
+                buildInfoRow(Icons.calendar_today, 'Date',
+                    widget.event['date'] is Timestamp
+                        ? formatTimestamp(widget.event['date'])
+                        : widget.event['date']),
                 buildInfoRow(Icons.access_time, 'Time',
                     '${widget.event['start_time']} - ${widget.event['end_time']}'),
                 buildInfoRow(Icons.description, 'Description',
                     widget.event['description']),
-
                 const SizedBox(height: 16),
                 if (widget.event['media'] != null &&
                     widget.event['media'].isNotEmpty)
@@ -145,26 +166,60 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                     ],
                   ),
 
-                // Show Join Button for Students or Instructors
-                if (userRole == 'Student' || userRole == 'Instructor')
+                if ((userRole == 'Student' || userRole == 'Instructor'))
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Join event logic here
+                      onPressed: hasJoined
+                          ? null
+                          : () async {
+                        try {
+                          final eventRef = FirebaseFirestore.instance
+                              .collection('events')
+                              .doc(widget.event.id);
+                          final userRef = FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(currentUserId);
+
+                          await eventRef.update({
+                            'joinedUsers': FieldValue.arrayUnion([currentUserId])
+                          });
+
+                          await userRef.update({
+                            'joinedEvents': FieldValue.arrayUnion([widget.event.id])
+                          });
+
+                          await refreshEventData();
+
+                          Get.snackbar(
+                            'Success',
+                            'You joined the event!',
+                            backgroundColor: Colors.green,
+                            colorText: Colors.white,
+                          );
+                        } catch (e) {
+                          print("Error joining event: $e");
+                          Get.snackbar(
+                            'Error',
+                            'Could not join event: $e',
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.lightgreen,
+                        backgroundColor: hasJoined
+                            ? Colors.grey
+                            : AppColors.lightgreen,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                         foregroundColor: Colors.white,
                       ),
-                      child: const Text('Join Event'),
+                      child: Text(hasJoined ? 'Joined ✅' : 'Join Event'),
                     ),
                   ),
 
-                // Show Edit/Delete buttons only if current user is event owner
                 if (widget.event['uid'] == currentUserId)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -233,10 +288,7 @@ class _EventDetailsViewState extends State<EventDetailsView> {
 
   void deleteEvent(String eventId) async {
     try {
-      await FirebaseFirestore.instance
-          .collection('events')
-          .doc(eventId)
-          .delete();
+      await FirebaseFirestore.instance.collection('events').doc(eventId).delete();
       Get.snackbar('Success', 'Event deleted successfully',
           colorText: Colors.white, backgroundColor: Colors.green);
     } catch (e) {

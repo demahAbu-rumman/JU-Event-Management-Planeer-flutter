@@ -9,6 +9,7 @@ import 'package:ju_event_managment_planner/screens/RequestedEventsSection.dart';
 import 'package:ju_event_managment_planner/screens/UpcomingEventsPage.dart';
 import 'package:ju_event_managment_planner/screens/settingsprofile.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'joined_events_page.dart';
 
 class Profiles_Page extends StatefulWidget {
   const Profiles_Page({super.key});
@@ -212,9 +213,8 @@ class _ProfilePageState extends State<Profiles_Page> {
                 _titleSection(),
                 _infoSection(joined),
                 const SizedBox(height: 24),
-                if (selectedRole != 'Vice Dean' &&
-                    selectedRole != 'Activities Director')
-                  _buildActivitySection(),
+                if (selectedRole == 'Student' || selectedRole == 'Instructor')
+                  _buildJoinedEventsSection(),
                 const SizedBox(height: 24),
                 if (selectedRole == 'Instructor') ...[
                   _buildUpcomingEvents(),
@@ -337,6 +337,19 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
+  Widget _buildJoinedEventsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle("Joined Events"),
+        JoinedEventsSection(
+          userId: authController.currentUser?.uid ?? '',
+        ),
+      ],
+    );
+  }
+
+
   Widget _buildActivityItem(Activity activity) {
     return ListTile(
       leading: Container(
@@ -439,7 +452,7 @@ class _ProfilePageState extends State<Profiles_Page> {
           RequestedEventsSection(
             collegeName: collegeName,
             locationToCollegeMap: locationToCollegeMap,
-            filterByCollege: true, // Enable college filtering for others
+            filterByCollege: true,
           ),
       ],
     );
@@ -453,7 +466,7 @@ class _ProfilePageState extends State<Profiles_Page> {
         ApprovedActivitiesSection(
           collegeName: collegeName,
           locationToCollegeMap: locationToCollegeMap,
-          filterByCollege: false, // Or true if you want to filter by college
+          filterByCollege: false,
         ),
       ],
     );
