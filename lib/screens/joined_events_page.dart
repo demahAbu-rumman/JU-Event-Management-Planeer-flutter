@@ -144,12 +144,17 @@ class _JoinedEventsSectionState extends State<JoinedEventsSection> {
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(24.0),
-            child: Text(
-              "You haven't joined any events.",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-              textAlign: TextAlign.center,
+          return SizedBox(
+            height: 150, // Adjust this height as needed
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Text(
+                  "You haven't joined any events. !",
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
           );
         }
@@ -187,6 +192,7 @@ class _JoinedEventsSectionState extends State<JoinedEventsSection> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildSectionTitle('Joined Events'), // <- Add this line
             SingleChildScrollView(
               child: Container(
                 constraints: _showAll ? null : const BoxConstraints(maxHeight: 400),
@@ -217,6 +223,7 @@ class _JoinedEventsSectionState extends State<JoinedEventsSection> {
             ),
           ],
         );
+
       },
     );
   }

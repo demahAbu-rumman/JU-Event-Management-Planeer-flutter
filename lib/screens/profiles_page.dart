@@ -5,6 +5,7 @@ import 'package:ju_event_managment_planner/Util/app_color.dart';
 import 'package:ju_event_managment_planner/controller/auth_controller.dart';
 import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:ju_event_managment_planner/screens/ApprovedeventsSection.dart';
+import 'package:ju_event_managment_planner/screens/CreatedEventsSection.dart';
 import 'package:ju_event_managment_planner/screens/RequestedEventsSection.dart';
 import 'package:ju_event_managment_planner/screens/UpcomingEventsPage.dart';
 import 'package:ju_event_managment_planner/screens/settingsprofile.dart';
@@ -67,6 +68,8 @@ class _ProfilePageState extends State<Profiles_Page> {
 
   bool _isOpen = false;
   bool _isExpanded = false;
+  int createdEventsCount = 0;
+
   late PanelController _panelController;
   String image = '';
   String collegeName = '';
@@ -86,6 +89,25 @@ class _ProfilePageState extends State<Profiles_Page> {
     _panelController = PanelController();
     _loadInitialData();
   }
+  void _fetchCreatedEventsCount(String uid) async {
+    try {
+      print("Fetching events for user: $uid"); // Debug print
+
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('events')
+          .where('uid', isEqualTo: uid)  // Changed from 'organizerId' to 'uid'
+          .get();
+
+      print("Found ${querySnapshot.docs.length} events"); // Debug print
+
+      setState(() {
+        createdEventsCount = querySnapshot.docs.length;
+      });
+    } catch (e) {
+      print("Failed to fetch event count: $e");
+    }
+  }
+
 
   // Update the _loadInitialData method to ensure it only gets college from user data
   void _loadInitialData() async {
@@ -106,10 +128,7 @@ class _ProfilePageState extends State<Profiles_Page> {
           lastNameController.text = data['last'] ?? '';
           selectedRole = data['role'] ?? 'Student';
           image = data['image'] ?? '';
-
-          // Ensure collegeName only comes from user document
           collegeName = data['collegeName'] ?? 'N/A';
-          // Don't derive college from location mapping
 
           final joinedTimestamp = data['joinedDate'];
           if (joinedTimestamp != null && joinedTimestamp is Timestamp) {
@@ -119,11 +138,17 @@ class _ProfilePageState extends State<Profiles_Page> {
             joinedDate.text = 'N/A';
           }
         });
+
+        // ✅ Fetch event count AFTER setting role
+        if (selectedRole == 'Event Organizer') {
+          _fetchCreatedEventsCount(uid);
+        }
       }
     } catch (e) {
       print("Failed to load user data: $e");
     }
   }
+
 
   void _updateProfileData(Map<String, dynamic> data) {
     setState(() {
@@ -216,7 +241,11 @@ class _ProfilePageState extends State<Profiles_Page> {
                 if (selectedRole == 'Student' || selectedRole == 'Instructor')
                   _buildJoinedEventsSection(),
                 const SizedBox(height: 24),
-                if (selectedRole == 'Instructor') ...[
+                if (selectedRole == 'Event Organizer') ...[
+                  _buildCreatedEventsSection(),
+                  const SizedBox(height: 24),
+                  _buildUpcomingEvents(),
+                ]else if (selectedRole == 'Instructor') ...[
                   _buildUpcomingEvents(),
                   _buildSchedule(),
                 ] else if (selectedRole == 'Vice Dean') ...[
@@ -287,13 +316,26 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
+  Widget _buildCreatedEventsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle("Created Events By You "),
+        CreatedEventsSection(
+          organizerId: authController.currentUser?.uid ?? '',
+        ),
+      ],
+    );
+  }
+
   List<Widget> _buildInfoCells(String joinedDate) {
     return [
       if (selectedRole == 'Event Organizer')
-        _buildAdaptiveInfoCell('Events', 'N/A'),
+        _buildAdaptiveInfoCell('Events', createdEventsCount.toString()),
       if (selectedRole == 'Instructor')
         _buildAdaptiveInfoCell('Courses', 'N/A'),
-      if (selectedRole != 'Activities Director')
+      // Remove the college section for Event Organizer
+      if (selectedRole != 'Event Organizer' && selectedRole != 'Activities Director')
         _buildAdaptiveInfoCell(
             'College', collegeName.isNotEmpty ? collegeName : 'N/A'),
       _buildAdaptiveInfoCell(
@@ -396,8 +438,6 @@ class _ProfilePageState extends State<Profiles_Page> {
       ),
     );
   }
-
-
 
   Widget _buildUpcomingEvents() {
     return Column(

@@ -121,12 +121,12 @@ class AuthController extends GetxController {
       storeToken();
 
       // 🔔 Save a local notification (if needed)
-      await LocalNotificationService.storeNotification(
+    /*  await LocalNotificationService.storeNotification(
         title: 'Welcome Back !',
         body: ' ',
         userId: FirebaseAuth.instance.currentUser!.uid,
       );
-
+*/
       // 👉 Navigate to home
       Get.to(() => const HomePage());
 

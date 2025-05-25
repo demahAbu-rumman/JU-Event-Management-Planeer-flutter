@@ -1366,7 +1366,6 @@ class _CreateEventViewState extends State<CreateEventView> {
 
 
 
-                              // Update or create
                               if (widget.isEditing && widget.event != null) {
                                 isCreatingEvent(false);
                                 await dataController.updateEvent(widget.event!.id, eventData);
@@ -1380,10 +1379,25 @@ class _CreateEventViewState extends State<CreateEventView> {
                                   backgroundColor: Colors.green,
                                 );
                               } else {
+                                // Add current user ID to the event data
+                                final currentUser = FirebaseAuth.instance.currentUser;
+                                if (currentUser == null) {
+                                  Get.snackbar(
+                                    'Error',
+                                    'You must be logged in to create an event',
+                                    colorText: Colors.white,
+                                    backgroundColor: Colors.red,
+                                  );
+                                  return;
+                                }
+
+                                eventData['userId'] = currentUser.uid; // Add this line
                                 eventData['status'] = 'Pending';
+
                                 await FirebaseFirestore.instance
                                     .collection('eventRequests')
                                     .add(eventData);
+
                                 resetControllers();
                                 Get.dialog(
                                   AlertDialog(

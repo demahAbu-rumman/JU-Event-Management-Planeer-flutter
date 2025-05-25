@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as Path;
 import 'package:http/http.dart' as http;
-
 import '../screens/notification_service.dart';
 
 class DataController extends GetxController {
@@ -255,7 +254,7 @@ class DataController extends GetxController {
         .snapshots();
   }
 
-// In DataController.dart, update the sendMessageToFirebase method:
+
  /* Future<void> sendMessageToFirebase({
     required Map<String, dynamic> data,
     required String lastMessage,

@@ -208,24 +208,55 @@ class RequestCard extends StatelessWidget {
     }
   }
 
-
   Future<void> _approveRequest(String docId, Map<String, dynamic> data) async {
     try {
-      final filteredData = Map<String, dynamic>.from(data)
-        ..['instructorApproval'] = true
-        ..['status'] = 'Approved'; //
+      final userId = data['userId'];
+      final eventTitle = data['eventName'] ?? 'An event';
 
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar('Error', 'No user ID found for this request',
+            backgroundColor: Colors.red, colorText: Colors.white);
+        return;
+      }
+
+      // Update request status
       await FirebaseFirestore.instance.collection('eventRequests').doc(docId).update({
         'instructorApproval': true,
-        'status': 'Approved', //
+        'status': 'Approved',
       });
 
+      // Add to events collection
+      final filteredData = Map<String, dynamic>.from(data)
+        ..['instructorApproval'] = true
+        ..['status'] = 'Approved';
       await FirebaseFirestore.instance.collection('events').add(filteredData);
-      Get.snackbar('Approved', 'Event has been approved and added to events.',
+
+      // Send in-app notification
+      await LocalNotificationService.storeNotification(
+        title: 'Event Approved!',
+        body: 'Your event "$eventTitle" has been approved.',
+        userId: userId,
+      );
+
+      // Send push notification if available
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      final fcmToken = userDoc.data()?['fcmToken'];
+
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        await LocalNotificationService.sendNotification(
+          title: 'Event Approved',
+          message: 'Your event "$eventTitle" has been approved!',
+          token: fcmToken,
+        );
+      }
+
+      Get.snackbar('Approved', 'Event has been approved and published.',
           backgroundColor: AppColors.lightgreen, colorText: Colors.white);
 
-      await publishEvent(eventTitle: data['eventName'] ?? 'A new event');
-
+      await publishEvent(eventTitle: eventTitle);
     } catch (e) {
       print("Error approving request: $e");
       Get.snackbar('Error', 'Failed to approve request.',
@@ -233,13 +264,48 @@ class RequestCard extends StatelessWidget {
     }
   }
 
-
   Future<void> _denyRequest(String docId) async {
     try {
+      final doc = await FirebaseFirestore.instance
+          .collection('eventRequests')
+          .doc(docId)
+          .get();
+      final data = doc.data() ?? {};
+      final userId = data['userId'];
+      final eventTitle = data['eventName'] ?? 'Your event';
+
+      if (userId == null || userId.isEmpty) {
+        Get.snackbar('Error', 'No user ID found for this request',
+            backgroundColor: Colors.red, colorText: Colors.white);
+        return;
+      }
+
       await FirebaseFirestore.instance.collection('eventRequests').doc(docId).update({
         'instructorApproval': false,
-        'status': 'Denied', //
+        'status': 'Denied',
       });
+
+      // Send in-app notification
+      await LocalNotificationService.storeNotification(
+        title: 'Event Denied',
+        body: 'Your event "$eventTitle" was not approved.',
+        userId: userId,
+      );
+
+      // Send push notification if available
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      final fcmToken = userDoc.data()?['fcmToken'];
+
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        await LocalNotificationService.sendNotification(
+          title: 'Event Denied',
+          message: 'Your event "$eventTitle" was not approved.',
+          token: fcmToken,
+        );
+      }
 
       Get.snackbar('Denied', 'Event request denied.',
           backgroundColor: Colors.red, colorText: Colors.white);
@@ -249,5 +315,4 @@ class RequestCard extends StatelessWidget {
           backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
-
 }

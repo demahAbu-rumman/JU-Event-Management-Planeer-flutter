@@ -45,7 +45,19 @@ class RequestedEventsSection extends StatelessWidget {
         }).toList();
 
         if (requestedEvents.isEmpty) {
-          return const Center(child: Text("No pending events found."));
+          return SizedBox(
+            height: 150, // Adjust this height as needed
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Text(
+                  "No pending events found  !",
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          );
         }
 
         return ListView.builder(

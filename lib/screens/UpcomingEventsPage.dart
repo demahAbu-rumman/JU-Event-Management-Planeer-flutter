@@ -37,7 +37,8 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
           final data = doc.data() as Map<String, dynamic>;
           final date = _parseDateFromString(data['date']);
           if (date == null) return false;
-          return date.isAfter(now) || _isSameDay(date, now); // Include today's and future events
+          return date.isAfter(now) ||
+              _isSameDay(date, now); // Include today's and future events
         }).toList();
       }
 
@@ -50,10 +51,12 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
           return true;
         }
 
-        final mappedCollege = widget.locationToCollegeMap.entries.firstWhere(
+        final mappedCollege = widget.locationToCollegeMap.entries
+            .firstWhere(
               (e) => location.toLowerCase().contains(e.key.toLowerCase()),
-          orElse: () => const MapEntry('', ''),
-        ).value;
+              orElse: () => const MapEntry('', ''),
+            )
+            .value;
 
         return mappedCollege.toLowerCase() == widget.collegeName.toLowerCase();
       }).toList();
@@ -70,7 +73,6 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
       return [];
     }
   }
-
 
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
@@ -122,12 +124,17 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(24.0),
-            child: Text(
-              "No upcoming events available.",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-              textAlign: TextAlign.center,
+          return SizedBox(
+            height: 150, // Adjust this height as needed
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Text(
+                  "No upcoming events available !",
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
           );
         }
@@ -152,26 +159,25 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
           groupedEvents.putIfAbsent(label, () => []).add(doc);
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-                     SingleChildScrollView(
-              child: Container(
-                constraints: _showAll
-                    ? null
-                    : const BoxConstraints(maxHeight: 400),
+        return SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                constraints: _showAll ? null : const BoxConstraints(maxHeight: 400),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: ListView(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   children: (groupedEvents.entries.toList()
                     ..sort((a, b) {
-                      // Prioritize 'Today' events to be at the top
                       if (a.key == 'Today') return -1;
                       if (b.key == 'Today') return 1;
                       final aDate = _labelToDate(a.key);
                       final bDate = _labelToDate(b.key);
-                      return (aDate ?? DateTime.now()).compareTo(bDate ?? DateTime.now());
+                      return (aDate ?? DateTime.now())
+                          .compareTo(bDate ?? DateTime.now());
                     }))
                       .map((entry) {
                     return Column(
@@ -191,13 +197,13 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                         const SizedBox(height: 16),
                       ],
                     );
-                  }).toList(), // ✅ Convert to List<Widget>
-              
+                  }).toList(),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
+
       },
     );
   }
@@ -295,16 +301,17 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
               const Icon(Icons.access_time, size: 16, color: Colors.teal),
               const SizedBox(width: 6),
               Text(
-                '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}',
+                '${data['start_time'] ?? 'N/A'} - ${data['end_time'] ?? 'N/A'}',
                 style: const TextStyle(fontSize: 14),
               ),
               const Spacer(),
               Text(
                 '${date.day}/${date.month}/${date.year}',
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-              )
+              ),
             ],
-          )
+          ),
+
         ],
       ),
     );
