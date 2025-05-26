@@ -192,7 +192,6 @@ class _JoinedEventsSectionState extends State<JoinedEventsSection> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle('Joined Events'), // <- Add this line
             SingleChildScrollView(
               child: Container(
                 constraints: _showAll ? null : const BoxConstraints(maxHeight: 400),
