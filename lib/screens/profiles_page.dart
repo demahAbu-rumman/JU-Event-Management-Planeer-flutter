@@ -201,51 +201,59 @@ class _ProfilePageState extends State<Profiles_Page> {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const SettingProfile()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingProfile()),
+              );
             },
           ),
         ],
       ),
       body: Stack(
         children: [
+          // صورة الغلاف الرمادية
           Container(
             height: 250,
             color: Colors.grey.shade100,
-            child: Center(
-              child: CircleAvatar(
-                radius: 80,
-                backgroundColor: Colors.white,
-                backgroundImage: image.isNotEmpty
-                    ? NetworkImage(image) as ImageProvider
-                    : null,
-                child: image.isEmpty
-                    ? Icon(
-                        selectedRole == 'Instructor'
-                            ? Icons.school
-                            : Icons.person,
-                        size: 60,
-                        color: Colors.blue,
-                      )
-                    : null,
-              ),
-            ),
           ),
+
+          // محتوى الصفحة بالكامل قابل للتمرير
           SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: 250),
+                const SizedBox(height: 50),
+                // صورة البروفايل
+                Center(
+                  child: CircleAvatar(
+                    radius: 80,
+                    backgroundColor: Colors.white,
+                    backgroundImage: image.isNotEmpty
+                        ? NetworkImage(image) as ImageProvider
+                        : null,
+                    child: image.isEmpty
+                        ? Icon(
+                      selectedRole == 'Instructor'
+                          ? Icons.school
+                          : Icons.person,
+                      size: 60,
+                      color: Colors.blue,
+                    )
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 24),
                 _titleSection(),
                 _infoSection(joined),
                 const SizedBox(height: 24),
+
                 if (selectedRole == 'Student' || selectedRole == 'Instructor')
                   _buildJoinedEventsSection(),
-                const SizedBox(height: 24),
+
                 if (selectedRole == 'Event Organizer') ...[
                   _buildCreatedEventsSection(),
                   const SizedBox(height: 24),
                   _buildUpcomingEvents(),
-                ]else if (selectedRole == 'Instructor') ...[
+                ] else if (selectedRole == 'Instructor') ...[
                   _buildUpcomingEvents(),
                   _buildSchedule(),
                 ] else if (selectedRole == 'Vice Dean') ...[
@@ -258,8 +266,9 @@ class _ProfilePageState extends State<Profiles_Page> {
                   _buildRequestedEvents(),
                 ] else ...[
                   _buildUpcomingEvents(),
-
                 ],
+
+                const SizedBox(height: 32),
               ],
             ),
           ),
@@ -267,6 +276,7 @@ class _ProfilePageState extends State<Profiles_Page> {
       ),
     );
   }
+
 
   Widget _titleSection() {
     return Padding(
