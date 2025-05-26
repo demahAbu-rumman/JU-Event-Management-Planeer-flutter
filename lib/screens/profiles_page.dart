@@ -88,6 +88,7 @@ class _ProfilePageState extends State<Profiles_Page> {
     super.initState();
     _panelController = PanelController();
     _loadInitialData();
+
   }
   void _fetchCreatedEventsCount(String uid) async {
     try {
@@ -250,22 +251,47 @@ class _ProfilePageState extends State<Profiles_Page> {
                   _buildJoinedEventsSection(),
 
                 if (selectedRole == 'Event Organizer') ...[
-                  _buildCreatedEventsSection(),
+                  CreatedEventsSection(organizerId: authController.currentUser?.uid ?? '',),
                   const SizedBox(height: 24),
-                  _buildUpcomingEvents(),
+                  UpcomingEventsSection(collegeName: collegeName,
+                    locationToCollegeMap: locationToCollegeMap,
+                    filterByCollege: true, ),
                 ] else if (selectedRole == 'Instructor') ...[
-                  _buildUpcomingEvents(),
+                  UpcomingEventsSection(collegeName: collegeName,
+                    locationToCollegeMap: locationToCollegeMap,
+                    filterByCollege: true, ),
                   _buildSchedule(),
                 ] else if (selectedRole == 'Vice Dean') ...[
-                  _buildUpcomingEvents(),
+                  UpcomingEventsSection(collegeName: collegeName,
+                    locationToCollegeMap: locationToCollegeMap,
+                    filterByCollege: true, ),
                   const SizedBox(height: 24),
-                  _buildRequestedEvents(),
+                  RequestedEventsSection(
+                    collegeName: null, // Pass null for Activities Director
+                    locationToCollegeMap: locationToCollegeMap,
+                    filterByCollege: false, // Disable college filtering
+                  )
                 ] else if (selectedRole == 'Activities Director') ...[
-                  _buildApprovedActivities(),
+                  ApprovedActivitiesSection(collegeName: collegeName,
+                    locationToCollegeMap: locationToCollegeMap,
+                    filterByCollege: false,),
                   const SizedBox(height: 24),
-                  _buildRequestedEvents(),
+                  if (selectedRole == 'Activities Director')
+                    RequestedEventsSection(
+                      collegeName: null, // Pass null for Activities Director
+                      locationToCollegeMap: locationToCollegeMap,
+                      filterByCollege: false, // Disable college filtering
+                    )
+                  else
+                    RequestedEventsSection(
+                      collegeName: collegeName,
+                      locationToCollegeMap: locationToCollegeMap,
+                      filterByCollege: true,
+                    ),
                 ] else ...[
-                  _buildUpcomingEvents(),
+                  UpcomingEventsSection(collegeName: collegeName,
+                    locationToCollegeMap: locationToCollegeMap,
+                    filterByCollege: true, ),
                 ],
 
                 const SizedBox(height: 32),
@@ -378,7 +404,7 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
-  Widget _buildActivitySection() {
+ /* Widget _buildActivitySection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -387,7 +413,7 @@ class _ProfilePageState extends State<Profiles_Page> {
         ...recentActivities.map((activity) => _buildActivityItem(activity)),
       ],
     );
-  }
+  }*/
 
   Widget _buildJoinedEventsSection() {
     return Column(
@@ -402,7 +428,7 @@ class _ProfilePageState extends State<Profiles_Page> {
   }
 
 
-  Widget _buildActivityItem(Activity activity) {
+  /*Widget _buildActivityItem(Activity activity) {
     return ListTile(
       leading: Container(
         width: 40,
@@ -417,7 +443,7 @@ class _ProfilePageState extends State<Profiles_Page> {
       subtitle: Text(activity.time),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
     );
-  }
+  }*/
 
   Widget _buildSectionTitle(String title) {
     return Padding(
@@ -433,23 +459,13 @@ class _ProfilePageState extends State<Profiles_Page> {
             ),
           ),
           const Spacer(),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-              });
-            },
-            child: Text(
-              _isExpanded ? 'Collapse' : 'View All',
-              style: TextStyle(color: AppColors.lightgreen),
-            ),
-          ),
+
         ],
       ),
     );
   }
 
-  Widget _buildUpcomingEvents() {
+ /* Widget _buildUpcomingEvents() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -461,7 +477,7 @@ class _ProfilePageState extends State<Profiles_Page> {
         ),
       ],
     );
-  }
+  }*/
 
 
   Widget _buildSchedule() {

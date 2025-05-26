@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ju_event_managment_planner/controller/auth_controller.dart';
 
+import '../Util/app_color.dart';
+
 class ProfileSetupScreen extends StatefulWidget {
   const ProfileSetupScreen({super.key});
 
@@ -446,8 +448,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         margin: const EdgeInsets.only(top: 24, bottom: 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          gradient: const LinearGradient(
-            colors: [Colors.green, Colors.green],
+          gradient: LinearGradient(
+            colors: [AppColors.lightgreen, AppColors.lightgreen],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -479,6 +481,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           ),
         ),
       );
+
     });
   }
 

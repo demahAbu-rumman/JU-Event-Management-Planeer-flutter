@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../Util/app_color.dart';
+
 class ApprovedActivitiesSection extends StatefulWidget {
   final String? collegeName;
   final Map<String, String> locationToCollegeMap;
@@ -18,6 +20,8 @@ class ApprovedActivitiesSection extends StatefulWidget {
 }
 
 class _ApprovedActivitiesSectionState extends State<ApprovedActivitiesSection> {
+  bool _expanded = false;
+
   Future<List<DocumentSnapshot>> _fetchApprovedEvents() async {
     final snapshot = await FirebaseFirestore.instance
         .collection('events')
@@ -57,16 +61,40 @@ class _ApprovedActivitiesSectionState extends State<ApprovedActivitiesSection> {
         }
 
         final events = snapshot.data!;
+        final visibleEvents = _expanded ? events : events.take(1).toList();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Approved Activities',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _expanded = !_expanded;
+                      });
+                    },
+                    child: Text(_expanded ? 'Collapse' : 'View All', style: TextStyle(color: AppColors.lightgreen)),
+                  )
+                ],
+              ),
+            ),
             ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: events.length,
+              itemCount: visibleEvents.length,
               itemBuilder: (context, index) {
-                final data = events[index].data() as Map<String, dynamic>;
+                final data = visibleEvents[index].data() as Map<String, dynamic>;
 
                 final eventName = data['eventName'] ?? 'Untitled Event';
                 final location = data['location'] ?? 'N/A';

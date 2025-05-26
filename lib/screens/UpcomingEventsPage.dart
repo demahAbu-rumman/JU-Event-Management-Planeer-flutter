@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import '../util/app_color.dart'; // Optional: only needed if you're using AppColors.lightgreen
+import '../util/app_color.dart'; // Your AppColors.lightgreen
 
 class UpcomingEventsSection extends StatefulWidget {
   final String collegeName;
@@ -21,7 +21,7 @@ class UpcomingEventsSection extends StatefulWidget {
 
 class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
   final Logger _logger = Logger();
-  bool _showAll = false;
+  bool _expanded = false;
 
   Future<List<DocumentSnapshot>> _fetchUpcomingEvents() async {
     try {
@@ -31,14 +31,12 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
           .get();
 
       if (!widget.filterByCollege) {
-        // Filter out past events
         final now = DateTime.now();
         return querySnapshot.docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>;
           final date = _parseDateFromString(data['date']);
           if (date == null) return false;
-          return date.isAfter(now) ||
-              _isSameDay(date, now); // Include today's and future events
+          return date.isAfter(now) || _isSameDay(date, now);
         }).toList();
       }
 
@@ -54,14 +52,13 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
         final mappedCollege = widget.locationToCollegeMap.entries
             .firstWhere(
               (e) => location.toLowerCase().contains(e.key.toLowerCase()),
-              orElse: () => const MapEntry('', ''),
-            )
+          orElse: () => const MapEntry('', ''),
+        )
             .value;
 
         return mappedCollege.toLowerCase() == widget.collegeName.toLowerCase();
       }).toList();
 
-      // Filter out past events in the filtered list
       final now = DateTime.now();
       return filteredEvents.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
@@ -123,26 +120,12 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return SizedBox(
-            height: 150, // Adjust this height as needed
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Text(
-                  "No upcoming events available !",
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          );
-        }
+        final events = snapshot.data ?? [];
 
         final groupedEvents = <String, List<DocumentSnapshot>>{};
         final now = DateTime.now();
 
-        for (var doc in snapshot.data!) {
+        for (var doc in events) {
           final data = doc.data() as Map<String, dynamic>;
           DateTime? date = _parseDateFromString(data['date']);
           if (date == null) continue;
@@ -159,31 +142,72 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
           groupedEvents.putIfAbsent(label, () => []).add(doc);
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                constraints: _showAll ? null : const BoxConstraints(maxHeight: 400),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ListView(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: (groupedEvents.entries.toList()
-                    ..sort((a, b) {
-                      if (a.key == 'Today') return -1;
-                      if (b.key == 'Today') return 1;
-                      final aDate = _labelToDate(a.key);
-                      final bDate = _labelToDate(b.key);
-                      return (aDate ?? DateTime.now())
-                          .compareTo(bDate ?? DateTime.now());
-                    }))
-                      .map((entry) {
-                    return Column(
+        final allEventsList = (groupedEvents.entries.toList()
+          ..sort((a, b) {
+            if (a.key == 'Today') return -1;
+            if (b.key == 'Today') return 1;
+            final aDate = _labelToDate(a.key);
+            final bDate = _labelToDate(b.key);
+            return (aDate ?? DateTime.now()).compareTo(bDate ?? DateTime.now());
+          }));
+
+        final displayEvents = _expanded ? allEventsList : allEventsList.take(1).toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Section Title + View All / Collapse
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Upcoming Events",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (events.isNotEmpty)
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _expanded = !_expanded;
+                        });
+                      },
+                      child: Text(
+                        _expanded ? 'Collapse' : 'View All',
+                        style: TextStyle(color: AppColors.lightgreen),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            if (events.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Center(
+                  child: Text(
+                    "No upcoming events available!",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: displayEvents.length,
+                itemBuilder: (context, index) {
+                  final entry = displayEvents[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 8),
                         Text(
                           entry.key,
                           style: const TextStyle(
@@ -193,49 +217,15 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        ...entry.value.map((doc) => _buildEventCard(doc)),
-                        const SizedBox(height: 16),
+                        ...entry.value.map((doc) => _buildEventCard(doc)).toList(),
                       ],
-                    );
-                  }).toList(),
-                ),
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+          ],
         );
-
       },
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const Spacer(),
-          TextButton(
-            onPressed: () {
-              setState(() => _showAll = !_showAll);
-            },
-            child: Text(
-              _showAll ? 'Collapse' : 'View All',
-              style: TextStyle(
-                color: AppColors.lightgreen, // or Colors.teal
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -311,7 +301,6 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
               ),
             ],
           ),
-
         ],
       ),
     );

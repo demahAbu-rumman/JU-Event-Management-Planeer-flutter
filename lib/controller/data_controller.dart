@@ -367,7 +367,7 @@ class DataController extends GetxController {
       // Parse date and time
       String newDateStr = newEventData['date'];
       DateTime newDate = _parseDateString(newDateStr);
-      //String loc=newEventData['location'];
+      String newLocation = newEventData['location']; // ✅ FIXED
 
       TimeOfDay newStartTime = _parseTimeString(newEventData['start_time']);
       TimeOfDay newEndTime = _parseTimeString(newEventData['end_time']);
@@ -385,7 +385,7 @@ class DataController extends GetxController {
         return true;
       }
 
-      // Get existing events with same date AND location
+      // Get existing events with same date
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('events')
           .where('date', isEqualTo: newDateStr)
@@ -399,30 +399,22 @@ class DataController extends GetxController {
           continue;
         }
 
-        // Parse existing event time
-        TimeOfDay existingStartTime = _parseTimeString(existingEvent['start_time']);
-        TimeOfDay existingEndTime = _parseTimeString(existingEvent['end_time']);
-
-        DateTime existingStartDateTime = DateTime(
-            newDate.year, newDate.month, newDate.day,
-            existingStartTime.hour, existingStartTime.minute);
-        DateTime existingEndDateTime = DateTime(
-            newDate.year, newDate.month, newDate.day,
-            existingEndTime.hour, existingEndTime.minute);
-
-        if (newStartDateTime.isBefore(existingEndDateTime) &&
-            newEndDateTime.isAfter(existingStartDateTime))
-        {
+        // Check for exact match on location, start_time, and end_time
+        if (existingEvent['location'] == newLocation &&
+            existingEvent['start_time'] == newEventData['start_time'] &&
+            existingEvent['end_time'] == newEventData['end_time']) {
           print('Conflict with event: ${doc.id}');
           return true;
         }
       }
+
       return false;
     } catch (e) {
       print('Error in hasEventConflict: $e');
       return false;
     }
   }
+
 
 
 

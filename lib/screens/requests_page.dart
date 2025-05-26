@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ju_event_managment_planner/screens/notification_service.dart';
@@ -210,6 +211,38 @@ class RequestCard extends StatelessWidget {
 
   Future<void> _approveRequest(String docId, Map<String, dynamic> data) async {
     try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        Get.snackbar('Error', 'No logged-in user found',
+            backgroundColor: Colors.red, colorText: Colors.white);
+        return;
+      }
+
+      final userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+      final userData = userSnapshot.data();
+      final userCollege = userData?['collegeName']; // updated field name
+      final userRole = userData?['role'];
+
+      final eventCollege = data['collage']; // make sure this spelling is correct in your data
+
+      // Check permission
+      if (userRole == 'Vice Dean' && userCollege != eventCollege) {
+        Get.snackbar('Permission Denied',
+            'Vice Deans can only approve events from their own college.',
+            backgroundColor: Colors.orange, colorText: Colors.white);
+        return;
+      }
+
+      if (userRole != 'Vice Dean' && userRole != 'Activities Director') {
+        Get.snackbar('Access Denied',
+            'Only Vice Deans or Activities Directors can approve events.',
+            backgroundColor: Colors.orange, colorText: Colors.white);
+        return;
+      }
+
       final userId = data['userId'];
       final eventTitle = data['eventName'] ?? 'An event';
 
@@ -219,26 +252,23 @@ class RequestCard extends StatelessWidget {
         return;
       }
 
-      // Update request status
       await FirebaseFirestore.instance.collection('eventRequests').doc(docId).update({
         'instructorApproval': true,
         'status': 'Approved',
       });
 
-      // Add to events collection
       final filteredData = Map<String, dynamic>.from(data)
         ..['instructorApproval'] = true
         ..['status'] = 'Approved';
+
       await FirebaseFirestore.instance.collection('events').add(filteredData);
 
-      // Send in-app notification
       await LocalNotificationService.storeNotification(
         title: 'Event Approved!',
         body: 'Your event "$eventTitle" has been approved.',
         userId: userId,
       );
 
-      // Send push notification if available
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
@@ -264,8 +294,18 @@ class RequestCard extends StatelessWidget {
     }
   }
 
+
+
+
   Future<void> _denyRequest(String docId) async {
     try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        Get.snackbar('Error', 'No logged-in user found',
+            backgroundColor: Colors.red, colorText: Colors.white);
+        return;
+      }
+
       final doc = await FirebaseFirestore.instance
           .collection('eventRequests')
           .doc(docId)
@@ -273,6 +313,34 @@ class RequestCard extends StatelessWidget {
       final data = doc.data() ?? {};
       final userId = data['userId'];
       final eventTitle = data['eventName'] ?? 'Your event';
+
+      final userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+      final userData = userSnapshot.data();
+      final userCollege = userData?['collegeName']; // updated field name here
+      final userRole = userData?['role'];
+
+      final eventCollege = data['collage']; // double check your spelling here
+
+      // Allow Activities Director to deny any college
+      if (userRole == 'Vice Dean' && userCollege != eventCollege) {
+        Get.snackbar(
+          'Permission Denied',
+          'You cannot deny events from another college.',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      if (userRole != 'Vice Dean' && userRole != 'Activities Director') {
+        Get.snackbar('Access Denied',
+            'Only Vice Dean from the same college or Activities Director can deny events.',
+            backgroundColor: Colors.orange, colorText: Colors.white);
+        return;
+      }
 
       if (userId == null || userId.isEmpty) {
         Get.snackbar('Error', 'No user ID found for this request',
@@ -285,14 +353,12 @@ class RequestCard extends StatelessWidget {
         'status': 'Denied',
       });
 
-      // Send in-app notification
       await LocalNotificationService.storeNotification(
         title: 'Event Denied',
         body: 'Your event "$eventTitle" was not approved.',
         userId: userId,
       );
 
-      // Send push notification if available
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
@@ -315,4 +381,7 @@ class RequestCard extends StatelessWidget {
           backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
+
+
+
 }
