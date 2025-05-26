@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:ju_event_managment_planner/screens/profile_setup.dart';
@@ -157,6 +158,7 @@ class _VerifyEmailPage extends State<VerifyEmailPage> {
         elevation: 0,
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.white),
+        automaticallyImplyLeading: false,
       ),
       body: SafeArea(
         child: Padding(
@@ -212,7 +214,8 @@ class _VerifyEmailPage extends State<VerifyEmailPage> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed: canResendEmail && !isLoading ? sendVerificationEmail : null,
+            onPressed:
+            canResendEmail && !isLoading ? sendVerificationEmail : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.lightgreen,
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -243,7 +246,23 @@ class _VerifyEmailPage extends State<VerifyEmailPage> {
         const SizedBox(height: 16),
         TextButton(
           onPressed: () async {
+            final user = FirebaseAuth.instance.currentUser;
+
+            try {
+              // حذف بيانات المستخدم من Firestore (collection: users)
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user!.uid)
+                  .delete();
+
+              // حذف المستخدم من Firebase Auth
+              await user.delete();
+            } catch (e) {
+              print("Error deleting user or Firestore data: $e");
+            }
+
             await FirebaseAuth.instance.signOut();
+
             if (mounted) {
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => const LoginView()),
