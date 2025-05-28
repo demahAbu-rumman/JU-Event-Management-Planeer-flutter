@@ -118,7 +118,7 @@ class LocalNotificationService {
       if (snapshot.docs.isEmpty) {
         await storeNotification(
           title: 'Welcome Back!',
-          body: 'Your notification history has been reset.',
+          body: '',
           userId: currentUser.uid,
         );
       }

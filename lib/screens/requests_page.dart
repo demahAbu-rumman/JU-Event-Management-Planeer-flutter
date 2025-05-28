@@ -70,7 +70,7 @@ class RequestCard extends StatelessWidget {
   final String docId;
   final Map<String, dynamic> data;
 
-  const RequestCard({
+   RequestCard({
     super.key,
     required this.docId,
     required this.data,
@@ -111,24 +111,27 @@ class RequestCard extends StatelessWidget {
                 info("Event Date", data['date']),
                 info("Event Time", "${data['start_time']} - ${data['end_time']}"),
                 info("Target Audience", (data['target'] as List?)?.join(', ')),
-                info("Support Services", data['Services']),
+                info("Support Services", data['services']),
                 info("Description and Objectives", data['description']),
                 const Divider(),
                 const Text("Supervisor Info", style: TextStyle(fontWeight: FontWeight.bold)),
-                info("Name", data['name sup']),
+                info("Name", data['name_sup']),
                 info("Phone", data['telesup']),
                 const Divider(),
+
                 const Text("Student Info", style: TextStyle(fontWeight: FontWeight.bold)),
+
                 info("Name", data['name std']),
                 info("ID", data['id']),
                 info("College", data['collage']),
                 const Divider(),
+
                 const Text("Comments", style: TextStyle(fontWeight: FontWeight.bold)),
-                info("Division Head", data['comment']),
-                info("Department Director", data['comment1']),
+                info("Comments of the Relevant Division Head", data['comment']),
+                info("Comments of the Relevant Department Director", data['comment1']),
                 const Divider(),
-                info("Dean", data['name Dean']),
-                info("Student Union President", data['Name of the Student Union President']),
+                info("Dean", data['name_Dean']),
+                info("Student Union President", data['nameof_theStudentUnionPresident']),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -209,6 +212,35 @@ class RequestCard extends StatelessWidget {
     }
   }
 
+  final Map<String, List<String>> schoolToColleges = {
+    'School of Medicine': ['مدرج1 - كلية الطب'],
+    'School of Engineering': ['مدرج سعيد المفتي - كلية الهندسة'],
+    'School of Arts': [
+      'مدرج الكندي - كلية الاداب',
+      'مدرج ابن خلدون - كلية الاداب',
+      'مدرج الفراهيدي - كلية الاداب'
+    ],
+    'School of Science': ['كلية العلوم'],
+    'School of Nursing': [
+      'مدرج ابن سينا - كلية التمريض',
+      'مرج القدس - كلية التمريض'
+    ],
+    'School of Pharmacy': ['كلية الصيدلة'],
+    'School of Law': ['كلية الحقوق'],
+    'King Abdullah II School of Information Technology': [
+      'مدرج اللوزي _ كلية الملك عبدلله الثاني لتكنولوجيا المعلومات'
+    ],
+    'School of Business': [
+      'مدرج1 - كلية الاعمال',
+      'مدرج الاعمال الكبير - كلية الاعمال'
+    ],
+    'School of Arts and Design': ['مدرج الموسيقى - كلية الفنون'],
+    'School of Shari\'a': ['مدرج الخياط _ كلية الشريعة'],
+    'Deanship of Student Affairs': ['مدرج الحسن - عمادة الشؤوون الطلبة'],
+    'School of Dentistry': ['مدرج بهجت التهلوني - مجمع القاعات الطبية'],
+    'School of Educational Sciences': ['مدرج الايمن - كلية التربية'],
+  };
+
   Future<void> _approveRequest(String docId, Map<String, dynamic> data) async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
@@ -223,78 +255,106 @@ class RequestCard extends StatelessWidget {
           .doc(currentUser.uid)
           .get();
       final userData = userSnapshot.data();
-      final userCollege = userData?['collegeName']; // updated field name
       final userRole = userData?['role'];
+      final userCollege = userData?['collegeName'];  // This is the School name (e.g., 'School of Medicine')
 
-      final eventCollege = data['collage']; // make sure this spelling is correct in your data
+      final requesterRole = data['role'];
+      final eventLocation = data['location'];  // This is a college/lecture hall string
+      final userId = data['uid'];
+      final eventTitle = data['eventName'] ?? 'Your event';
 
-      // Check permission
-      if (userRole == 'Vice Dean' && userCollege != eventCollege) {
-        Get.snackbar('Permission Denied',
-            'Vice Deans can only approve events from their own college.',
+      final docRef = FirebaseFirestore.instance.collection('eventRequests').doc(docId);
+      final docSnap = await docRef.get();
+      final currentData = docSnap.data() ?? {};
+
+      // Check permissions for Event Organizer requests
+      if (requesterRole == 'Event Organizer' && userRole != 'Activities Director') {
+        Get.snackbar('Access Denied',
+            'Only Activities Director can approve Event Organizer requests.',
             backgroundColor: Colors.orange, colorText: Colors.white);
         return;
+      }
+
+      // Vice Dean approval location logic using schoolToColleges map
+      if (userRole == 'Vice Dean') {
+        final allowedColleges = schoolToColleges[userCollege] ?? [];
+        if (!allowedColleges.contains(eventLocation)) {
+          Get.snackbar('Permission Denied',
+              'Vice Deans can only approve events in their own college locations.',
+              backgroundColor: Colors.orange, colorText: Colors.white);
+          return;
+        }
       }
 
       if (userRole != 'Vice Dean' && userRole != 'Activities Director') {
         Get.snackbar('Access Denied',
-            'Only Vice Deans or Activities Directors can approve events.',
+            'Only Vice Dean or Activities Director can approve events.',
             backgroundColor: Colors.orange, colorText: Colors.white);
         return;
       }
 
-      final userId = data['userId'];
-      final eventTitle = data['eventName'] ?? 'An event';
+      final isViceDean = userRole == 'Vice Dean';
+      final isActivitiesDirector = userRole == 'Activities Director';
 
-      if (userId == null || userId.isEmpty) {
-        Get.snackbar('Error', 'No user ID found for this request',
-            backgroundColor: Colors.red, colorText: Colors.white);
-        return;
+      Map<String, dynamic> updateData = {};
+      bool shouldPublish = false;
+
+      if (isViceDean) {
+        updateData['viceDeanApproval'] = true;
+      } else if (isActivitiesDirector) {
+        updateData['activitiesDirectorApproval'] = true;
       }
 
-      await FirebaseFirestore.instance.collection('eventRequests').doc(docId).update({
-        'instructorApproval': true,
-        'status': 'Approved',
-      });
+      // Determine if both approvals exist
+      final hasViceDeanApproval = isViceDean || currentData['viceDeanApproval'] == true;
+      final hasActivitiesApproval = isActivitiesDirector || currentData['activitiesDirectorApproval'] == true;
 
-      final filteredData = Map<String, dynamic>.from(data)
-        ..['instructorApproval'] = true
-        ..['status'] = 'Approved';
+      // Final approval decision
+      if (hasViceDeanApproval && hasActivitiesApproval) {
+        updateData['status'] = 'Approved';
+        shouldPublish = true;
+      }
 
-      await FirebaseFirestore.instance.collection('events').add(filteredData);
+      await docRef.update(updateData);
 
-      await LocalNotificationService.storeNotification(
-        title: 'Event Approved!',
-        body: 'Your event "$eventTitle" has been approved.',
-        userId: userId,
-      );
+      if (shouldPublish) {
+        await FirebaseFirestore.instance.collection('events').add({
+          ...data,
+          'status': 'Approved',
+          'instructorApproval': true,
+        });
 
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get();
-      final fcmToken = userDoc.data()?['fcmToken'];
-
-      if (fcmToken != null && fcmToken.isNotEmpty) {
-        await LocalNotificationService.sendNotification(
-          title: 'Event Approved',
-          message: 'Your event "$eventTitle" has been approved!',
-          token: fcmToken,
+        await LocalNotificationService.storeNotification(
+          title: 'Event Approved!',
+          body: 'Your event "$eventTitle" has been approved.',
+          userId: userId,
         );
+
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+        final fcmToken = userDoc.data()?['fcmToken'];
+
+        if (fcmToken != null && fcmToken.isNotEmpty) {
+          await LocalNotificationService.sendNotification(
+            title: 'Event Approved',
+            message: 'Your event "$eventTitle" has been approved!',
+            token: fcmToken,
+          );
+        }
+
+        Get.snackbar('Approved', 'Event has been approved and published.',
+            backgroundColor: AppColors.lightgreen, colorText: Colors.white);
+        await publishEvent(eventTitle: eventTitle);
+      } else {
+        Get.snackbar('Partially Approved',
+            'Approval registered. Waiting for the other approver.',
+            backgroundColor: Colors.orange, colorText: Colors.white);
       }
-
-      Get.snackbar('Approved', 'Event has been approved and published.',
-          backgroundColor: AppColors.lightgreen, colorText: Colors.white);
-
-      await publishEvent(eventTitle: eventTitle);
     } catch (e) {
       print("Error approving request: $e");
       Get.snackbar('Error', 'Failed to approve request.',
           backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
-
-
 
 
   Future<void> _denyRequest(String docId) async {
@@ -306,51 +366,48 @@ class RequestCard extends StatelessWidget {
         return;
       }
 
-      final doc = await FirebaseFirestore.instance
-          .collection('eventRequests')
-          .doc(docId)
-          .get();
-      final data = doc.data() ?? {};
-      final userId = data['userId'];
-      final eventTitle = data['eventName'] ?? 'Your event';
-
       final userSnapshot = await FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser.uid)
           .get();
       final userData = userSnapshot.data();
-      final userCollege = userData?['collegeName']; // updated field name here
       final userRole = userData?['role'];
+      final userCollege = userData?['collegeName'];
 
-      final eventCollege = data['collage']; // double check your spelling here
+      final docRef = FirebaseFirestore.instance.collection('eventRequests').doc(docId);
+      final docSnap = await docRef.get();
+      final data = docSnap.data() ?? {};
 
-      // Allow Activities Director to deny any college
-      if (userRole == 'Vice Dean' && userCollege != eventCollege) {
-        Get.snackbar(
-          'Permission Denied',
-          'You cannot deny events from another college.',
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
+      final requesterRole = data['role'];
+      final requesterCollege = data['collage'];
+      final userId = data['userId'];
+      final eventTitle = data['eventName'] ?? 'Your event';
+
+      // Permission checks
+      if (requesterRole == 'Event Organizer' && userRole != 'Activities Director') {
+        Get.snackbar('Access Denied',
+            'Only Activities Director can deny Event Organizer requests.',
+            backgroundColor: Colors.orange, colorText: Colors.white);
+        return;
+      }
+
+      if (userRole == 'Vice Dean' && userCollege != requesterCollege) {
+        Get.snackbar('Permission Denied',
+            'Vice Deans can only deny events from their own college.',
+            backgroundColor: Colors.orange, colorText: Colors.white);
         return;
       }
 
       if (userRole != 'Vice Dean' && userRole != 'Activities Director') {
         Get.snackbar('Access Denied',
-            'Only Vice Dean from the same college or Activities Director can deny events.',
+            'Only Vice Dean or Activities Director can deny events.',
             backgroundColor: Colors.orange, colorText: Colors.white);
         return;
       }
 
-      if (userId == null || userId.isEmpty) {
-        Get.snackbar('Error', 'No user ID found for this request',
-            backgroundColor: Colors.red, colorText: Colors.white);
-        return;
-      }
-
-      await FirebaseFirestore.instance.collection('eventRequests').doc(docId).update({
-        'instructorApproval': false,
+      await docRef.update({
         'status': 'Denied',
+        'instructorApproval': false,
       });
 
       await LocalNotificationService.storeNotification(
@@ -359,10 +416,7 @@ class RequestCard extends StatelessWidget {
         userId: userId,
       );
 
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .get();
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
       final fcmToken = userDoc.data()?['fcmToken'];
 
       if (fcmToken != null && fcmToken.isNotEmpty) {
@@ -373,7 +427,7 @@ class RequestCard extends StatelessWidget {
         );
       }
 
-      Get.snackbar('Denied', 'Event request denied.',
+      Get.snackbar('Denied', 'Event request has been denied.',
           backgroundColor: Colors.red, colorText: Colors.white);
     } catch (e) {
       print("Error denying request: $e");
@@ -381,6 +435,8 @@ class RequestCard extends StatelessWidget {
           backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
+
+
 
 
 

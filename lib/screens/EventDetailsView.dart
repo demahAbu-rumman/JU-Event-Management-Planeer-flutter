@@ -7,6 +7,7 @@ import 'package:ju_event_managment_planner/controller/data_controller.dart';
 import 'package:ju_event_managment_planner/screens/add_event.dart';
 import 'package:ju_event_managment_planner/screens/home_page.dart';
 
+
 class EventDetailsView extends StatefulWidget {
   DocumentSnapshot event;
   EventDetailsView({Key? key, required this.event}) : super(key: key);
@@ -190,12 +191,19 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                           });
 
                           await refreshEventData();
+                          await sendJoinEventNotification(
+                            userId: currentUserId,
+                            eventId: widget.event.id,
+                            eventName: widget.event['eventName'],
+                            organizerId: widget.event['uid'],
+                          );
 
                           Get.snackbar(
                             'Success',
                             'You joined the event!',
                             backgroundColor: Colors.green,
                             colorText: Colors.white,
+
                           );
                         } catch (e) {
                           print("Error joining event: $e");
@@ -297,4 +305,25 @@ class _EventDetailsViewState extends State<EventDetailsView> {
           colorText: Colors.white, backgroundColor: Colors.red);
     }
   }
+
+  Future<void> sendJoinEventNotification({
+    required String userId,
+    required String eventId,
+    required String eventName,
+    required String organizerId,
+  }) async {
+    final docRef = FirebaseFirestore.instance.collection('notifications').doc();
+
+    await docRef.set({
+      'id': docRef.id,
+      'type': 'event_joined',
+      'userId': userId,
+      'eventId': eventId,
+      'eventName': eventName,
+      'organizerId': organizerId,
+      'timestamp': FieldValue.serverTimestamp(),
+      'isRead': false,
+    });
+  }
+
 }

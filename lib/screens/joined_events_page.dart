@@ -61,17 +61,19 @@ class _JoinedEventsSectionState extends State<JoinedEventsSection> {
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
-  DateTime? _parseDateFromString(String rawDate) {
-    try {
-      final parts = rawDate.split('-');
-      if (parts.length == 3) {
-        final day = int.parse(parts[0]);
-        final month = int.parse(parts[1]);
-        final year = int.parse(parts[2]);
-        return DateTime(year, month, day);
+  DateTime? _parseDateFromString(dynamic rawDate) {
+    if (rawDate is String) {
+      try {
+        final parts = rawDate.split('-');
+        if (parts.length == 3) {
+          final day = int.parse(parts[0]);
+          final month = int.parse(parts[1]);
+          final year = int.parse(parts[2]);
+          return DateTime(year, month, day);
+        }
+      } catch (e) {
+        _logger.e("Invalid date string format: $rawDate");
       }
-    } catch (e) {
-      _logger.e("Invalid date string format: $rawDate");
     }
     return null;
   }
@@ -340,7 +342,7 @@ class _JoinedEventsSectionState extends State<JoinedEventsSection> {
               Icon(Icons.access_time, size: 16, color: AppColors.lightgreen),
               const SizedBox(width: 6),
               Text(
-                '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}',
+                '${data['start_time'] ?? 'N/A'} - ${data['end_time'] ?? 'N/A'}',
                 style: const TextStyle(fontSize: 14),
               ),
               const Spacer(),

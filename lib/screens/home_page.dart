@@ -21,6 +21,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedFilterIndex = 0;
   String? _userRole;
+  TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -32,9 +34,15 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadUserRole() async {
     final dataController = Get.find<DataController>();
-    await dataController.fetchMyDocumentOnce(); //
+    await dataController.fetchMyDocumentOnce();
     if (dataController.myDocument != null && dataController.myDocument!.exists) {
       final role = dataController.myDocument!.get('role');
       setState(() {
@@ -43,11 +51,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
   bool _shouldShowCreateEvent() {
     final dataController = Get.find<DataController>();
     final role = dataController.myDocument?.get('role') ?? 'Student';
-    return role != 'Student'; // Show for all non-student roles
+    return role != 'Student';
   }
 
   @override
@@ -94,27 +101,53 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 60),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Builder(
-                        builder: (context) => IconButton(
-                          icon: const Icon(
-                            Icons.menu,
-                            color: Colors.white,
-                            size: 30,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Builder(
+                          builder: (context) => IconButton(
+                            icon: const Icon(Icons.menu, color: Colors.white, size: 30),
+                            onPressed: () {
+                              Scaffold.of(context).openDrawer();
+                            },
                           ),
-                          onPressed: () {
-                            Scaffold.of(context).openDrawer();
-                          },
                         ),
+                        Text(
+                          "JU Planner",
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(width: 48),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      title: Text(
-                        "JU Planner",
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5,
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value.toLowerCase();
+                          });
+                        },
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: "Search events...",
+                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.8)),
+                          prefixIcon: const Icon(Icons.search, color: Colors.white),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 10),
                         ),
                       ),
                     ),
@@ -144,7 +177,8 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+
+          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
@@ -157,18 +191,26 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(height: 8),
+
           Expanded(
             child: Obx(() {
               if (dataController.isEventsLoading.value) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (dataController.filteredEvents.isEmpty) {
+
+              final events = dataController.filteredEvents
+                  .where((event) =>
+                  event['eventName'].toString().toLowerCase().contains(_searchQuery))
+                  .toList();
+
+              if (events.isEmpty) {
                 return const Center(child: Text("There's no event available"));
               }
+
               return ListView.builder(
-                itemCount: dataController.filteredEvents.length,
+                itemCount: events.length,
                 itemBuilder: (context, index) {
-                  final event = dataController.filteredEvents[index];
+                  final event = events[index];
                   return GestureDetector(
                     onTap: () {
                       Get.to(() => EventDetailsView(event: event));
@@ -182,7 +224,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       bottomNavigationBar: _userRole == null
-          ? const SizedBox() // or a loader while waiting for role
+          ? const SizedBox()
           : Padding(
         padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         child: Container(
@@ -215,21 +257,31 @@ class _HomePageState extends State<HomePage> {
               onTap: (index) {
                 if (_userRole == 'Student') {
                   switch (index) {
-                    case 0: break;
+                    case 0:
+                      break;
                     case 1:
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const CalendarPage()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const CalendarPage()));
                       break;
                     case 2:
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const MessagesPage()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const MessagesPage()));
                       break;
                     case 3:
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const Profiles_Page()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const Profiles_Page()));
                       break;
                   }
                 } else {
                   switch (index) {
                     case 0:
-                      break; // Already on home page
+                      break;
                     case 1:
                       Get.to(() => const CalendarPage());
                       break;
@@ -241,7 +293,8 @@ class _HomePageState extends State<HomePage> {
                       break;
                     case 4:
                       if (_shouldShowCreateEvent()) {
-                        Get.to(() => const CreateEventView(event: null, isEditing: false));
+                        Get.to(() => const CreateEventView(
+                            event: null, isEditing: false));
                       }
                       break;
                   }
@@ -249,24 +302,38 @@ class _HomePageState extends State<HomePage> {
               },
               items: _userRole == 'Student'
                   ? const [
-                BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-                BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Calendar'),
-                BottomNavigationBarItem(icon: Icon(Icons.mark_chat_unread_rounded), label: 'Messages'),
-                BottomNavigationBarItem(icon: Icon(Icons.account_circle_rounded), label: 'Profile'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.home_rounded), label: 'Home'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.calendar_month_rounded),
+                    label: 'Calendar'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.mark_chat_unread_rounded),
+                    label: 'Messages'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.account_circle_rounded),
+                    label: 'Profile'),
               ]
                   : const [
-                BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-                BottomNavigationBarItem(icon: Icon(Icons.calendar_month_rounded), label: 'Calendar'),
-                BottomNavigationBarItem(icon: Icon(Icons.mark_chat_unread_rounded), label: 'Messages'),
-                BottomNavigationBarItem(icon: Icon(Icons.account_circle_rounded), label: 'Profile'),
-                BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline_rounded), label: 'Create'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.home_rounded), label: 'Home'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.calendar_month_rounded),
+                    label: 'Calendar'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.mark_chat_unread_rounded),
+                    label: 'Messages'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.account_circle_rounded),
+                    label: 'Profile'),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.add_circle_outline_rounded),
+                    label: 'Create'),
               ],
             ),
           ),
         ),
       ),
-
-
     );
   }
 
