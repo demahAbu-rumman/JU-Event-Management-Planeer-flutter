@@ -174,7 +174,9 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                       onPressed: hasJoined
                           ? null
                           : () {
-                        final eventDate = (widget.event['date'] as Timestamp).toDate();
+                        final eventDate = widget.event['date'] is Timestamp
+                            ? (widget.event['date'] as Timestamp).toDate()
+                            : _parseCustomDateFormat(widget.event['date']);
                         final endTimeStr = widget.event['end_time']; // Example: "18:30"
                         final endTimeParts = endTimeStr.split(':');
                         final endHour = int.tryParse(endTimeParts[0]) ?? 0;
@@ -215,19 +217,27 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                             });
 
                             await refreshEventData();
-                            await sendJoinEventNotification(
-                            userId: currentUserId,
-                            eventId: widget.event.id,
-                            eventName: widget.event['eventName'],
-                            organizerId: widget.event['uid'],
-                            );
 
+                            // Show success snackbar early
                             Get.snackbar(
                               'Success',
                               'You joined the event!',
                               backgroundColor: Colors.green,
                               colorText: Colors.white,
                             );
+
+                            // Try sending the notification, but don't break flow if it fails
+                            try {
+                              await sendJoinEventNotification(
+                              userId: currentUserId,
+                              eventId: widget.event.id,
+                              eventName: widget.event['eventName'],
+                              organizerId: widget.event['uid'],
+                              );
+                            } catch (notificationError) {
+                              print("Failed to send notification: $notificationError");
+                              // Optionally show another snackbar or log silently
+                            }
                           } catch (e) {
                             print("Error joining event: $e");
                             Get.snackbar(
@@ -329,6 +339,20 @@ class _EventDetailsViewState extends State<EventDetailsView> {
           colorText: Colors.white, backgroundColor: Colors.red);
     }
   }
+  DateTime _parseCustomDateFormat(String dateStr) {
+    // Assumes format is "dd-MM-yyyy" or "d-M-yyyy"
+    final parts = dateStr.split('-');
+    if (parts.length != 3) {
+      throw FormatException('Invalid date format');
+    }
+
+    final day = int.tryParse(parts[0]) ?? 1;
+    final month = int.tryParse(parts[1]) ?? 1;
+    final year = int.tryParse(parts[2]) ?? 2000;
+
+    return DateTime(year, month, day);
+  }
+
 
   Future<void> sendJoinEventNotification({
     required String userId,

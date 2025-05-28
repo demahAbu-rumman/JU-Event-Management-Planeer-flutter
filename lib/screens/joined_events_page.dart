@@ -191,44 +191,36 @@ class _JoinedEventsSectionState extends State<JoinedEventsSection> {
           groupedEvents.putIfAbsent(label, () => []).add(doc);
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SingleChildScrollView(
-              child: Container(
-                constraints: _showAll ? null : const BoxConstraints(maxHeight: 400),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ListView(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: (groupedEvents.entries.toList()
-                    ..sort((a, b) {
-                      if (a.key == 'Today') return -1;
-                      if (b.key == 'Today') return 1;
-                      final aDate = _labelToDate(a.key);
-                      final bDate = _labelToDate(b.key);
-                      return (aDate ?? DateTime.now()).compareTo(bDate ?? DateTime.now());
-                    }))
-                      .map((entry) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 8),
-                        ...entry.value.map((doc) => _buildEventCard(doc)),
-                        const SizedBox(height: 16),
-                      ],
-                    );
-                  }).toList(),
-                ),
-              ),
+        return SizedBox(
+          height: _showAll ? null : 400,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: (groupedEvents.entries.toList()
+                ..sort((a, b) {
+                  if (a.key == 'Today') return -1;
+                  if (b.key == 'Today') return 1;
+                  final aDate = _labelToDate(a.key);
+                  final bDate = _labelToDate(b.key);
+                  return (aDate ?? DateTime.now()).compareTo(bDate ?? DateTime.now());
+                }))
+                  .map((entry) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    ...entry.value.map((doc) => _buildEventCard(doc)),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              }).toList(),
             ),
-          ],
+          ),
         );
-
       },
     );
   }
-
 
   Widget _buildEventCard(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;

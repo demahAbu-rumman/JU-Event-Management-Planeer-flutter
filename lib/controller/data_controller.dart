@@ -310,7 +310,7 @@ class DataController extends GetxController {
       // Parse date and time
       String newDateStr = newEventData['date'];
       DateTime newDate = _parseDateString(newDateStr);
-      String newLocation = newEventData['location']; // ✅ FIXED
+      String newLocation = newEventData['location'];
 
       TimeOfDay newStartTime = _parseTimeString(newEventData['start_time']);
       TimeOfDay newEndTime = _parseTimeString(newEventData['end_time']);
