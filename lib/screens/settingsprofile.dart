@@ -44,7 +44,6 @@ class _SettingProfileState extends State<SettingProfile> {
   Future<void> _updateProfile() async {
     if (_formKey.currentState!.validate()) {
       try {
-        // Show full-screen loading overlay
         Get.dialog(
           const Center(
             child: CircularProgressIndicator(),
@@ -66,10 +65,8 @@ class _SettingProfileState extends State<SettingProfile> {
           userData?['collegeName'] ?? '',
         );
 
-        // Close loading overlay
         Get.back();
 
-        // Show success snackbar
         Get.snackbar(
           'Profile updated successfully',
           'Success',
@@ -82,10 +79,8 @@ class _SettingProfileState extends State<SettingProfile> {
         );
 
 
-        // Refresh local data
         await authController.fetchUserData();
 
-        // Removed Get.back() to prevent navigation and stay on the same page
       } catch (e) {
         Get.back();
         Get.snackbar(

@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../Util/app_color.dart';
@@ -163,23 +161,6 @@ class _LocationState extends State<Location> {
                       snackPosition: SnackPosition.BOTTOM);
                 }
 
-                /* if (selectedCollege != null) {
-                  final uid = FirebaseAuth.instance.currentUser?.uid;
-                  if (uid != null) {
-                    await FirebaseFirestore.instance
-                        .collection('eventRequests')
-                        .doc(uid)
-                        .set({
-                      'collegeName': selectedCollege,
-                    }, SetOptions(merge: true)); // This creates or updates safely
-                  }
-                  Get.back(result: selectedCollege);
-                } else {
-                  Get.snackbar('خطأ', 'يرجى اختيار الكلية',
-                      colorText: Colors.white,
-                      backgroundColor: Colors.red,
-                      snackPosition: SnackPosition.BOTTOM);
-                }*/
               },
               child: Text(
                 'Confirm',

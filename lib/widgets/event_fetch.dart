@@ -49,7 +49,6 @@ Widget EventItem(DocumentSnapshot event) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// Event Name & Notification Badge
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -65,7 +64,6 @@ Widget EventItem(DocumentSnapshot event) {
                 ),
               ),
 
-              /// Notification Badge (Right Side)
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
@@ -83,7 +81,6 @@ Widget EventItem(DocumentSnapshot event) {
 
           const SizedBox(height: 6),
 
-          /// Location
           Row(
             children: [
               const Icon(Icons.location_on, size: 16, color: Colors.grey),
@@ -102,7 +99,6 @@ Widget EventItem(DocumentSnapshot event) {
 
           const SizedBox(height: 12),
 
-         /// Event Time
           Row(
             children: [
               const Icon(Icons.access_time, size: 16, color: Colors.grey),
@@ -121,7 +117,6 @@ Widget EventItem(DocumentSnapshot event) {
 
           const SizedBox(height: 12),
 
-          /// Event Image
           if (eventImage.isNotEmpty)
             ClipRRect(
               borderRadius: BorderRadius.circular(16),

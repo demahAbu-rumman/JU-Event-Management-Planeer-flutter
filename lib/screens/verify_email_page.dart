@@ -20,7 +20,7 @@ class _VerifyEmailPage extends State<VerifyEmailPage> {
   Timer? resendTimer;
   int countdown = 60;
   bool isLoading = false;
-  bool hasNavigated = false; // Add this flag to prevent multiple navigations
+  bool hasNavigated = false;
 
   @override
   void initState() {
@@ -31,7 +31,6 @@ class _VerifyEmailPage extends State<VerifyEmailPage> {
       sendVerificationEmail();
       startEmailVerificationCheck();
     } else {
-      // If already verified when page loads, navigate immediately
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _navigateToProfile();
       });
@@ -120,7 +119,6 @@ class _VerifyEmailPage extends State<VerifyEmailPage> {
 
   @override
   Widget build(BuildContext context) {
-    // If email is verified, show a loading indicator while waiting to navigate
     if (isEmailVerified) {
       return Scaffold(
         backgroundColor: Colors.white,
@@ -249,13 +247,11 @@ class _VerifyEmailPage extends State<VerifyEmailPage> {
             final user = FirebaseAuth.instance.currentUser;
 
             try {
-              // حذف بيانات المستخدم من Firestore (collection: users)
               await FirebaseFirestore.instance
                   .collection('users')
                   .doc(user!.uid)
                   .delete();
 
-              // حذف المستخدم من Firebase Auth
               await user.delete();
             } catch (e) {
               print("Error deleting user or Firestore data: $e");

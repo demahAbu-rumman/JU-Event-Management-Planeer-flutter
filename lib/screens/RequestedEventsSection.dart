@@ -72,7 +72,6 @@ class _RequestedEventsSectionState extends State<RequestedEventsSection> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Section Title + View All / Collapse
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
               child: Row(

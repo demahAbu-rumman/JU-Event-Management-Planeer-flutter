@@ -447,7 +447,6 @@ class _MessagesPageState extends State<MessagesPage> {
     try {
       final currentUser = dataController.auth.currentUser;
       if (currentUser == null) {
-        print('No current user');
         return;
       }
 
@@ -455,22 +454,18 @@ class _MessagesPageState extends State<MessagesPage> {
       final currentUserId = currentUser.uid;
 
       if (userId.isEmpty || currentUserId.isEmpty) {
-        print('Invalid user IDs');
         return;
       }
 
-      print('Opening chat between $currentUserId and $userId');
 
       final groupId = [userId, currentUserId]..sort();
       final chatId = groupId.join('-');
 
-      print('Chat ID: $chatId');
 
       final chatDoc = FirebaseFirestore.instance.collection('chats').doc(chatId);
       final chatSnapshot = await chatDoc.get();
 
       if (!chatSnapshot.exists) {
-        print('Creating new chat document');
         await chatDoc.set({
           'chatId': chatId,
           'participants': [userId, currentUserId],
@@ -483,7 +478,6 @@ class _MessagesPageState extends State<MessagesPage> {
 
       final receiverName =
       '${user.get('first') ?? 'User'} ${user.get('last') ?? ''}'.trim();
-      print('Navigating to chat with $receiverName');
 
       Get.to(() => ChatPage(
         chatId: chatId,
@@ -491,7 +485,6 @@ class _MessagesPageState extends State<MessagesPage> {
         receiverId: userId,
       ));
     } catch (e) {
-      print('Error opening chat: $e');
       Get.snackbar('Error', 'Could not open chat: ${e.toString()}');
     }
   }

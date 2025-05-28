@@ -5,7 +5,6 @@ import 'package:ju_event_managment_planner/screens/profiles_page.dart';
 import 'package:ju_event_managment_planner/widgets/my_widgets.dart';
 import '../Util/app_color.dart';
 import '../controller/auth_controller.dart';
-import 'profile_setup.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -287,7 +286,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       const SizedBox(height: 4), // Space between text and line
                       Container(
-                        width: 130, // Adjust to match text width
+                        width: 130,
                         height: 1.5,
                         color: AppColors.textColor,
                       ),
@@ -418,7 +417,6 @@ class _LoginViewState extends State<LoginView> {
           ),
           SizedBox(height: Get.height * 0.02),
 
-          // First Password Field with Strength Indicator
           Stack(
             children: [
               myTextField(
@@ -462,7 +460,6 @@ class _LoginViewState extends State<LoginView> {
             ],
           ),
 
-          // Password Strength Hints (appears under first password box)
           if (showPasswordHints)
             Container(
               width: double.infinity,
@@ -515,7 +512,6 @@ class _LoginViewState extends State<LoginView> {
               ),
             ),
 
-          // Confirm Password Field (unchanged)
           SizedBox(height: Get.height * 0.02),
           Stack(
             children: [
@@ -559,7 +555,6 @@ class _LoginViewState extends State<LoginView> {
             ],
           ),
 
-          // Rest of your sign up form remains unchanged...
           SizedBox(height: Get.height * 0.02),
           Obx(() => authController.isLoading.value
               ? const Center(child: CircularProgressIndicator())

@@ -84,7 +84,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     }
   }
 
-  // In the _onSavePressed method of profile_setup.dart
   Future<void> _onSavePressed() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -117,7 +116,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50], // Light background for better contrast
+      backgroundColor: Colors.grey[50],
       body: Container(
         margin: EdgeInsets.symmetric(horizontal: Get.width * 0.05),
         child: SingleChildScrollView(
@@ -128,7 +127,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               children: [
                 SizedBox(height: Get.height * 0.05),
 
-                // Profile Image (unchanged)
                 GestureDetector(
                   onTap: _showImagePickerDialog,
                   child: Container(
@@ -344,7 +342,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Widget _buildCollegeField() {
-    // List of schools from your screenshots
     final List<String> schools = [
       // HUMANITIES SCHOOLS
       'School of Arts',

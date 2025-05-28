@@ -184,26 +184,13 @@ class RequestCard extends StatelessWidget {
 
       for (var userDoc in allUsersSnapshot.docs) {
         final userId = userDoc.id;
-        //  final fcmToken = userDoc.data()['fcmToken']; // optional
 
-        //  Use your LocalNotificationService to store the notification
         await LocalNotificationService.storeNotification(
           title: 'New Event Published!',
           body: 'A new event "$eventTitle" has been published. Check it out!',
           userId: userId,
         );
 
-        // Optional: Send push notification here if needed later
-        /*
-      final fcmToken = userDoc.data()['fcmToken'];
-      if (fcmToken != null && fcmToken.isNotEmpty) {
-        await LocalNotificationService.sendNotification(
-          title: 'New Event Published!',
-          message: 'Check out the latest event "$eventTitle" now!',
-          token: fcmToken,
-        );
-      }
-      */
       }
 
       print('Notifications sent to all users.');
@@ -256,10 +243,10 @@ class RequestCard extends StatelessWidget {
           .get();
       final userData = userSnapshot.data();
       final userRole = userData?['role'];
-      final userCollege = userData?['collegeName'];  // This is the School name (e.g., 'School of Medicine')
+      final userCollege = userData?['collegeName'];
 
       final requesterRole = data['role'];
-      final eventLocation = data['location'];  // This is a college/lecture hall string
+      final eventLocation = data['location'];
       final userId = data['uid'];
       final eventTitle = data['eventName'] ?? 'Your event';
 
@@ -267,7 +254,7 @@ class RequestCard extends StatelessWidget {
       final docSnap = await docRef.get();
       final currentData = docSnap.data() ?? {};
 
-      // Check permissions for Event Organizer requests
+
       if (requesterRole == 'Event Organizer' && userRole != 'Activities Director') {
         Get.snackbar('Access Denied',
             'Only Activities Director can approve Event Organizer requests.',
@@ -275,7 +262,7 @@ class RequestCard extends StatelessWidget {
         return;
       }
 
-      // Vice Dean approval location logic using schoolToColleges map
+
       if (userRole == 'Vice Dean') {
         final allowedColleges = schoolToColleges[userCollege] ?? [];
         if (!allowedColleges.contains(eventLocation)) {
@@ -304,12 +291,9 @@ class RequestCard extends StatelessWidget {
       } else if (isActivitiesDirector) {
         updateData['activitiesDirectorApproval'] = true;
       }
-
-      // Determine if both approvals exist
       final hasViceDeanApproval = isViceDean || currentData['viceDeanApproval'] == true;
       final hasActivitiesApproval = isActivitiesDirector || currentData['activitiesDirectorApproval'] == true;
 
-      // Final approval decision
       if (hasViceDeanApproval && hasActivitiesApproval) {
         updateData['status'] = 'Approved';
         shouldPublish = true;
@@ -435,9 +419,6 @@ class RequestCard extends StatelessWidget {
           backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
-
-
-
 
 
 }

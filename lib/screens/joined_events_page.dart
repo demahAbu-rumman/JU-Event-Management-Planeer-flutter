@@ -147,7 +147,7 @@ class _JoinedEventsSectionState extends State<JoinedEventsSection> {
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return SizedBox(
-            height: 150, // Adjust this height as needed
+            height: 150,
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
@@ -229,36 +229,6 @@ class _JoinedEventsSectionState extends State<JoinedEventsSection> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const Spacer(),
-          TextButton(
-            onPressed: () {
-              setState(() => _showAll = !_showAll);
-            },
-            child: Text(
-              _showAll ? 'Collapse' : 'View All',
-              style: TextStyle(
-                color: AppColors.lightgreen,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildEventCard(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;

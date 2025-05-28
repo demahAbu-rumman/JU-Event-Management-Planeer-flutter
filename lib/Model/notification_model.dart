@@ -21,7 +21,7 @@ class NotificationModel {
       id: doc.id,
       title: data['title'] ?? '',
       body: data['body'] ?? '',
-      timestamp: (data['timestamp'] as Timestamp).toDate(), // Directly convert Timestamp to DateTime
+      timestamp: (data['timestamp'] as Timestamp).toDate(),
       isRead: data['isRead'] ?? false,
     );
   }

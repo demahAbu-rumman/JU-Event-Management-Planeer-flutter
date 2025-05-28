@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -192,19 +191,16 @@ class _CustomDrawerState extends State<CustomDrawer> {
             ),
 
 
-
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Exit'),
             onTap: () async {
-              // First show feedback dialog
               final feedback = await showDialog<String>(
                 context: context,
                 builder: (context) => FeedbackDialog(),
               );
 
-              // Then show logout confirmation
               bool? confirmLogout = await showDialog(
                 context: context,
                 builder: (context) {
@@ -226,7 +222,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
               );
 
               if (confirmLogout == true) {
-                // Submit feedback if provided
                 if (feedback != null && feedback.isNotEmpty) {
                   await _submitFeedback(feedback);
                 }

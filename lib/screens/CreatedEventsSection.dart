@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
 import '../util/app_color.dart';
 
 class CreatedEventsSection extends StatefulWidget {
@@ -67,7 +65,6 @@ class _CreatedEventsSectionState extends State<CreatedEventsSection> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Section title and toggle
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(

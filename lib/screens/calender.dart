@@ -26,7 +26,6 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   void _fetchEventsForSelectedDate(DateTime selectedDay) {
-    // Use the new method to filter events by the selected date
     dataController.filterEventsByDate(selectedDay);
   }
 
@@ -156,7 +155,7 @@ class _CalendarPageState extends State<CalendarPage> {
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(
-            16), // Ensure child widgets follow the rounded corners
+            16),
         child: Column(
           children: [
             Container(

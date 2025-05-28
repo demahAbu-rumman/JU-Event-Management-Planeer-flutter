@@ -173,47 +173,71 @@ class _EventDetailsViewState extends State<EventDetailsView> {
                     child: ElevatedButton(
                       onPressed: hasJoined
                           ? null
-                          : () async {
-                        try {
-                          final eventRef = FirebaseFirestore.instance
-                              .collection('events')
-                              .doc(widget.event.id);
-                          final userRef = FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(currentUserId);
+                          : () {
+                        final eventDate = (widget.event['date'] as Timestamp).toDate();
+                        final endTimeStr = widget.event['end_time']; // Example: "18:30"
+                        final endTimeParts = endTimeStr.split(':');
+                        final endHour = int.tryParse(endTimeParts[0]) ?? 0;
+                        final endMinute = int.tryParse(endTimeParts[1]) ?? 0;
 
-                          await eventRef.update({
-                            'joinedUsers': FieldValue.arrayUnion([currentUserId])
-                          });
+                        final eventEndDateTime = DateTime(
+                          eventDate.year,
+                          eventDate.month,
+                          eventDate.day,
+                          endHour,
+                          endMinute,
+                        );
 
-                          await userRef.update({
-                            'joinedEvents': FieldValue.arrayUnion([widget.event.id])
-                          });
+                        if (DateTime.now().isAfter(eventEndDateTime)) {
+                          Get.snackbar(
+                            'Event Expired',
+                            'You cannot join an event that has already ended.',
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                          return;
+                        }
+                        () async {
+                          try {
+                            final eventRef = FirebaseFirestore.instance
+                                .collection('events')
+                                .doc(widget.event.id);
+                            final userRef = FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(currentUserId);
 
-                          await refreshEventData();
-                          await sendJoinEventNotification(
+                            await eventRef.update({
+                              'joinedUsers': FieldValue.arrayUnion([currentUserId])
+                            });
+
+                            await userRef.update({
+                              'joinedEvents': FieldValue.arrayUnion([widget.event.id])
+                            });
+
+                            await refreshEventData();
+                            await sendJoinEventNotification(
                             userId: currentUserId,
                             eventId: widget.event.id,
                             eventName: widget.event['eventName'],
                             organizerId: widget.event['uid'],
-                          );
+                            );
 
-                          Get.snackbar(
-                            'Success',
-                            'You joined the event!',
-                            backgroundColor: Colors.green,
-                            colorText: Colors.white,
-
-                          );
-                        } catch (e) {
-                          print("Error joining event: $e");
-                          Get.snackbar(
-                            'Error',
-                            'Could not join event: $e',
-                            backgroundColor: Colors.red,
-                            colorText: Colors.white,
-                          );
-                        }
+                            Get.snackbar(
+                              'Success',
+                              'You joined the event!',
+                              backgroundColor: Colors.green,
+                              colorText: Colors.white,
+                            );
+                          } catch (e) {
+                            print("Error joining event: $e");
+                            Get.snackbar(
+                              'Error',
+                              'Could not join event: $e',
+                              backgroundColor: Colors.red,
+                              colorText: Colors.white,
+                            );
+                          }
+                        }();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: hasJoined

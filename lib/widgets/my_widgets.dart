@@ -39,7 +39,7 @@ Widget myTextField({
   bool,
   TextEditingController? controller,
   Function? validator,
-  Function(String)? onChanged, // Add this optional parameter
+  Function(String)? onChanged,
 }) {
   return SizedBox(
     height: 45,
@@ -88,7 +88,6 @@ Widget settingIconAndText(
   image,
 }) {
   return Container(
-    // margin: EdgeInsets.only(top: Get.height * 0.03),
     child: ListTile(
       onTap: () => onPressed(),
       leading: SvgPicture.asset(
@@ -189,8 +188,6 @@ Widget iconWithTitle({text, Function? func, bool? isShow = true}) {
                   width: 30,
                   height: 30,
                   decoration: const BoxDecoration(
-                    // border: Border.all(width: 1),
-                    // borderRadius: BorderRadius.circular(50),
                     image: DecorationImage(
                       image: AssetImage('lib/assets/Header.png'),
                     ),
@@ -234,7 +231,6 @@ Widget iconTitleContainer(
     double width = 150,
     double height = 40}) {
   return Container(
-    // padding: EdgeInsets.only(left: 10),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(8),
       border: Border.all(width: 0.1, color: AppColors.genderTextColor),
@@ -249,11 +245,7 @@ Widget iconTitleContainer(
       onTap: () {
         onPress!();
       },
-      // style: TextStyle(
-      //   fontSize: 16,
-      //   fontWeight: FontWeight.w400,
-      //   color: AppColors.genderTextColor,
-      // ),
+
       decoration: InputDecoration(
         errorStyle: const TextStyle(fontSize: 0),
         contentPadding: const EdgeInsets.only(top: 3),

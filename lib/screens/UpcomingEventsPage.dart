@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import '../util/app_color.dart'; // Your AppColors.lightgreen
+import '../util/app_color.dart';
 
 class UpcomingEventsSection extends StatefulWidget {
   final String collegeName;
@@ -156,7 +156,6 @@ class _UpcomingEventsSectionState extends State<UpcomingEventsSection> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Section Title + View All / Collapse
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
               child: Row(

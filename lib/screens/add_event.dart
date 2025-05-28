@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ju_event_managment_planner/Util/app_color.dart';
 import 'package:ju_event_managment_planner/screens/Location.dart';
-import 'package:ju_event_managment_planner/screens/notification_service.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import '../../../controller/data_controller.dart';
 import '../../../widgets/my_widgets.dart';
@@ -16,7 +15,7 @@ import '../Model/event_model.dart';
 
 class CreateEventView extends StatefulWidget {
   final DocumentSnapshot? event;
-  final bool isEditing; // هل الصفحة في وضع التعديل؟
+  final bool isEditing;
 
   const CreateEventView(
       {Key? key, required this.event, required this.isEditing})
@@ -81,43 +80,6 @@ class _CreateEventViewState extends State<CreateEventView> {
     setState(() {});
   }
 
-  /*Future<void> publishEvent({required String eventTitle}) async {
-    try {
-      final allUsersSnapshot = await FirebaseFirestore.instance.collection('users').get();
-
-      for (var userDoc in allUsersSnapshot.docs) {
-        final userId = userDoc.id;
-        final fcmToken = userDoc.data()['fcmToken']; // optional
-
-        // Store the notification in Firestore
-        await FirebaseFirestore.instance
-            .collection('notifications')
-            .doc(userId)
-            .collection('userNotifications')
-            .add({
-          'title': 'New Event Published!',
-          'body': 'A new event "$eventTitle" has been published. Check it out!',
-          'timestamp': FieldValue.serverTimestamp(),
-          'isRead': false,
-        });
-
-        // Optional: Send FCM push notification
-        if (fcmToken != null && fcmToken.isNotEmpty) {
-          await LocalNotificationService.sendNotification(
-            title: 'New Event Published!',
-            message: 'Check out the latest event "$eventTitle" now!',
-            token: fcmToken,
-          );
-        }
-      }
-
-      print('Notifications sent to all users.');
-    } catch (e) {
-      print('Error notifying users: $e');
-    }
-  }
-
-*/
   var isCreatingEvent = false.obs;
 
   _selectDate(BuildContext context) async {
@@ -196,9 +158,8 @@ class _CreateEventViewState extends State<CreateEventView> {
     dateController.text = '${date!.day}-${date!.month}-${date!.year}';
 
     if (widget.event != null) {
-      // تعبئة الحقول بقيم الحدث المحدد
       final eventData = widget.event!.data()
-          as Map<String, dynamic>; // تحويل البيانات إلى Map
+          as Map<String, dynamic>;
       actualEventNameController.text=eventData['eventName']?? '' ;
       titleController.text = eventData['Organization_name'] ?? '';
       locationController.text = eventData['location'] ?? '';
@@ -226,7 +187,7 @@ class _CreateEventViewState extends State<CreateEventView> {
       SupervisorTController.text = eventData['telesup'] ?? '';
       SupervisorController.text = eventData['name_sup'] ?? '';
       DeanController.text = eventData['name_Dean'] ?? '';
-      event_type = eventData['event'] ?? 'Initiative'; // قيمة افتراضية
+      event_type = eventData['event'] ?? 'Initiative';
     }
   }
 
@@ -251,15 +212,13 @@ class _CreateEventViewState extends State<CreateEventView> {
             key: formKey,
             child: Column(
               children: [
-                //iconWithTitle(text: 'Create Event', func: () {}),
                 SizedBox(
                   height: Get.height * 0.02,
                 ),
                 Card(
-                  elevation: 6, // درجة ظل الكارد
+                  elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
@@ -345,7 +304,6 @@ class _CreateEventViewState extends State<CreateEventView> {
                                         mediaDialog(context);
                                       },
                                       text: 'Upload',
-                                      // Assuming elevatedButton preserves your original button styling
                                     ),
                                   ],
                                 ),
@@ -355,6 +313,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                         )),
                   ),
                 ),
+
                 // This widget checks if media is empty and conditionally displays the media uploader or a message
                 media.isEmpty
                     ? Container(
@@ -459,10 +418,9 @@ class _CreateEventViewState extends State<CreateEventView> {
                       ),
 
                 Card(
-                  elevation: 6, // درجة ظل الكارد
+                  elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
@@ -511,10 +469,9 @@ class _CreateEventViewState extends State<CreateEventView> {
                   height: 20,
                 ),
                 Card(
-                  elevation: 6, // درجة ظل الكارد
+                  elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
@@ -562,15 +519,14 @@ class _CreateEventViewState extends State<CreateEventView> {
                   height: 20,
                 ),
                 Card(
-                  elevation: 6, // درجة ظل الكارد
+                  elevation: 6,
                   shadowColor: Colors.green,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  margin: EdgeInsets.only(bottom: 16), // تباعد من الأسفل
+                  margin: EdgeInsets.only(bottom: 16),
                   child: Padding(
-                    padding: EdgeInsets.all(16), // تباعد داخلي
+                    padding: EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -585,7 +541,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                                 fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                         ]),
-                        SizedBox(height: 10), // مسافة بين العنوان والحقل
+                        SizedBox(height: 10),
                         GestureDetector(
                           onTap: () async {
                             var result = await Get.to(() => Location());
@@ -601,8 +557,8 @@ class _CreateEventViewState extends State<CreateEventView> {
                               decoration: InputDecoration(
                                 hintText: 'Select Location',
                                 prefixIcon: Image.asset(
-                                    'lib/assets/location.png'), // أيقونة الموقع
-                                border: OutlineInputBorder(), // حدود للحقل
+                                    'lib/assets/location.png'),
+                                border: OutlineInputBorder(),
                               ),
                               validator: (String? value) {
                                 if (value == null || value.isEmpty) {
@@ -632,10 +588,9 @@ class _CreateEventViewState extends State<CreateEventView> {
                 ),
 
                 Card(
-                  elevation: 6, // درجة ظل الكارد
+                  elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
                   margin: EdgeInsets.only(bottom: 16),
@@ -671,7 +626,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                               ),
                               validator: (value) {
                                 if (date == null) {
-                                  return ' '; // مسافة فارغة لإظهار الخطأ
+                                  return ' ';
                                 }
                                 return null;
                               },
@@ -687,15 +642,14 @@ class _CreateEventViewState extends State<CreateEventView> {
                   height: 20,
                 ),
                 Card(
-                  elevation: 6, // درجة ظل الكارد
+                  elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  margin: EdgeInsets.only(bottom: 16), // التباعد الخارجي
+                  margin: EdgeInsets.only(bottom: 16),
                   child: Padding(
-                    padding: EdgeInsets.all(16), // التباعد الداخلي
+                    padding: EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -712,7 +666,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                             ),
                           ),
                         ]),
-                        SizedBox(height: 12), // مسافة بين العنوان والحقل
+                        SizedBox(height: 12),
                         iconTitleContainer(
                           path: 'lib/assets/#.png',
                           text: 'hint (student it,student Bussines)',
@@ -720,7 +674,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                           controller: TargetController,
                           type: TextInputType.text,
                           onPress:
-                              () {}, // يمكنك إضافة وظيفة عند الضغط إذا لزم الأمر
+                              () {},
                           validator: (String input) {
                             if (input.isEmpty) {
                               Get.snackbar(
@@ -744,16 +698,16 @@ class _CreateEventViewState extends State<CreateEventView> {
                 ),
 
                 Card(
-                  elevation: 6, // درجة ظل الكارد
+                  elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
+
                     borderRadius: BorderRadius.circular(12),
                   ),
                   margin:
-                      EdgeInsets.only(bottom: 16), // التباعد الخارجي من الأسفل
+                      EdgeInsets.only(bottom: 16),
                   child: Padding(
-                    padding: EdgeInsets.all(16), // التباعد الداخلي
+                    padding: EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -770,7 +724,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                             ),
                           ),
                         ]),
-                        SizedBox(height: 12), // مسافة بين العنوان وحقل الوصف
+                        SizedBox(height: 12),
                         Container(
                           height: 149,
                           decoration: BoxDecoration(
@@ -811,26 +765,15 @@ class _CreateEventViewState extends State<CreateEventView> {
                     ),
                   ),
                 ),
-                // myTextField(
-                //     bool: false,
-                //     icon: 'assets/repeat.png',
-                //     text: 'Frequecy of event',
-                //     controller: frequencyEventController,
-                //     validator: (String input){
-                //       if(input.isEmpty){
-                //         Get.snackbar('Opps', "Frequency is required.",colorText: Colors.white,backgroundColor: Colors.blue);
-                //         return '';
-                //       }
-                //     }
-                // ),
+
                 const SizedBox(
                   height: 20,
                 ),
                 Card(
-                  elevation: 6, // درجة ظل الكارد
+                  elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
+
                     borderRadius: BorderRadius.circular(12),
                   ),
                   margin: EdgeInsets.only(bottom: 16),
@@ -891,16 +834,16 @@ class _CreateEventViewState extends State<CreateEventView> {
                   height: 20,
                 ),
                 Card(
-                  elevation: 6, // درجة ظل الكارد
+                  elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
+
                     borderRadius: BorderRadius.circular(12),
                   ),
                   margin:
-                      EdgeInsets.only(bottom: 16), // التباعد الخارجي من الأسفل
+                      EdgeInsets.only(bottom: 16),
                   child: Padding(
-                    padding: EdgeInsets.all(16), // التباعد الداخلي
+                    padding: EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -917,7 +860,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                             ),
                           ),
                         ]),
-                        SizedBox(height: 12), // مسافة بين العنوان وحقل الوصف
+                        SizedBox(height: 12),
                         Container(
                           height: 149,
                           decoration: BoxDecoration(
@@ -962,17 +905,17 @@ class _CreateEventViewState extends State<CreateEventView> {
                   height: Get.height * 0.02,
                 ),
                 Divider(
-                  color: AppColors.lightGreen, // تغيير اللون إلى أخضر
-                  thickness: 2, // سمك الخط
-                  indent: 20, // المسافة من اليسار
-                  endIndent: 20, // المسافة من اليمين
+                  color: AppColors.lightGreen,
+                  thickness: 2,
+                  indent: 20,
+                  endIndent: 20,
                   height: 20,
                 ),
                 Card(
                   elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
+
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
@@ -1027,17 +970,16 @@ class _CreateEventViewState extends State<CreateEventView> {
                   height: Get.height * 0.03,
                 ),
                 Divider(
-                  color: AppColors.lightGreen, // تغيير اللون إلى أخضر
-                  thickness: 2, // سمك الخط
-                  indent: 20, // المسافة من اليسار
-                  endIndent: 20, // المسافة من اليمين
+                  color: AppColors.lightGreen,
+                  thickness: 2,
+                  indent: 20,
+                  endIndent: 20,
                   height: 20,
                 ),
                 Card(
                   elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
@@ -1046,10 +988,6 @@ class _CreateEventViewState extends State<CreateEventView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(children: [
-                          Text("*",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red)),
                           Text('Student Information ',
                               style: TextStyle(fontWeight: FontWeight.bold)),
                         ]),
@@ -1060,14 +998,6 @@ class _CreateEventViewState extends State<CreateEventView> {
                           text: 'Name of the Student Submitting the Activity',
                           controller: studentController,
                           validator: (String input) {
-                            if (input.isEmpty) {
-                              Get.snackbar('Opps',
-                                  "Name of the Student Submitting the Activity is required.",
-                                  colorText: Colors.white,
-                                  backgroundColor: Colors.blue);
-                              return '';
-                            }
-
                             return null;
                           },
                         ),
@@ -1078,14 +1008,6 @@ class _CreateEventViewState extends State<CreateEventView> {
                           text: 'University ID Number',
                           controller: studentidController,
                           validator: (String input) {
-                            if (input.isEmpty) {
-                              Get.snackbar(
-                                  'Opps', "University ID Number is required.",
-                                  colorText: Colors.white,
-                                  backgroundColor: Colors.blue);
-                              return '';
-                            }
-
                             return null;
                           },
                         ),
@@ -1096,13 +1018,6 @@ class _CreateEventViewState extends State<CreateEventView> {
                           text: 'collage',
                           controller: collageController,
                           validator: (String input) {
-                            if (input.isEmpty) {
-                              Get.snackbar('Opps', " collage is required.",
-                                  colorText: Colors.white,
-                                  backgroundColor: Colors.blue);
-                              return '';
-                            }
-
                             return null;
                           },
                         ),
@@ -1110,22 +1025,22 @@ class _CreateEventViewState extends State<CreateEventView> {
                       ],
                     ),
                   ),
+
                 ),
                 SizedBox(
                   height: Get.height * 0.03,
                 ),
                 Divider(
-                  color: AppColors.lightGreen, // تغيير اللون إلى أخضر
-                  thickness: 2, // سمك الخط
-                  indent: 20, // المسافة من اليسار
-                  endIndent: 20, // المسافة من اليمين
+                  color: AppColors.lightGreen,
+                  thickness: 2,
+                  indent: 20,
+                  endIndent: 20,
                   height: 20,
                 ),
                 Card(
                   elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
@@ -1157,17 +1072,16 @@ class _CreateEventViewState extends State<CreateEventView> {
                   height: Get.height * 0.03,
                 ),
                 Divider(
-                  color: AppColors.lightGreen, // تغيير اللون إلى أخضر
-                  thickness: 2, // سمك الخط
-                  indent: 20, // المسافة من اليسار
-                  endIndent: 20, // المسافة من اليمين
+                  color: AppColors.lightGreen,
+                  thickness: 2,
+                  indent: 20,
+                  endIndent: 20,
                   height: 20,
                 ),
                 Card(
                   elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
@@ -1176,48 +1090,40 @@ class _CreateEventViewState extends State<CreateEventView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(children: [
-                          Text("*",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red)),
+                          // Removed the asterisk to reflect it's optional now
                           Text('For events through the colleges',
                               style: TextStyle(fontWeight: FontWeight.bold)),
                         ]),
                         SizedBox(height: 16),
                         myTextField(
-                            bool: false,
-                            icon: 'lib/assets/4DotIcon.png',
-                            text: 'Name of the College Dean',
-                            controller: DeanController,
-                            validator: (String input) {
-                              if (input.isEmpty) {
-                                Get.snackbar('Opps',
-                                    "Name of the College Dean is required.",
-                                    colorText: Colors.white,
-                                    backgroundColor: Colors.blue);
-                                return '';
-                              }
-                              return null;
-                            }),
+                          bool: false,
+                          icon: 'lib/assets/4DotIcon.png',
+                          text: 'Name of the College Dean',
+                          controller: DeanController,
+                          validator: (String input) {
+                            // No validation — optional field
+                            return null;
+                          },
+                        ),
                       ],
                     ),
                   ),
+
                 ),
                 SizedBox(
                   height: Get.height * 0.03,
                 ),
                 Divider(
-                  color: AppColors.lightGreen, // تغيير اللون إلى أخضر
-                  thickness: 2, // سمك الخط
-                  indent: 20, // المسافة من اليسار
-                  endIndent: 20, // المسافة من اليمين
+                  color: AppColors.lightGreen,
+                  thickness: 2,
+                  indent: 20,
+                  endIndent: 20,
                   height: 20,
                 ),
                 Card(
                   elevation: 6,
                   shadowColor: AppColors.lightgreen,
                   shape: RoundedRectangleBorder(
-                    // زوايا مدورة
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
@@ -1226,32 +1132,25 @@ class _CreateEventViewState extends State<CreateEventView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(children: [
-                          Text("*",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red)),
+                          // Removed the asterisk (*) to indicate the field is now optional
                           Text('For events through the Student Union',
                               style: TextStyle(fontWeight: FontWeight.bold)),
                         ]),
                         SizedBox(height: 16),
                         myTextField(
-                            bool: false,
-                            icon: 'lib/assets/4DotIcon.png',
-                            text: 'Name of the Student Union President',
-                            controller: unionController,
-                            validator: (String input) {
-                              if (input.isEmpty) {
-                                Get.snackbar('Opps',
-                                    "Name of the Student Union President is required.",
-                                    colorText: Colors.white,
-                                    backgroundColor: Colors.blue);
-                                return '';
-                              }
-                              return null;
-                            }),
+                          bool: false,
+                          icon: 'lib/assets/4DotIcon.png',
+                          text: 'Name of the Student Union President',
+                          controller: unionController,
+                          validator: (String input) {
+                            // No validation – optional field
+                            return null;
+                          },
+                        ),
                       ],
                     ),
                   ),
+
                 ),
                 SizedBox(
                   height: Get.height * 0.03,
@@ -1379,7 +1278,6 @@ class _CreateEventViewState extends State<CreateEventView> {
                                   backgroundColor: Colors.green,
                                 );
                               } else {
-                                // Add current user ID to the event data
                                 final currentUser = FirebaseAuth.instance.currentUser;
                                 if (currentUser == null) {
                                   Get.snackbar(
@@ -1391,7 +1289,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                                   return;
                                 }
 
-                                eventData['userId'] = currentUser.uid; // Add this line
+                                eventData['userId'] = currentUser.uid;
                                 eventData['status'] = 'Pending';
 
                                 await FirebaseFirestore.instance
@@ -1416,7 +1314,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                                     actions: [
                                       TextButton(
                                         onPressed: () {
-                                          Get.back(); // Close dialog
+                                          Get.back();
                                           isCreatingEvent(false);
                                           Get.back(); // Go back to previous screen
                                         },
@@ -1475,13 +1373,11 @@ class _CreateEventViewState extends State<CreateEventView> {
 
   getVideoDialog(ImageSource source) async {
     final ImagePicker picker = ImagePicker();
-    // Pick an image
     final XFile? video = await picker.pickVideo(
       source: source,
     );
 
     if (video != null) {
-      // media.add(File(image.path));
 
       Uint8List? uint8list = await VideoThumbnail.thumbnailData(
         video: video.path,
@@ -1491,12 +1387,8 @@ class _CreateEventViewState extends State<CreateEventView> {
 
       media.add(EventMediaModel(
           thumbnail: uint8list!, video: File(video.path), isVideo: true));
-      // thumbnail.add(uint8list!);
-      //
-      // isImage.add(false);
     }
 
-    // print(thumbnail.first.path);
     setState(() {});
 
     Navigator.pop(context);

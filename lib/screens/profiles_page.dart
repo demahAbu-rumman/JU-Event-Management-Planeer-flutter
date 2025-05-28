@@ -50,7 +50,6 @@ class _ProfilePageState extends State<Profiles_Page> {
     "مرج القدس - كلية التمريض": 'School of Nursing',
     "مدرج الخياط _ كلية الشريعة": 'School of Shari\'a',
 
-    // Add alternative spellings or common variations
     "كلية الطب": 'School of Medicine',
     "كلية الهندسة": 'School of Engineering',
     "المسرح الرئيسي": 'School of Science',
@@ -65,9 +64,6 @@ class _ProfilePageState extends State<Profiles_Page> {
     "المجمع الطبي": 'Public Health Institute',
     "كلية الشريعة": 'School of Shari\'a',
   };
-
-  bool _isOpen = false;
-  bool _isExpanded = false;
   int createdEventsCount = 0;
 
   late PanelController _panelController;
@@ -92,7 +88,6 @@ class _ProfilePageState extends State<Profiles_Page> {
   }
   void _fetchCreatedEventsCount(String uid) async {
     try {
-      print("Fetching events for user: $uid"); // Debug print
 
       final querySnapshot = await FirebaseFirestore.instance
           .collection('events')
@@ -110,7 +105,6 @@ class _ProfilePageState extends State<Profiles_Page> {
   }
 
 
-  // Update the _loadInitialData method to ensure it only gets college from user data
   void _loadInitialData() async {
     try {
       final uid = authController.currentUser?.uid;
@@ -140,7 +134,6 @@ class _ProfilePageState extends State<Profiles_Page> {
           }
         });
 
-        // ✅ Fetch event count AFTER setting role
         if (selectedRole == 'Event Organizer') {
           _fetchCreatedEventsCount(uid);
         }
@@ -150,35 +143,6 @@ class _ProfilePageState extends State<Profiles_Page> {
     }
   }
 
-
-  void _updateProfileData(Map<String, dynamic> data) {
-    setState(() {
-      firstNameController.text = data['first'] ?? '';
-      lastNameController.text = data['last'] ?? '';
-      selectedRole = data['role'] ?? 'Student';
-      image = data['image'] ?? '';
-      collegeName = data['collegeName'] ?? 'N/A';
-      joinedDate.text = _formatJoinedDate(data['joinedDate']);
-    });
-  }
-
-  String _formatJoinedDate(dynamic date) {
-    if (date == null) return 'N/A';
-    try {
-      DateTime dateTime;
-      if (date is Timestamp) {
-        dateTime = date.toDate();
-      } else if (date is DateTime) {
-        dateTime = date;
-      } else {
-        return 'N/A';
-      }
-      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-    } catch (e) {
-      print("Error formatting date: $e");
-      return 'N/A';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -212,18 +176,15 @@ class _ProfilePageState extends State<Profiles_Page> {
       ),
       body: Stack(
         children: [
-          // صورة الغلاف الرمادية
           Container(
             height: 250,
             color: Colors.grey.shade100,
           ),
 
-          // محتوى الصفحة بالكامل قابل للتمرير
           SingleChildScrollView(
             child: Column(
               children: [
                 const SizedBox(height: 50),
-                // صورة البروفايل
                 Center(
                   child: CircleAvatar(
                     radius: 80,
@@ -352,25 +313,12 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
-  Widget _buildCreatedEventsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle("Created Events By You "),
-        CreatedEventsSection(
-          organizerId: authController.currentUser?.uid ?? '',
-        ),
-      ],
-    );
-  }
-
   List<Widget> _buildInfoCells(String joinedDate) {
     return [
       if (selectedRole == 'Event Organizer')
         _buildAdaptiveInfoCell('Events', createdEventsCount.toString()),
       if (selectedRole == 'Instructor')
         _buildAdaptiveInfoCell('Courses', 'N/A'),
-      // Remove the college section for Event Organizer
       if (selectedRole != 'Event Organizer' && selectedRole != 'Activities Director')
         _buildAdaptiveInfoCell(
             'College', collegeName.isNotEmpty ? collegeName : 'N/A'),
@@ -404,16 +352,6 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
- /* Widget _buildActivitySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Recent Activity'),
-        const SizedBox(height: 8),
-        ...recentActivities.map((activity) => _buildActivityItem(activity)),
-      ],
-    );
-  }*/
 
   Widget _buildJoinedEventsSection() {
     return Column(
@@ -427,23 +365,6 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
-
-  /*Widget _buildActivityItem(Activity activity) {
-    return ListTile(
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(activity.icon, color: Colors.blue),
-      ),
-      title: Text(activity.title),
-      subtitle: Text(activity.time),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-    );
-  }*/
 
   Widget _buildSectionTitle(String title) {
     return Padding(
@@ -465,21 +386,6 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
- /* Widget _buildUpcomingEvents() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle("Upcoming Events"),
-        UpcomingEventsSection(
-          collegeName: collegeName,
-          locationToCollegeMap: locationToCollegeMap,
-          filterByCollege: true, // or false if you want all events
-        ),
-      ],
-    );
-  }*/
-
-
   Widget _buildSchedule() {
     return Card(
       margin: const EdgeInsets.all(16),
@@ -500,41 +406,6 @@ class _ProfilePageState extends State<Profiles_Page> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildRequestedEvents() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Requested Events'),
-        if (selectedRole == 'Activities Director')
-          RequestedEventsSection(
-            collegeName: null, // Pass null for Activities Director
-            locationToCollegeMap: locationToCollegeMap,
-            filterByCollege: false, // Disable college filtering
-          )
-        else
-          RequestedEventsSection(
-            collegeName: collegeName,
-            locationToCollegeMap: locationToCollegeMap,
-            filterByCollege: true,
-          ),
-      ],
-    );
-  }
-
-  Widget _buildApprovedActivities() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('Approved Activities'),
-        ApprovedActivitiesSection(
-          collegeName: collegeName,
-          locationToCollegeMap: locationToCollegeMap,
-          filterByCollege: false,
-        ),
-      ],
     );
   }
 }

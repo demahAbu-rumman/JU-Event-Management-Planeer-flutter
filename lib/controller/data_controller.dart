@@ -253,39 +253,6 @@ class DataController extends GetxController {
         .orderBy('timestamp', descending: true)
         .snapshots();
   }
-
-
- /* Future<void> sendMessageToFirebase({
-    required Map<String, dynamic> data,
-    required String lastMessage,
-    required String groupId,
-    required String recipientToken,
-  }) async {
-    isMessageSending(true);
-
-    // Add message to the consistent path
-    await FirebaseFirestore.instance
-        .collection('chats')
-        .doc(groupId)
-        .collection('messages')  // Changed from 'chatroom' to 'messages'
-        .add(data);
-
-    await FirebaseFirestore.instance.collection('chats').doc(groupId).set({
-      'lastMessage': lastMessage,
-      'groupId': groupId,
-      'participants': groupId.split('-'),  // Changed from 'group' to 'participants'
-      'lastMessageTime': Timestamp.now(),  // Add timestamp for sorting
-    }, SetOptions(merge: true));
-
-    isMessageSending(false);
-
-    await sendFCMNotification(
-      title: 'New Message',
-      body: lastMessage,
-      token: recipientToken,
-    );
-  }*/
-
   Future<void> sendFCMNotification({
     required String title,
     required String body,
@@ -312,30 +279,6 @@ class DataController extends GetxController {
       print('Error sending FCM notification: $e');
     }
   }
-
-  /*Future<void> createNotification(String recipientUid, String recipientToken) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('notifications')
-          .doc(recipientUid)
-          .collection('userNotifications')
-          .add({
-        'message': "Sent you a message.",
-        'image': myDocument?.get('image') ?? '',
-        'name': "${myDocument?.get('first') ?? ''} ${myDocument?.get('last') ?? ''}",
-        'time': DateTime.now(),
-      });
-      print('Notification added successfully');
-    } catch (e) {
-      print('Error creating notification: $e');
-    }
-
-    await sendFCMNotification(
-      title: 'New Message',
-      body: 'You have a new message from ${myDocument?.get('first') ?? ''}',
-      token: recipientToken,
-    );
-  }*/
 
   Future<List<Map<String, dynamic>>> fetchTodaysEvents() async {
     final today = DateTime.now();
@@ -414,9 +357,6 @@ class DataController extends GetxController {
       return false;
     }
   }
-
-
-
 
   TimeOfDay _parseTimeString(String timeStr) {
     try {

@@ -20,7 +20,6 @@ class LocalNotificationService {
 
   static void display(RemoteMessage message) async {
     try {
-      print("In Notification method");
       Random random = Random();
       int id = random.nextInt(1000);
       const NotificationDetails notificationDetails = NotificationDetails(
@@ -32,7 +31,6 @@ class LocalNotificationService {
           )
 
       );
-      print("my id is ${id.toString()}");
       await _flutterLocalNotificationsPlugin.show(
         id,
         message.notification!.title,
@@ -45,9 +43,6 @@ class LocalNotificationService {
 
   static Future<void> sendNotification(
       {String? title, String? message, String? token}) async {
-    print("\n\n\n\n\n\n\n\n\n\n\n\n");
-    print("token is $token");
-    print("\n\n\n\n\n\n\n\n\n\n\n\n");
 
     final data = {
       "click_action": "FLUTTER_NOTIFICATION_CLICK",
@@ -100,13 +95,11 @@ class LocalNotificationService {
     }
   }
 
-  // Add this method to your LocalNotificationService class in notification_service.dart
   static Future<void> initializeNotificationStructure() async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
 
-      // Check if the notifications collection exists for the current user
       final snapshot = await FirebaseFirestore.instance
           .collection('notifications')
           .doc(currentUser.uid)
@@ -114,7 +107,6 @@ class LocalNotificationService {
           .limit(1)
           .get();
 
-      // If no documents exist, create a welcome notification
       if (snapshot.docs.isEmpty) {
         await storeNotification(
           title: 'Welcome Back!',
