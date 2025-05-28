@@ -221,7 +221,6 @@ class _ProfilePageState extends State<Profiles_Page> {
                   UpcomingEventsSection(collegeName: collegeName,
                     locationToCollegeMap: locationToCollegeMap,
                     filterByCollege: true, ),
-                  _buildSchedule(),
                 ] else if (selectedRole == 'Vice Dean') ...[
                   UpcomingEventsSection(collegeName: collegeName,
                     locationToCollegeMap: locationToCollegeMap,
@@ -386,28 +385,6 @@ class _ProfilePageState extends State<Profiles_Page> {
     );
   }
 
-  Widget _buildSchedule() {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.calendar_today),
-            title: const Text('Monday'),
-            subtitle: const Text('9:00 AM - 11:00 AM'),
-            trailing: const Text('CS101'),
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.calendar_today),
-            title: const Text('Wednesday'),
-            subtitle: const Text('1:00 PM - 3:00 PM'),
-            trailing: const Text('CS201'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class Activity {
