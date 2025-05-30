@@ -4,9 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:ju_event_managment_planner/screens/Academycalender.dart';
+import 'package:ju_event_managment_planner/screens/ITSupport.dart';
 import 'package:ju_event_managment_planner/screens/MessagesPage.dart';
 import 'package:ju_event_managment_planner/screens/notification_page.dart';
 import 'package:ju_event_managment_planner/screens/profiles_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../Util/app_color.dart';
 import 'add_event.dart';
 import 'calender.dart';
@@ -32,7 +34,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
   Future<void> _loadUserRole() async {
     final dataController = Get.find<DataController>();
-    if (dataController.myDocument != null && dataController.myDocument!.exists) {
+    if (dataController.myDocument != null &&
+        dataController.myDocument!.exists) {
       setState(() {
         _userRole = dataController.myDocument!.get('role');
       });
@@ -138,7 +141,8 @@ class _CustomDrawerState extends State<CustomDrawer> {
               Navigator.pop(context);
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AcademyCalendarPage()),
+                MaterialPageRoute(
+                    builder: (context) => const AcademyCalendarPage()),
               );
             },
           ),
@@ -165,6 +169,16 @@ class _CustomDrawerState extends State<CustomDrawer> {
             },
           ),
           ListTile(
+              leading: const Icon(Icons.support_agent),
+              title: const Text('IT Support'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ItSupportPage()),
+                );
+              }),
+          ListTile(
             leading: const Icon(Icons.notifications),
             title: const Text('Notifications'),
             onTap: () {
@@ -189,8 +203,6 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 );
               },
             ),
-
-
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
@@ -268,14 +280,16 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(5, (index) => IconButton(
-                  icon: Icon(
-                    index < _rating ? Icons.star : Icons.star_border,
-                    color: Colors.amber,
-                    size: 30,
-                  ),
-                  onPressed: () => setState(() => _rating = index + 1),
-                )),
+                children: List.generate(
+                    5,
+                    (index) => IconButton(
+                          icon: Icon(
+                            index < _rating ? Icons.star : Icons.star_border,
+                            color: Colors.amber,
+                            size: 30,
+                          ),
+                          onPressed: () => setState(() => _rating = index + 1),
+                        )),
               ),
               const SizedBox(height: 20),
               const Text('Any suggestions or comments?'),

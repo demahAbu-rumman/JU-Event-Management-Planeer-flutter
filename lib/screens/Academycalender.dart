@@ -13,6 +13,7 @@ class _AcademyCalendarPage extends State<AcademyCalendarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
         backgroundColor: AppColors.lightgreen,
         title: const Text(
           'AcademyCalendar',
