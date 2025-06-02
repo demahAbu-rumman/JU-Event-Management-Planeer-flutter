@@ -253,6 +253,7 @@ class DataController extends GetxController {
         .orderBy('timestamp', descending: true)
         .snapshots();
   }
+
   Future<void> sendFCMNotification({
     required String title,
     required String body,
